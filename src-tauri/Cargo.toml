@@ -1,0 +1,50 @@
+[package]
+name = "shieldr"
+version = "0.1.0"
+description = "Shieldr - Toddler & Touch Screen Guard"
+authors = ["you"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+# The `_lib` suffix may seem redundant but it is necessary
+# to make the lib name unique and wouldn't conflict with the bin name.
+# This seems to be only an issue on Windows, see https://github.com/rust-lang/cargo/issues/8519
+name = "shieldr_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-opener = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+keyring = "4.2.0"
+rusqlite = { version = "0.40.2", features = ["bundled"] }
+argon2 = { version = "0.6.0", features = ["rand_core"] }
+subtle = "2.6.1"
+thiserror = "2.0.20"
+rand = "0.10.2"
+bip39 = "2.2.2"
+chrono = { version = "0.4.45", features = ["serde"] }
+tauri-plugin-stronghold = "2"
+iota_stronghold = "2.1"
+zeroize = "1"
+rand_core = "0.9"
+sha2 = "0.11.0"
+tauri-plugin-clipboard-manager = "2"
+
+
+# Read the optimization guideline for more details: https://tauri.app/concept/size/#cargo-configuration
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = 3
+panic = "abort"
+strip = true
+
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+tauri-plugin-updater = "2"
