@@ -1,0 +1,196 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <!-- Background Gradient -->
+    <radialGradient id="bgGrad" cx="50%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#141E33" />
+      <stop offset="60%" stop-color="#090E17" />
+      <stop offset="100%" stop-color="#04060A" />
+    </radialGradient>
+
+    <!-- Outer Shield Rim Gradient -->
+    <linearGradient id="shieldRimGrad" x1="20%" y1="10%" x2="80%" y2="90%">
+      <stop offset="0%" stop-color="#60A5FA" />
+      <stop offset="35%" stop-color="#3B82F6" />
+      <stop offset="70%" stop-color="#2563EB" />
+      <stop offset="100%" stop-color="#10B981" />
+    </linearGradient>
+
+    <!-- Inner Shield Face Gradient -->
+    <linearGradient id="shieldFaceGrad" x1="50%" y1="10%" x2="50%" y2="95%">
+      <stop offset="0%" stop-color="#1E293B" />
+      <stop offset="45%" stop-color="#0F172A" />
+      <stop offset="100%" stop-color="#070B14" />
+    </linearGradient>
+
+    <!-- Metallic Shackle Gradient -->
+    <linearGradient id="shackleGrad" x1="20%" y1="0%" x2="80%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="25%" stop-color="#BFDBFE" />
+      <stop offset="65%" stop-color="#3B82F6" />
+      <stop offset="100%" stop-color="#1D4ED8" />
+    </linearGradient>
+
+    <!-- Lock Body Gradient -->
+    <linearGradient id="lockBodyGrad" x1="30%" y1="0%" x2="70%" y2="100%">
+      <stop offset="0%" stop-color="#27354F" />
+      <stop offset="50%" stop-color="#162035" />
+      <stop offset="100%" stop-color="#0B111F" />
+    </linearGradient>
+
+    <!-- Cyan to Emerald Core Glow -->
+    <linearGradient id="coreGlowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8" />
+      <stop offset="60%" stop-color="#10B981" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+
+    <!-- Glass Specular Highlight -->
+    <linearGradient id="glassSweep" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.32" />
+      <stop offset="40%" stop-color="#60A5FA" stop-opacity="0.1" />
+      <stop offset="70%" stop-color="#3B82F6" stop-opacity="0" />
+    </linearGradient>
+
+    <!-- Glow Filter -->
+    <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="16" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <filter id="softShadow" x="-10%" y="-10%" width="120%" height="125%">
+      <feDropShadow dx="0" dy="24" stdDeviation="32" flood-color="#000000" flood-opacity="0.75" />
+    </filter>
+  </defs>
+
+  <!-- Squircle Base App Tile with Border -->
+  <rect x="32" y="32" width="960" height="960" rx="220" fill="url(#bgGrad)" stroke="rgba(255, 255, 255, 0.12)" stroke-width="6" />
+
+  <!-- Ambient Shield Backglow -->
+  <circle cx="512" cy="460" r="280" fill="url(#coreGlowGrad)" opacity="0.16" filter="url(#neonGlow)" />
+
+  <!-- The Security Shield Crest -->
+  <g filter="url(#softShadow)">
+    <!-- Shield Outer Shell -->
+    <path
+      d="M 512 144
+         C 672 144, 824 186, 824 372
+         C 824 648, 624 818, 512 900
+         C 400 818, 200 648, 200 372
+         C 200 186, 352 144, 512 144 Z"
+      fill="url(#shieldFaceGrad)"
+      stroke="url(#shieldRimGrad)"
+      stroke-width="18"
+      stroke-linejoin="round"
+    />
+
+    <!-- Shield Inner Bevel Contour -->
+    <path
+      d="M 512 176
+         C 644 176, 788 214, 788 382
+         C 788 626, 608 780, 512 856
+         C 416 780, 236 626, 236 382
+         C 236 214, 380 176, 512 176 Z"
+      fill="none"
+      stroke="rgba(255, 255, 255, 0.15)"
+      stroke-width="3"
+    />
+
+    <!-- Glass Specular Split Facet -->
+    <path
+      d="M 512 154
+         C 660 154, 800 192, 808 360
+         L 512 550
+         L 216 360
+         C 224 192, 364 154, 512 154 Z"
+      fill="url(#glassSweep)"
+    />
+  </g>
+
+  <!-- Padlock Security Shackle -->
+  <path
+    d="M 404 460
+       V 368
+       C 404 308, 452 260, 512 260
+       C 572 260, 620 308, 620 368
+       V 460"
+    fill="none"
+    stroke="url(#shackleGrad)"
+    stroke-width="46"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    filter="url(#softShadow)"
+  />
+
+  <!-- Padlock Vault Body -->
+  <g filter="url(#softShadow)">
+    <rect
+      x="336"
+      y="440"
+      width="352"
+      height="288"
+      rx="48"
+      fill="url(#lockBodyGrad)"
+      stroke="rgba(255, 255, 255, 0.2)"
+      stroke-width="4"
+    />
+
+    <!-- Lock Accent Trim -->
+    <rect
+      x="340"
+      y="444"
+      width="344"
+      height="280"
+      rx="44"
+      fill="none"
+      stroke="url(#shieldRimGrad)"
+      stroke-width="3"
+      opacity="0.8"
+    />
+
+    <!-- Biometric Screen Guard Radial Orbit -->
+    <circle
+      cx="512"
+      cy="570"
+      r="66"
+      fill="none"
+      stroke="rgba(56, 189, 248, 0.35)"
+      stroke-width="3"
+      stroke-dasharray="10 8"
+    />
+
+    <circle
+      cx="512"
+      cy="570"
+      r="48"
+      fill="rgba(16, 185, 129, 0.12)"
+      stroke="url(#coreGlowGrad)"
+      stroke-width="2.5"
+    />
+
+    <!-- Glowing Keyhole Core -->
+    <g filter="url(#neonGlow)">
+      <circle cx="512" cy="554" r="18" fill="url(#coreGlowGrad)" />
+      <path
+        d="M 503 558
+           L 497 608
+           C 497 614, 502 618, 508 618
+           H 516
+           C 522 618, 527 614, 527 608
+           L 521 558 Z"
+        fill="url(#coreGlowGrad)"
+      />
+    </g>
+  </g>
+
+  <!-- Cybernetic Grid Dots / Touch Guard Nodes -->
+  <circle cx="384" cy="488" r="5" fill="#60A5FA" opacity="0.6" />
+  <circle cx="640" cy="488" r="5" fill="#60A5FA" opacity="0.6" />
+  <circle cx="384" cy="680" r="5" fill="#10B981" opacity="0.6" />
+  <circle cx="640" cy="680" r="5" fill="#10B981" opacity="0.6" />
+
+  <!-- Shield Apex Jewel Accent -->
+  <polygon points="512,190 520,206 512,222 504,206" fill="#38BDF8" opacity="0.9" />
+</svg>
