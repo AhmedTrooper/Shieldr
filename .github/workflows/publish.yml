@@ -1,0 +1,99 @@
+name: "publish"
+
+on:
+  push:
+    tags:
+      - 'v*'
+      - 'shieldr-v*'
+
+jobs:
+  publish-tauri:
+    # Forces GitHub Actions (checkout and setup-bun) to use Node 24, fixing the deprecation warning
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # --- APPLE ---
+          - platform: "macos-latest" # Apple Silicon
+            target: "aarch64-apple-darwin"
+            args: "--target aarch64-apple-darwin"
+
+          # --- LINUX ---
+          - platform: "ubuntu-22.04" # Linux x64
+            target: "x86_64-unknown-linux-gnu"
+            args: ""
+          - platform: "ubuntu-22.04-arm" # Linux ARM64
+            target: "aarch64-unknown-linux-gnu"
+            args: ""
+
+          # --- WINDOWS ---
+          - platform: "windows-latest" # Windows x64
+            target: "x86_64-pc-windows-msvc"
+            args: ""
+          - platform: "windows-latest" # Windows ARM64
+            target: "aarch64-pc-windows-msvc"
+            args: "--target aarch64-pc-windows-msvc"
+
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: setup bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      # --- UBUNTU SETUP ---
+      - name: install dependencies (ubuntu only)
+        if: startsWith(matrix.platform, 'ubuntu')
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.0-dev \
+            libwebkit2gtk-4.1-dev \
+            libappindicator3-dev \
+            librsvg2-dev \
+            patchelf \
+            pkg-config \
+            xdg-utils
+
+      # --- BUILD AND PUBLISH ---
+      - name: install frontend dependencies
+        run: bun install --frozen-lockfile
+
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          tagName: shieldr-v__VERSION__
+          releaseName: "Shieldr v__VERSION__"
+          releaseDraft: true
+          prerelease: false
+          args: ${{ matrix.args }}
+          releaseBody: |
+            ## 📥 Which file should I download?
+            Select the correct file from the **Assets** list below based on your operating system and computer architecture.
+
+            ### 🍎 macOS
+            * **Apple Silicon (M1/M2/M3/M4)**: Download the `aarch64` file (e.g., `.dmg` or `.app.tar.gz`)
+
+            ### 🪟 Windows
+            * **Standard PC (Most Intel/AMD)**: Download the `x64` file (e.g., `-setup.exe` or `.msi`)
+            * **Windows on ARM (Snapdragon/Copilot+)**: Download the `arm64` or `aarch64` file (e.g., `-setup.exe`)
+
+            ### 🐧 Linux
+            * **Standard PC (Intel/AMD)**: Download the `amd64` or `x64` file (e.g., `.AppImage` or `.deb`)
+            * **ARM 64-bit (Raspberry Pi/ARM Servers)**: Download the `aarch64` file (e.g., `.AppImage` or `.deb`)
