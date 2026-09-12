@@ -1,0 +1,30 @@
+{
+  "name": "shieldr",
+  "version": "0.1.0",
+  "description": "",
+  "type": "module",
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "tsc --noEmit",
+    "serve": "vite preview",
+    "tauri": "tauri"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@tauri-apps/api": "^2",
+    "@tauri-apps/plugin-clipboard-manager": "~2",
+    "@tauri-apps/plugin-opener": "^2",
+    "@tauri-apps/plugin-stronghold": "^2.3.2",
+    "@tauri-apps/plugin-updater": "~2",
+    "solid-js": "^1.9.3",
+    "zod": "^4.6.2"
+  },
+  "devDependencies": {
+    "typescript": "~6.0.3",
+    "vite": "^8.0.16",
+    "vite-plugin-solid": "^2.11.12",
+    "@tauri-apps/cli": "^2"
+  }
+}
