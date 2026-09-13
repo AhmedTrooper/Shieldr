@@ -9,6 +9,7 @@
     "main"
   ],
   "permissions": [
+    "core:app:default",
     "updater:default",
     "clipboard-manager:default",
     "global-shortcut:default",

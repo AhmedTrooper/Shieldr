@@ -20,7 +20,7 @@ export interface UpdaterState {
 }
 
 const [updaterState, setUpdaterState] = createSignal<UpdaterState>({
-  currentVersion: "0.1.0",
+  currentVersion: "",
   isChecking: false,
   updateAvailable: false,
   updateInfo: null,
@@ -30,22 +30,27 @@ const [updaterState, setUpdaterState] = createSignal<UpdaterState>({
   error: null,
 });
 
-// Dynamically fetch application version from native host
-(async () => {
+// Dynamically fetch application version from native host via Tauri getVersion API
+const initAppVersion = async () => {
   try {
     const v = await getVersion();
     if (v) {
       setUpdaterState((s) => ({ ...s, currentVersion: v }));
+      return v;
     }
   } catch (err) {
     console.warn("Unable to fetch app version from Tauri API:", err);
   }
-})();
+  return "";
+};
+
+void initAppVersion();
 
 let pendingUpdate: Update | null = null;
 
 export const updaterService = {
   state: updaterState,
+  getAppVersion: initAppVersion,
 
   async checkForUpdates(silent = false): Promise<UpdateInfo | null> {
     setUpdaterState((s) => ({

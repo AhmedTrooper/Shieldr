@@ -1129,9 +1129,11 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                   class={clsx("text-blue-400 shrink-0 sm:size-4", { "animate-spin": updaterService.state().isChecking })}
                 />
                 <h3 class={clsx("text-[13px] sm:text-[14px] md:text-[15px] font-semibold text-white m-0 truncate")}>Software Updates</h3>
-                <span class={clsx("text-[10.5px] sm:text-[11px] font-semibold font-mono px-1.5 sm:px-2 py-0.5 rounded-full bg-white/10 text-slate-200 border border-white/15 shrink-0")}>
-                  v{updaterService.state().currentVersion}
-                </span>
+                <Show when={updaterService.state().currentVersion}>
+                  <span class={clsx("text-[10.5px] sm:text-[11px] font-semibold font-mono px-1.5 sm:px-2 py-0.5 rounded-full bg-white/10 text-slate-200 border border-white/15 shrink-0")}>
+                    v{updaterService.state().currentVersion}
+                  </span>
+                </Show>
               </div>
               <p class={clsx("text-[11px] sm:text-xs text-slate-400 m-0 leading-snug")}>
                 Checks official signed releases from GitHub.
