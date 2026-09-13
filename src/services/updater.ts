@@ -1,4 +1,5 @@
 import { check, Update } from "@tauri-apps/plugin-updater";
+import { getVersion } from "@tauri-apps/api/app";
 import { createSignal } from "solid-js";
 
 export interface UpdateInfo {
@@ -8,6 +9,7 @@ export interface UpdateInfo {
 }
 
 export interface UpdaterState {
+  currentVersion: string;
   isChecking: boolean;
   updateAvailable: boolean;
   updateInfo: UpdateInfo | null;
@@ -18,6 +20,7 @@ export interface UpdaterState {
 }
 
 const [updaterState, setUpdaterState] = createSignal<UpdaterState>({
+  currentVersion: "0.1.0",
   isChecking: false,
   updateAvailable: false,
   updateInfo: null,
@@ -26,6 +29,18 @@ const [updaterState, setUpdaterState] = createSignal<UpdaterState>({
   isDownloaded: false,
   error: null,
 });
+
+// Dynamically fetch application version from native host
+(async () => {
+  try {
+    const v = await getVersion();
+    if (v) {
+      setUpdaterState((s) => ({ ...s, currentVersion: v }));
+    }
+  } catch (err) {
+    console.warn("Unable to fetch app version from Tauri API:", err);
+  }
+})();
 
 let pendingUpdate: Update | null = null;
 

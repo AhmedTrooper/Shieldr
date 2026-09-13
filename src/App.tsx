@@ -195,6 +195,8 @@ const App: Component = () => {
       {/* Main Dashboard Control Center (Shown when Unlocked) */}
       <Show when={!status().is_locked}>
         <Dashboard
+          status={status()}
+          isLocked={status().is_locked}
           properties={status().properties}
           onLockNow={handleLockNow}
           onPropertiesUpdated={(props) => {

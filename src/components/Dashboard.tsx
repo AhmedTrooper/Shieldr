@@ -23,7 +23,7 @@ import {
   Database,
 } from "lucide-solid";
 import { SiGithub, SiYoutube } from "solid-icons/si";
-import { AuditLogEntry, ShieldProperties } from "../types";
+import { AuditLogEntry, ShieldProperties, ShieldStatus } from "../types";
 import { tauriBridge } from "../services/tauriBridge";
 import { sound } from "../services/sound";
 import { updaterService } from "../services/updater";
@@ -35,6 +35,8 @@ import {
 import { Tooltip } from "./ui/tooltip";
 
 interface DashboardProps {
+  status?: ShieldStatus;
+  isLocked?: boolean;
   properties: ShieldProperties;
   onLockNow: () => Promise<void>;
   onPropertiesUpdated: (props: ShieldProperties) => void;
@@ -42,6 +44,21 @@ interface DashboardProps {
 
 export const Dashboard: Component<DashboardProps> = (props) => {
   const [activeTab, setActiveTab] = createSignal<"control" | "security" | "display" | "audit">("control");
+
+  // Dynamic system status
+  const statusLabel = () => {
+    if (props.status?.is_locked_out) return "Locked Out";
+    if (props.isLocked || props.status?.is_locked) return "Armed";
+    if (props.status && !props.status.is_configured) return "Setup Needed";
+    return "Ready";
+  };
+
+  const statusClass = () => {
+    if (props.status?.is_locked_out) return "status-locked-out";
+    if (props.isLocked || props.status?.is_locked) return "status-armed";
+    if (props.status && !props.status.is_configured) return "status-unconfigured";
+    return "status-ready";
+  };
 
   // Countdown locking state (in-memory, never stored)
   const [countdown, setCountdown] = createSignal<number | null>(null);
@@ -300,9 +317,9 @@ export const Dashboard: Component<DashboardProps> = (props) => {
         >
           <div class="hero-card">
             <div class="hero-left">
-              <span class="status-indicator-pill">
+              <span class={`status-indicator-pill ${statusClass()}`}>
                 <span class="status-dot-pulse" />
-                Ready
+                {statusLabel()}
               </span>
               <h1 class="hero-title">Screen Protection</h1>
               <p class="hero-description">
@@ -446,10 +463,10 @@ export const Dashboard: Component<DashboardProps> = (props) => {
               <div class="updater-title-row">
                 <RefreshCw
                   size={18}
-                  class={`text-zinc-300 ${updaterService.state().isChecking ? "spin-animation" : ""}`}
+                  class={`text-blue-400 ${updaterService.state().isChecking ? "spin-animation" : ""}`}
                 />
                 <h3 class="updater-title">Software Updates</h3>
-                <span class="version-tag">v0.1.0</span>
+                <span class="version-tag">v{updaterService.state().currentVersion}</span>
               </div>
               <p class="updater-desc">
                 Checks official signed releases from GitHub.
