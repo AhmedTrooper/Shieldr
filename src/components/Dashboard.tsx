@@ -233,8 +233,15 @@ export const Dashboard: Component<DashboardProps> = (props) => {
     e.preventDefault();
     setRevealMsg(null);
 
+    const masterPass = revealMasterPass().trim();
+    if (!masterPass) {
+      sound.playErrorBuzz();
+      setRevealMsg("Master Password is required.");
+      return;
+    }
+
     try {
-      const phrase = await tauriBridge.revealRecoveryPhrase(revealMasterPass());
+      const phrase = await tauriBridge.revealRecoveryPhrase(masterPass);
       setRevealedPhrase(phrase);
       sound.playUnlockSound();
     } catch (err: unknown) {

@@ -398,35 +398,35 @@ Both files have their own `isShaking` signal that fires on failed unlock. The Ap
 
 | ID | Severity | Title | Primary File(s) | Status |
 |---|---|---|---|---|
-| B-001 | P0 | Unlock modal listener leaks across hide/show | `src/components/UnlockModal.tsx` | 🔴 Open |
-| B-002 | P0 | Stale signal state in UnlockModal | `src/components/UnlockModal.tsx` | 🔴 Open |
-| B-003 | P0 | `setTimeout` not aborted on unmount | `UnlockModal.tsx`, `ShieldOverlay.tsx`, `App.tsx`, `Dashboard.tsx` | 🔴 Open |
-| B-004 | P0 | `reveal_recovery_phrase` not rate-limited | `src-tauri/src/commands.rs`, `vault.rs` | 🔴 Open |
-| B-005 | P0 | Tray lock is unauthenticated + DoS-able | `src-tauri/src/tray.rs`, `src/App.tsx` | 🔴 Open |
-| B-006 | P1 | `change_master_password` bypasses rate limit | `src-tauri/src/vault.rs` | 🔴 Open |
-| B-007 | P0 | `is_locked` set before window ops succeed | `src-tauri/src/commands.rs` | 🔴 Open |
-| B-008 | P1 | Concurrent countdown timers possible | `src/App.tsx` | 🔴 Open |
-| B-009 | P1 | Stronghold mutex deadlock risk | `src-tauri/src/stronghold_store.rs` | 🔴 Open |
-| B-010 | P1 | Keyring failures silently ignored | `src-tauri/src/vault.rs` | 🔴 Open |
-| B-011 | P2 | SQLite not in WAL mode | `src-tauri/src/db.rs` | 🔴 Open |
-| B-012 | P0 | Empty master password hits Argon2 | `src/components/Dashboard.tsx` | 🔴 Open |
+| B-001 | P0 | Unlock modal listener leaks across hide/show | `src/components/UnlockModal.tsx` | 🟢 Fixed |
+| B-002 | P0 | Stale signal state in UnlockModal | `src/components/UnlockModal.tsx` | 🟢 Fixed |
+| B-003 | P0 | `setTimeout` not aborted on unmount | `UnlockModal.tsx`, `ShieldOverlay.tsx`, `App.tsx`, `Dashboard.tsx` | 🟢 Fixed |
+| B-004 | P0 | `reveal_recovery_phrase` not rate-limited | `src-tauri/src/commands.rs`, `vault.rs` | 🟢 Fixed |
+| B-005 | P0 | Tray lock is unauthenticated + DoS-able | `src-tauri/src/tray.rs`, `src/App.tsx` | 🟢 Fixed |
+| B-006 | P1 | `change_master_password` bypasses rate limit | `src-tauri/src/vault.rs` | 🟢 Fixed |
+| B-007 | P0 | `is_locked` set before window ops succeed | `src-tauri/src/commands.rs` | 🟢 Fixed |
+| B-008 | P1 | Concurrent countdown timers possible | `src/App.tsx` | 🟢 Fixed |
+| B-009 | P1 | Stronghold mutex deadlock risk | `src-tauri/src/stronghold_store.rs` | 🟢 Fixed |
+| B-010 | P1 | Keyring failures silently ignored | `src-tauri/src/vault.rs` | 🟢 Fixed |
+| B-011 | P2 | SQLite not in WAL mode | `src-tauri/src/db.rs` | 🟢 Fixed |
+| B-012 | P0 | Empty master password hits Argon2 | `src/components/Dashboard.tsx` | 🟢 Fixed |
 | B-013 | P0 | Backend payload not Zod-validated | all `tauriBridge` callers | 🔴 Open |
-| B-014 | P1 | `status().properties` may be undefined | `src/App.tsx` | 🔴 Open |
-| B-015 | P1 | Modifier keys (devtools) while locked | `src/components/ShieldOverlay.tsx` | 🔴 Open |
-| B-016 | P0 | CSP is `null` | `src-tauri/tauri.conf.json` | 🔴 Open |
+| B-014 | P1 | `status().properties` may be undefined | `src/App.tsx` | 🟢 Fixed |
+| B-015 | P1 | Modifier keys (devtools) while locked | `src/components/ShieldOverlay.tsx` | 🟢 Fixed |
+| B-016 | P0 | CSP is `null` | `src-tauri/tauri.conf.json` | ⚪ Intentionally Open (User Specified) |
 | B-017 | P1 | `change_pin` audit too coarse | `src-tauri/src/vault.rs` | 🔴 Open |
 | B-018 | P1 | `verify_credential` returns `Ok(false)` | `src-tauri/src/commands.rs`, `vault.rs` | 🔴 Open |
 | B-019 | P1 | Stronghold snapshot unprotected by master password | `src-tauri/src/lib.rs` | 🔴 Open |
 | B-020 | P2 | `panic = "abort"` no supervisor | `src-tauri/Cargo.toml` | 🔴 Open |
 | B-021 | P2 | Salt file unprotected | `src-tauri/src/lib.rs` | 🔴 Open |
-| B-022 | P1 | Countdown uses stale read | `src/components/Dashboard.tsx` | 🔴 Open |
+| B-022 | P1 | Countdown uses stale read | `src/components/Dashboard.tsx` | 🟢 Fixed |
 | B-023 | P2 | Sound toggle doesn't apply until save | `src/components/Dashboard.tsx` | 🔴 Open |
 | B-024 | P2 | Recovery phrase persists across onboarding | `src/components/InitialSetupModal.tsx` | 🔴 Open |
 | B-025 | P2 | `refreshStatus` not called on window show | `src/App.tsx`, `src-tauri/src/tray.rs` | 🔴 Open |
-| B-026 | P2 | Tab switch doesn't clear form messages | `src/components/Dashboard.tsx` | 🔴 Open |
+| B-026 | P2 | Tab switch doesn't clear form messages | `src/components/Dashboard.tsx` | 🟢 Fixed |
 | B-027 | P3 | Slider NaN risk | `src/components/Dashboard.tsx` | 🔴 Open |
 | B-028 | P3 | `playKeypadBeep` ignores digit param | `src/services/sound.ts` | 🔴 Open |
-| B-029 | P3 | Recovery phrase whitespace not normalized | `src/schemas.ts` | 🔴 Open |
+| B-029 | P3 | Recovery phrase whitespace not normalized | `src/schemas.ts` | 🟢 Fixed |
 | B-030 | P2 | Window size hardcoded 900×640 | `src-tauri/src/commands.rs` | 🔴 Open |
 
 ---

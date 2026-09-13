@@ -127,7 +127,8 @@ export const Tooltip: Component<TooltipProps> = (props) => {
   });
 
   onCleanup(() => {
-    window.removeEventListener("scroll", updatePlacement as EventListener);
+    window.removeEventListener("resize", updatePlacement);
+    window.removeEventListener("scroll", updatePlacement, { capture: true } as EventListenerOptions);
   });
 
   return (

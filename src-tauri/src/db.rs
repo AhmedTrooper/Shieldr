@@ -88,6 +88,9 @@ impl SqliteStore {
     fn init_schema(&self) -> AppResult<()> {
         let conn = self.lock_conn()?;
 
+        // B-011: Enable WAL journal mode and normal synchronous writes for concurrency and resilience
+        conn.execute_batch("PRAGMA journal_mode = WAL; PRAGMA synchronous = NORMAL;")?;
+
         // 1. Properties table (strictly non-secret metadata & UI preferences)
         conn.execute(
             "CREATE TABLE IF NOT EXISTS properties (

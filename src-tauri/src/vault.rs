@@ -55,10 +55,16 @@ impl Vault {
         let master_hash = CryptoService::hash_password(master_password.trim())?;
         let recovery_phrase = CryptoService::generate_recovery_phrase()?;
 
-        // Save secret hashes to OS Keyring
-        let _ = self.keyring.set_secret(KEY_PIN_HASH, &pin_hash);
-        let _ = self.keyring.set_secret(KEY_MASTER_HASH, &master_hash);
-        let _ = self.keyring.set_secret(KEY_RESET_PHRASE, &recovery_phrase);
+        // Save secret hashes to OS Keyring (log warnings if unavailable, B-010)
+        if let Err(e) = self.keyring.set_secret(KEY_PIN_HASH, &pin_hash) {
+            eprintln!("Warning: OS Keyring set_secret failed for PIN hash: {e}");
+        }
+        if let Err(e) = self.keyring.set_secret(KEY_MASTER_HASH, &master_hash) {
+            eprintln!("Warning: OS Keyring set_secret failed for Master hash: {e}");
+        }
+        if let Err(e) = self.keyring.set_secret(KEY_RESET_PHRASE, &recovery_phrase) {
+            eprintln!("Warning: OS Keyring set_secret failed for Recovery phrase: {e}");
+        }
 
         // Save to Stronghold encrypted vault snapshot
         self.stronghold.set_secret(KEY_PIN_HASH, &pin_hash)?;
@@ -208,8 +214,16 @@ impl Vault {
     /// already knowing it. We now require the master password explicitly,
     /// removing ambiguity and forcing PIN rotation to be a privileged action.
     pub fn change_pin(&self, master_password: &str, new_pin: &str) -> AppResult<()> {
-        if master_password.trim().is_empty() {
+        let master_password = master_password.trim();
+        if master_password.is_empty() {
             return Err(AppError::InvalidCredentials);
+        }
+
+        // B-006: Check lockout state before performing any expensive cryptographic operations
+        if let Some(remaining_secs) = self.db.check_lockout()? {
+            return Err(AppError::LockedOut {
+                remaining_seconds: remaining_secs,
+            });
         }
 
         let master_hash = self
@@ -232,6 +246,8 @@ impl Vault {
             return Err(AppError::InvalidCredentials);
         }
 
+        self.db.reset_rate_limiter()?;
+
         let new_pin = new_pin.trim();
         if new_pin.is_empty() {
             return Err(AppError::Crypto("New PIN cannot be empty".to_string()));
@@ -253,13 +269,40 @@ impl Vault {
         let current_master = current_master.trim();
         let new_master = new_master.trim();
 
+        if current_master.is_empty() {
+            return Err(AppError::InvalidCredentials);
+        }
+        if new_master.is_empty() {
+            return Err(AppError::Crypto(
+                "New master password cannot be empty".to_string(),
+            ));
+        }
+
+        // B-006: Check lockout state before verifying master password
+        if let Some(remaining_secs) = self.db.check_lockout()? {
+            return Err(AppError::LockedOut {
+                remaining_seconds: remaining_secs,
+            });
+        }
+
         let master_hash = self
             .get_secret_with_fallback(KEY_MASTER_HASH)?
             .ok_or(AppError::NotConfigured)?;
 
         if !CryptoService::verify_password(current_master, &master_hash) {
+            let props = self.db.get_all_properties()?;
+            let (_attempts, _is_locked, lock_secs) = self
+                .db
+                .record_failed_attempt(props.max_failed_attempts, props.lockout_duration_secs)?;
+            if let Some(secs) = lock_secs {
+                return Err(AppError::LockedOut {
+                    remaining_seconds: secs,
+                });
+            }
             return Err(AppError::InvalidCredentials);
         }
+
+        self.db.reset_rate_limiter()?;
 
         let new_hash = CryptoService::hash_password(new_master)?;
         let _ = self.keyring.set_secret(KEY_MASTER_HASH, &new_hash);
@@ -276,18 +319,41 @@ impl Vault {
     pub fn reveal_recovery_phrase(&self, master_password: &str) -> AppResult<String> {
         // B-063: Trim the candidate for consistency with the other auth paths.
         let master_password = master_password.trim();
+        if master_password.is_empty() {
+            return Err(AppError::InvalidCredentials);
+        }
+
+        // B-004: Check lockout state before revealing recovery phrase
+        if let Some(remaining_secs) = self.db.check_lockout()? {
+            return Err(AppError::LockedOut {
+                remaining_seconds: remaining_secs,
+            });
+        }
 
         let master_hash = self
             .get_secret_with_fallback(KEY_MASTER_HASH)?
             .ok_or(AppError::NotConfigured)?;
 
         if !CryptoService::verify_password(master_password, &master_hash) {
+            let props = self.db.get_all_properties()?;
+            let (_attempts, _is_locked, lock_secs) = self
+                .db
+                .record_failed_attempt(props.max_failed_attempts, props.lockout_duration_secs)?;
+
             self.db.audit_log_best_effort(
                 "RECOVERY_REVEAL_DENIED",
                 "Unauthorized attempt to reveal recovery phrase.",
             );
+
+            if let Some(secs) = lock_secs {
+                return Err(AppError::LockedOut {
+                    remaining_seconds: secs,
+                });
+            }
             return Err(AppError::InvalidCredentials);
         }
+
+        self.db.reset_rate_limiter()?;
 
         let phrase = self
             .get_secret_with_fallback(KEY_RESET_PHRASE)?
