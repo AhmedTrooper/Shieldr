@@ -123,7 +123,7 @@ export const ChangeMasterPasswordSchema = z.object({
   currentMaster: z.string().min(1, "Current master password is required"),
   newMaster: z
     .string()
-    .min(8, "New master password must be at least 8 characters"),
+    .min(6, "New master password must be at least 6 characters"),
 });
 
 export type ChangeMasterPasswordInput = z.infer<typeof ChangeMasterPasswordSchema>;

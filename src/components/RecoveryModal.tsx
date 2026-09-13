@@ -130,7 +130,10 @@ export const RecoveryModal: Component<RecoveryModalProps> = (props) => {
                     "text-xs text-zinc-100 placeholder:text-zinc-500 tracking-widest text-center transition-colors"
                   )}
                   maxLength={8}
-                  placeholder="••••"
+                  minLength={4}
+                  pattern="[0-9]{4,8}"
+                  inputMode="numeric"
+                  placeholder="4-8 digits"
                   value={newPin()}
                   onInput={(e) => setNewPin(e.currentTarget.value)}
                   required
@@ -146,7 +149,10 @@ export const RecoveryModal: Component<RecoveryModalProps> = (props) => {
                     "text-xs text-zinc-100 placeholder:text-zinc-500 tracking-widest text-center transition-colors"
                   )}
                   maxLength={8}
-                  placeholder="••••"
+                  minLength={4}
+                  pattern="[0-9]{4,8}"
+                  inputMode="numeric"
+                  placeholder="Repeat PIN"
                   value={confirmPin()}
                   onInput={(e) => setConfirmPin(e.currentTarget.value)}
                   required

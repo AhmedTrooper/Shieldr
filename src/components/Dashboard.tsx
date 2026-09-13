@@ -808,6 +808,10 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                     type="password"
                     class={clsx("w-full h-9 sm:h-10 px-3 rounded-lg bg-slate-950/80 border border-white/15 text-white text-xs sm:text-[13px] font-mono outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-slate-600")}
                     maxLength={8}
+                    minLength={4}
+                    pattern="[0-9]{4,8}"
+                    inputMode="numeric"
+                    placeholder="4-8 digits"
                     value={newPin()}
                     onInput={(e) => setNewPin(e.currentTarget.value)}
                     required
@@ -858,6 +862,8 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                   <input
                     type="password"
                     class={clsx("w-full h-9 sm:h-10 px-3 rounded-lg bg-slate-950/80 border border-white/15 text-white text-xs sm:text-[13px] font-mono outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-slate-600")}
+                    minLength={6}
+                    placeholder="At least 6 characters..."
                     value={newMaster()}
                     onInput={(e) => setNewMaster(e.currentTarget.value)}
                     required

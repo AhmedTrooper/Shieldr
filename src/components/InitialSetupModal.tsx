@@ -151,6 +151,9 @@ export const InitialSetupModal: Component<InitialSetupModalProps> = (props) => {
                       "text-xs text-zinc-100 placeholder:text-zinc-500 tracking-widest text-center transition-colors"
                     )}
                     maxLength={8}
+                    minLength={4}
+                    pattern="[0-9]{4,8}"
+                    inputMode="numeric"
                     placeholder="4-8 digits"
                     value={pin()}
                     onInput={(e) => setPin(e.currentTarget.value)}
@@ -168,6 +171,9 @@ export const InitialSetupModal: Component<InitialSetupModalProps> = (props) => {
                       "text-xs text-zinc-100 placeholder:text-zinc-500 tracking-widest text-center transition-colors"
                     )}
                     maxLength={8}
+                    minLength={4}
+                    pattern="[0-9]{4,8}"
+                    inputMode="numeric"
                     placeholder="Repeat PIN"
                     value={confirmPin()}
                     onInput={(e) => setConfirmPin(e.currentTarget.value)}
@@ -185,6 +191,7 @@ export const InitialSetupModal: Component<InitialSetupModalProps> = (props) => {
                     "w-full h-10 min-h-[40px] px-3 rounded-lg bg-slate-950/70 border border-white/15 hover:border-white/25 focus:border-blue-500 focus:outline-none",
                     "text-xs text-zinc-100 placeholder:text-zinc-500 transition-colors"
                   )}
+                  minLength={6}
                   placeholder="At least 6 characters..."
                   value={masterPassword()}
                   onInput={(e) => setMasterPassword(e.currentTarget.value)}

@@ -27,6 +27,28 @@ pub struct Vault {
     db: SqliteStore,
 }
 
+/// Validates that a PIN is between 4 and 8 numeric digits.
+pub fn validate_pin(pin: &str) -> AppResult<()> {
+    let pin = pin.trim();
+    if pin.len() < 4 || pin.len() > 8 || !pin.chars().all(|c| c.is_ascii_digit()) {
+        return Err(AppError::Crypto(
+            "PIN must be between 4 and 8 numeric digits".to_string(),
+        ));
+    }
+    Ok(())
+}
+
+/// Validates that a Master Password is at least 6 characters.
+pub fn validate_master_password(password: &str) -> AppResult<()> {
+    let password = password.trim();
+    if password.len() < 6 {
+        return Err(AppError::Crypto(
+            "Master password must be at least 6 characters".to_string(),
+        ));
+    }
+    Ok(())
+}
+
 impl Vault {
     pub fn new(keyring: KeyringStore, stronghold: StrongholdStore, db: SqliteStore) -> Self {
         Self {
@@ -42,14 +64,8 @@ impl Vault {
 
     /// Sets up security credentials: PIN, Master Password, and generated BIP-39 phrase.
     pub fn setup_security(&self, pin: &str, master_password: &str) -> AppResult<String> {
-        if pin.trim().is_empty() {
-            return Err(AppError::Crypto("PIN cannot be empty".to_string()));
-        }
-        if master_password.trim().is_empty() {
-            return Err(AppError::Crypto(
-                "Master password cannot be empty".to_string(),
-            ));
-        }
+        validate_pin(pin)?;
+        validate_master_password(master_password)?;
 
         let pin_hash = CryptoService::hash_password(pin.trim())?;
         let master_hash = CryptoService::hash_password(master_password.trim())?;
@@ -194,6 +210,7 @@ impl Vault {
             return Err(AppError::InvalidRecoveryPhrase);
         }
 
+        validate_pin(new_pin)?;
         let pin_hash = CryptoService::hash_password(new_pin.trim())?;
 
         let _ = self.keyring.set_secret(KEY_PIN_HASH, &pin_hash);
@@ -220,6 +237,9 @@ impl Vault {
         if master_password.is_empty() {
             return Err(AppError::InvalidCredentials);
         }
+
+        // Validate new PIN format upfront before doing crypto work
+        validate_pin(new_pin)?;
 
         // B-006: Check lockout state before performing any expensive cryptographic operations
         if let Some(remaining_secs) = self.db.check_lockout()? {
@@ -250,12 +270,7 @@ impl Vault {
 
         self.db.reset_rate_limiter()?;
 
-        let new_pin = new_pin.trim();
-        if new_pin.is_empty() {
-            return Err(AppError::Crypto("New PIN cannot be empty".to_string()));
-        }
-
-        let pin_hash = CryptoService::hash_password(new_pin)?;
+        let pin_hash = CryptoService::hash_password(new_pin.trim())?;
         let _ = self.keyring.set_secret(KEY_PIN_HASH, &pin_hash);
         self.stronghold.set_secret(KEY_PIN_HASH, &pin_hash)?;
 
@@ -274,11 +289,7 @@ impl Vault {
         if current_master.is_empty() {
             return Err(AppError::InvalidCredentials);
         }
-        if new_master.is_empty() {
-            return Err(AppError::Crypto(
-                "New master password cannot be empty".to_string(),
-            ));
-        }
+        validate_master_password(new_master)?;
 
         // B-006: Check lockout state before verifying master password
         if let Some(remaining_secs) = self.db.check_lockout()? {
@@ -367,5 +378,35 @@ impl Vault {
         );
 
         Ok(phrase)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_validate_pin() {
+        assert!(validate_pin("1234").is_ok());
+        assert!(validate_pin("12345678").is_ok());
+        assert!(validate_pin(" 1234 ").is_ok());
+
+        assert!(validate_pin("").is_err());
+        assert!(validate_pin("   ").is_err());
+        assert!(validate_pin("123").is_err());
+        assert!(validate_pin("123456789").is_err());
+        assert!(validate_pin("123a").is_err());
+        assert!(validate_pin("abcd").is_err());
+    }
+
+    #[test]
+    fn test_validate_master_password() {
+        assert!(validate_master_password("123456").is_ok());
+        assert!(validate_master_password("longer-secure-password").is_ok());
+        assert!(validate_master_password(" 123456 ").is_ok());
+
+        assert!(validate_master_password("").is_err());
+        assert!(validate_master_password("     ").is_err());
+        assert!(validate_master_password("12345").is_err());
     }
 }
