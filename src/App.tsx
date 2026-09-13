@@ -12,7 +12,6 @@ import { UnlockModal } from "./components/UnlockModal";
 import { RecoveryModal } from "./components/RecoveryModal";
 import { InitialSetupModal } from "./components/InitialSetupModal";
 import { Dashboard } from "./components/Dashboard";
-import "./App.css";
 
 const defaultProperties: ShieldProperties = {
   overlay_opacity: 0.02,
