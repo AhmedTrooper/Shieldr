@@ -599,7 +599,10 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                   max="0.40"
                   step="0.01"
                   value={opacity()}
-                  onInput={(e) => setOpacity(parseFloat(e.currentTarget.value))}
+                  onInput={(e) => {
+                    const v = parseFloat(e.currentTarget.value);
+                    if (Number.isFinite(v)) setOpacity(v);
+                  }}
                   class={clsx("flex-1 sm:flex-none sm:w-32 md:w-36 h-1.5 rounded-lg bg-slate-800 accent-blue-500 cursor-pointer")}
                 />
                 <span class={clsx("min-w-[42px] text-right font-mono font-bold text-[11px] sm:text-xs text-blue-400 px-1.5 py-0.5 rounded bg-white/[0.06] border border-white/10")}>
@@ -622,7 +625,10 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                   max="20"
                   step="1"
                   value={blur()}
-                  onInput={(e) => setBlur(parseInt(e.currentTarget.value))}
+                  onInput={(e) => {
+                    const v = parseInt(e.currentTarget.value, 10);
+                    if (Number.isFinite(v)) setBlur(v);
+                  }}
                   class={clsx("flex-1 sm:flex-none sm:w-32 md:w-36 h-1.5 rounded-lg bg-slate-800 accent-blue-500 cursor-pointer")}
                 />
                 <span class={clsx("min-w-[42px] text-right font-mono font-bold text-[11px] sm:text-xs text-blue-400 px-1.5 py-0.5 rounded-md bg-white/[0.06] border border-white/10")}>
@@ -676,7 +682,11 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                     <input
                       type="checkbox"
                       checked={soundEnabled()}
-                      onChange={(e) => setSoundEnabled(e.currentTarget.checked)}
+                      onChange={(e) => {
+                        const checked = e.currentTarget.checked;
+                        setSoundEnabled(checked);
+                        sound.setEnabled(checked);
+                      }}
                       aria-label="Sound Feedback"
                       class={clsx("sr-only peer")}
                     />

@@ -128,6 +128,10 @@ const App: Component = () => {
   let unlistenTrayLock: UnlistenFn | null = null;
   let unlistenTrayUpdates: UnlistenFn | null = null;
   let unlistenEscapeAttempt: UnlistenFn | null = null;
+  let unlistenWindowShown: UnlistenFn | null = null;
+  const handleWindowFocus = () => {
+    if (mounted) refreshStatus();
+  };
   // B-042: Track whether the component is still mounted so listeners
   // registered asynchronously can avoid touching signals after onCleanup
   // runs (which happens on window close during init or HMR).
@@ -135,6 +139,7 @@ const App: Component = () => {
 
   onMount(async () => {
     await refreshStatus();
+    window.addEventListener("focus", handleWindowFocus);
 
     try {
       unlistenTrayLock = await listen("tray-lock-request", () => {
@@ -143,6 +148,11 @@ const App: Component = () => {
 
       unlistenTrayUpdates = await listen("tray-check-updates", () => {
         if (mounted) updaterService.checkForUpdates(false);
+      });
+
+      // B-025: Refresh status when window is revealed from tray
+      unlistenWindowShown = await listen("window-shown", () => {
+        if (mounted) refreshStatus();
       });
 
       // B-081: Listen for OS-level escape attempts (Alt+F4, Super+Q/W/M/H, Ctrl+W).
@@ -161,10 +171,12 @@ const App: Component = () => {
 
   onCleanup(() => {
     mounted = false;
+    window.removeEventListener("focus", handleWindowFocus);
     if (lockoutCountdownTimer) clearInterval(lockoutCountdownTimer);
     if (unlistenTrayLock) unlistenTrayLock();
     if (unlistenTrayUpdates) unlistenTrayUpdates();
     if (unlistenEscapeAttempt) unlistenEscapeAttempt();
+    if (unlistenWindowShown) unlistenWindowShown();
     setLockoutEndAt(null);
   });
 

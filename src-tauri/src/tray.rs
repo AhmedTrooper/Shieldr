@@ -61,6 +61,7 @@ pub fn setup_tray(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
                             let _ = window.show();
                             let _ = window.unminimize();
                             let _ = window.set_focus();
+                            let _ = window.emit("window-shown", ());
                         }
                     }
                 }
@@ -119,6 +120,7 @@ pub fn setup_tray(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
                     let _ = window.show();
                     let _ = window.unminimize();
                     let _ = window.set_focus();
+                    let _ = window.emit("window-shown", ());
                 }
             }
         })

@@ -105,7 +105,8 @@ class SoundService {
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
 
-    const baseFreq = typeof digit === "number" ? 440 + digit * 40 : 580;
+    const num = typeof digit === "number" ? digit : (digit ? parseInt(digit, 10) : NaN);
+    const baseFreq = Number.isFinite(num) ? 440 + (num % 10) * 35 : 580;
     osc.type = "sine";
     osc.frequency.setValueAtTime(baseFreq, now);
 

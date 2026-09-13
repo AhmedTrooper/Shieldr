@@ -119,7 +119,7 @@ impl Vault {
     /// time, so the candidate must be trimmed here too. Without this, a user
     /// who accidentally types `" 1234 "` cannot unlock even though the stored
     /// hash is for `"1234"`.
-    pub fn verify_credential(&self, candidate: &str) -> AppResult<bool> {
+    pub fn verify_credential(&self, candidate: &str) -> AppResult<()> {
         let candidate = candidate.trim();
 
         // 1. Check lockout state
@@ -149,9 +149,11 @@ impl Vault {
 
         if matched {
             self.db.reset_rate_limiter()?;
-            self.db
-                .audit_log_best_effort("AUTH_SUCCESS", "Authentication successful.");
-            Ok(true)
+            // B-017: Differentiate whether auth was achieved via PIN or Master Password
+            let method = if pin_verified { "PIN" } else { "MASTER" };
+            let detail = format!("Authentication successful via {method}.");
+            self.db.audit_log_best_effort("AUTH_SUCCESS", &detail);
+            Ok(())
         } else {
             let props = self.db.get_all_properties()?;
             let (attempts, is_locked, lock_secs) = self
@@ -169,7 +171,7 @@ impl Vault {
                     remaining_seconds: secs,
                 })
             } else {
-                Ok(false)
+                Err(AppError::InvalidCredentials)
             }
         }
     }

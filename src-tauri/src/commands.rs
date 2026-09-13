@@ -139,11 +139,7 @@ pub async fn unlock_shield(
     credential: String,
 ) -> Result<ShieldStatus, AppError> {
     let credential = Zeroizing::new(credential);
-    let valid = state.vault.verify_credential(&credential)?;
-
-    if !valid {
-        return Err(AppError::InvalidCredentials);
-    }
+    state.vault.verify_credential(&credential)?;
 
     // B-036: Flip is_locked to false FIRST so the UI reflects the user's intent,
     // then attempt the window operations. If they fail, we still consider the
@@ -295,10 +291,7 @@ pub async fn request_close_window(
     // The unlock modal's "Quit" button supplies one; any other path that
     // omits it (e.g. a desynced state) must be refused.
     let credential = Zeroizing::new(credential.ok_or(AppError::LockedPermissionDenied)?);
-    let valid = state.vault.verify_credential(&credential)?;
-    if !valid {
-        return Err(AppError::InvalidCredentials);
-    }
+    state.vault.verify_credential(&credential)?;
 
     if let Some(window) = app.get_webview_window("main") {
         if let Ok(mut guard) = state.keep_awake_guard.lock() {
@@ -320,10 +313,7 @@ pub async fn request_hide_window(
 ) -> Result<(), AppError> {
     // B-035: Same hardening as request_close_window.
     let credential = Zeroizing::new(credential.ok_or(AppError::LockedPermissionDenied)?);
-    let valid = state.vault.verify_credential(&credential)?;
-    if !valid {
-        return Err(AppError::InvalidCredentials);
-    }
+    state.vault.verify_credential(&credential)?;
 
     if let Some(window) = app.get_webview_window("main") {
         window.hide().map_err(|e| AppError::Window(e.to_string()))?;

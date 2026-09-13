@@ -1,4 +1,4 @@
-import { Component, createSignal, For, Show } from "solid-js";
+import { Component, createEffect, createSignal, For, Show } from "solid-js";
 import { clsx } from "clsx";
 import { ArrowRight, Check, Copy, KeyRound, ScrollText, ShieldCheck } from "lucide-solid";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
@@ -23,6 +23,21 @@ export const InitialSetupModal: Component<InitialSetupModalProps> = (props) => {
   const [confirmedBackup, setConfirmedBackup] = createSignal(false);
   const [isSubmitting, setIsSubmitting] = createSignal(false);
   const [errorMsg, setErrorMsg] = createSignal<string | null>(null);
+
+  // B-024: Clear phrase and sensitive credentials when modal closes
+  createEffect(() => {
+    if (!props.isOpen) {
+      setPin("");
+      setConfirmPin("");
+      setMasterPassword("");
+      setRecoveryPhrase("");
+      setCopied(false);
+      setHasCopiedPhrase(false);
+      setConfirmedBackup(false);
+      setErrorMsg(null);
+      setStep(1);
+    }
+  });
 
   const handleStep1Submit = async (e: Event) => {
     e.preventDefault();
