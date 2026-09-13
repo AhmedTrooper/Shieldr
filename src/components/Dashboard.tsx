@@ -230,40 +230,43 @@ export const Dashboard: Component<DashboardProps> = (props) => {
     <div class="dashboard-shell">
       {/* Tab Navigation */}
       <nav class="dashboard-tabs">
-        <Tooltip content="Control Center & Shield Arming" placement="bottom">
+        <Tooltip content="Control Center & Shield Arming" placement="bottom" class="tab-tooltip-item">
           <button
             type="button"
             class={`tab-btn ${activeTab() === "control" ? "active" : ""}`}
             onClick={() => setActiveTab("control")}
             aria-label="Control Center"
           >
-            <Shield size={18} />
-            <span>Control Center</span>
+            <Shield size={18} class="tab-icon" />
+            <span class="tab-label-full">Control Center</span>
+            <span class="tab-label-short">Control</span>
           </button>
         </Tooltip>
-        <Tooltip content="Display, Overlay Tint & Blur Settings" placement="bottom">
+        <Tooltip content="Display, Overlay Tint & Blur Settings" placement="bottom" class="tab-tooltip-item">
           <button
             type="button"
             class={`tab-btn ${activeTab() === "display" ? "active" : ""}`}
             onClick={() => setActiveTab("display")}
             aria-label="Display & Overlay"
           >
-            <Sliders size={18} />
-            <span>Display & Overlay</span>
+            <Sliders size={18} class="tab-icon" />
+            <span class="tab-label-full">Display & Overlay</span>
+            <span class="tab-label-short">Display</span>
           </button>
         </Tooltip>
-        <Tooltip content="Security PIN, Password & Recovery Phrase" placement="bottom">
+        <Tooltip content="Security PIN, Password & Recovery Phrase" placement="bottom" class="tab-tooltip-item">
           <button
             type="button"
             class={`tab-btn ${activeTab() === "security" ? "active" : ""}`}
             onClick={() => setActiveTab("security")}
             aria-label="Security & Vault"
           >
-            <KeyRound size={18} />
-            <span>Security & Vault</span>
+            <KeyRound size={18} class="tab-icon" />
+            <span class="tab-label-full">Security & Vault</span>
+            <span class="tab-label-short">Security</span>
           </button>
         </Tooltip>
-        <Tooltip content="SQLite Security Audit Logs & History" placement="bottom">
+        <Tooltip content="SQLite Security Audit Logs & History" placement="bottom" class="tab-tooltip-item">
           <button
             type="button"
             class={`tab-btn ${activeTab() === "audit" ? "active" : ""}`}
@@ -273,8 +276,9 @@ export const Dashboard: Component<DashboardProps> = (props) => {
             }}
             aria-label="SQLite Audit Log"
           >
-            <FileText size={18} />
-            <span>Audit Trail</span>
+            <FileText size={18} class="tab-icon" />
+            <span class="tab-label-full">SQLite Audit Log</span>
+            <span class="tab-label-short">Audit</span>
           </button>
         </Tooltip>
       </nav>
