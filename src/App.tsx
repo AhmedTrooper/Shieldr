@@ -1,7 +1,9 @@
 import { Component, createSignal, onCleanup, onMount, Show } from "solid-js";
+import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { ShieldProperties, ShieldStatus } from "./types";
 import { tauriBridge } from "./services/tauriBridge";
 import { sound } from "./services/sound";
+import { updaterService } from "./services/updater";
 import { TitleBar } from "./components/TitleBar";
 import { LockIconWidget } from "./components/LockIconWidget";
 import { ShieldOverlay } from "./components/ShieldOverlay";
@@ -22,6 +24,7 @@ const defaultProperties: ShieldProperties = {
   has_pin_configured: false,
   has_master_password: false,
   has_reset_phrase: false,
+  keep_awake: true,
 };
 
 const App: Component = () => {
@@ -78,13 +81,31 @@ const App: Component = () => {
     }, 1000);
   };
 
-  onMount(() => {
-    refreshStatus();
+  let unlistenTrayLock: UnlistenFn | null = null;
+  let unlistenTrayUpdates: UnlistenFn | null = null;
+
+  onMount(async () => {
+    await refreshStatus();
+
+    try {
+      unlistenTrayLock = await listen("tray-lock-request", () => {
+        handleLockNow();
+      });
+
+      unlistenTrayUpdates = await listen("tray-check-updates", () => {
+        updaterService.checkForUpdates(false);
+      });
+    } catch (e) {
+      console.warn("Tray event listeners registration failed:", e);
+    }
   });
 
   onCleanup(() => {
     if (lockoutCountdownTimer) clearInterval(lockoutCountdownTimer);
+    if (unlistenTrayLock) unlistenTrayLock();
+    if (unlistenTrayUpdates) unlistenTrayUpdates();
   });
+
 
   // Lock Action
   const handleLockNow = async () => {

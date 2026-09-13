@@ -1,8 +1,27 @@
 import { Component, createSignal, For, onMount, Show } from "solid-js";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
+import { openUrl } from "@tauri-apps/plugin-opener";
+import { Motion } from "@motionone/solid";
+import {
+  Shield,
+  Lock,
+  Sliders,
+  KeyRound,
+  FileText,
+  Clock,
+  RefreshCw,
+  Copy,
+  Check,
+  CheckCircle2,
+  AlertCircle,
+  Download,
+  ExternalLink,
+} from "lucide-solid";
+import { SiGithub, SiYoutube } from "solid-icons/si";
 import { AuditLogEntry, ShieldProperties } from "../types";
 import { tauriBridge } from "../services/tauriBridge";
 import { sound } from "../services/sound";
+import { updaterService } from "../services/updater";
 import {
   ChangePinSchema,
   ChangeMasterPasswordSchema,
@@ -43,6 +62,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
   const [position, setPosition] = createSignal(props.properties.lock_icon_position);
   const [autohide, setAutohide] = createSignal(props.properties.lock_icon_autohide_secs);
   const [soundEnabled, setSoundEnabled] = createSignal(props.properties.sound_enabled);
+  const [keepAwake, setKeepAwake] = createSignal(props.properties.keep_awake ?? true);
   const [saveDisplayMsg, setSaveDisplayMsg] = createSignal<string | null>(null);
 
   // Audit Logs State
@@ -163,6 +183,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
       lock_icon_position: position() as "floating" | "center" | "top-right" | "bottom-right",
       lock_icon_autohide_secs: autohide(),
       sound_enabled: soundEnabled(),
+      keep_awake: keepAwake(),
     };
 
     const parsed = ShieldPropertiesSchema.safeParse(rawUpdated);
@@ -212,21 +233,24 @@ export const Dashboard: Component<DashboardProps> = (props) => {
           class={`tab-btn ${activeTab() === "control" ? "active" : ""}`}
           onClick={() => setActiveTab("control")}
         >
-          🛡️ Control Center
+          <Shield size={16} />
+          <span>Control Center</span>
         </button>
         <button
           type="button"
           class={`tab-btn ${activeTab() === "display" ? "active" : ""}`}
           onClick={() => setActiveTab("display")}
         >
-          🎨 Display & Overlay
+          <Sliders size={16} />
+          <span>Display & Overlay</span>
         </button>
         <button
           type="button"
           class={`tab-btn ${activeTab() === "security" ? "active" : ""}`}
           onClick={() => setActiveTab("security")}
         >
-          🔑 Security & Vault
+          <KeyRound size={16} />
+          <span>Security & Vault</span>
         </button>
         <button
           type="button"
@@ -236,13 +260,19 @@ export const Dashboard: Component<DashboardProps> = (props) => {
             loadAuditLogs();
           }}
         >
-          📜 SQLite Audit Log
+          <FileText size={16} />
+          <span>SQLite Audit Log</span>
         </button>
       </nav>
 
       {/* Tab 1: Control Center */}
       <Show when={activeTab() === "control"}>
-        <div class="tab-content control-tab">
+        <Motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2 }}
+          class="tab-content control-tab"
+        >
           <div class="hero-card">
             <div class="hero-left">
               <span class="status-indicator-pill">Ready to Guard</span>
@@ -261,7 +291,8 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                       class="big-lock-btn"
                       onClick={() => props.onLockNow()}
                     >
-                      🔒 Lock Screen Now
+                      <Lock size={18} />
+                      <span>Lock Screen Now</span>
                     </button>
                     <button
                       type="button"
@@ -269,7 +300,8 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                       onClick={startCountdownLock}
                       title="Gives you 3 seconds to switch windows before locking"
                     >
-                      ⏳ Lock in 3s Delay
+                      <Clock size={16} />
+                      <span>Lock in 3s Delay</span>
                     </button>
                   </div>
                 }
@@ -314,6 +346,112 @@ export const Dashboard: Component<DashboardProps> = (props) => {
             </div>
           </div>
 
+          {/* Updater & Community Card */}
+          <div class="updater-card">
+            <div class="updater-left">
+              <div class="updater-title-row">
+                <RefreshCw
+                  size={18}
+                  class={`text-blue-400 ${updaterService.state().isChecking ? "spin-animation" : ""}`}
+                />
+                <h3 class="updater-title">Software Updates</h3>
+                <span class="version-tag">v0.1.0</span>
+              </div>
+              <p class="updater-desc">
+                Shieldr automatically checks official signed GitHub releases with ed25519 signatures.
+              </p>
+
+              <Show when={updaterService.state().updateAvailable && updaterService.state().updateInfo}>
+                <div class="update-banner">
+                  <div class="update-banner-header">
+                    <CheckCircle2 size={16} class="text-emerald-400" />
+                    <strong>New version {updaterService.state().updateInfo?.version} is available!</strong>
+                  </div>
+                  <Show when={updaterService.state().updateInfo?.body}>
+                    <p class="update-notes">{updaterService.state().updateInfo?.body}</p>
+                  </Show>
+                  <Show when={!updaterService.state().isDownloaded}>
+                    <button
+                      type="button"
+                      class="download-update-btn"
+                      onClick={() => updaterService.downloadAndInstallUpdate()}
+                      disabled={updaterService.state().isDownloading}
+                    >
+                      <Download size={14} />
+                      <span>
+                        {updaterService.state().isDownloading
+                          ? `Downloading (${updaterService.state().progressPercent}%)...`
+                          : "Download & Install Now"}
+                      </span>
+                    </button>
+                  </Show>
+                  <Show when={updaterService.state().isDownloaded}>
+                    <div class="update-ready-box">
+                      <Check size={16} class="text-emerald-400" />
+                      <span>Update downloaded! Restart Shieldr to complete installation.</span>
+                    </div>
+                  </Show>
+                </div>
+              </Show>
+
+              <Show
+                when={
+                  !updaterService.state().updateAvailable &&
+                  !updaterService.state().isChecking &&
+                  !updaterService.state().error
+                }
+              >
+                <div class="up-to-date-row">
+                  <CheckCircle2 size={14} class="text-emerald-400" />
+                  <span>Shieldr is running the latest version</span>
+                </div>
+              </Show>
+
+              <Show when={updaterService.state().error}>
+                <div class="update-error-row">
+                  <AlertCircle size={14} class="text-amber-400" />
+                  <span>{updaterService.state().error}</span>
+                </div>
+              </Show>
+            </div>
+
+            <div class="updater-right">
+              <button
+                type="button"
+                class="check-update-btn"
+                onClick={() => updaterService.checkForUpdates(false)}
+                disabled={updaterService.state().isChecking}
+              >
+                <RefreshCw
+                  size={14}
+                  class={updaterService.state().isChecking ? "spin-animation" : ""}
+                />
+                <span>{updaterService.state().isChecking ? "Checking..." : "Check for Updates"}</span>
+              </button>
+
+              <div class="community-links">
+                <button
+                  type="button"
+                  class="community-btn github-btn"
+                  onClick={() => openUrl("https://github.com/AhmedTrooper/Shieldr")}
+                >
+                  <SiGithub size={15} />
+                  <span>GitHub Repository</span>
+                  <ExternalLink size={12} class="opacity-60" />
+                </button>
+                <button
+                  type="button"
+                  class="community-btn youtube-btn"
+                  onClick={() => openUrl("https://www.youtube.com")}
+                >
+                  <SiYoutube size={15} />
+                  <span>YouTube Channel</span>
+                  <ExternalLink size={12} class="opacity-60" />
+                </button>
+              </div>
+            </div>
+          </div>
+
           <div class="features-grid">
             <div class="feature-tile">
               <div class="tile-icon">👶</div>
@@ -340,12 +478,18 @@ export const Dashboard: Component<DashboardProps> = (props) => {
               </p>
             </div>
           </div>
-        </div>
+        </Motion.div>
       </Show>
+
 
       {/* Tab 2: Display & Overlay Settings */}
       <Show when={activeTab() === "display"}>
-        <div class="tab-content settings-tab">
+        <Motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2 }}
+          class="tab-content settings-tab"
+        >
           <div class="settings-card">
             <div class="card-header">
               <h2>Overlay Transparency & Appearance</h2>
@@ -379,17 +523,19 @@ export const Dashboard: Component<DashboardProps> = (props) => {
 
             <div class="setting-row">
               <div class="setting-info">
-                <label>Background Backdrop Blur</label>
-                <span>Optional frosted glass effect (0px = zero blur, crystal clear)</span>
+                <label>Background Frost Blur</label>
+                <span>
+                  Frosted glass blur effect underneath the guard layer (Current: {blur()}px blur)
+                </span>
               </div>
               <div class="setting-control slider-control">
                 <input
                   type="range"
                   min="0"
-                  max="12"
+                  max="20"
                   step="1"
                   value={blur()}
-                  onInput={(e) => setBlur(parseInt(e.currentTarget.value, 10))}
+                  onInput={(e) => setBlur(parseInt(e.currentTarget.value))}
                 />
                 <span class="slider-badge">{blur()}px</span>
               </div>
@@ -397,46 +543,49 @@ export const Dashboard: Component<DashboardProps> = (props) => {
 
             <div class="setting-row">
               <div class="setting-info">
-                <label>Lock Icon Position</label>
-                <span>Where the floating padlock should sit when screen is locked</span>
+                <label>Emergency Unlock Padlock Position</label>
+                <span>Where the click-to-unlock floating padlock icon appears.</span>
               </div>
               <div class="setting-control">
                 <select
-                  class="select-input"
+                  class="form-select"
                   value={position()}
-                  onChange={(e) => setPosition(e.currentTarget.value as any)}
+                  onChange={(e) =>
+                    setPosition(e.currentTarget.value as ShieldProperties["lock_icon_position"])
+                  }
                 >
-                  <option value="floating">Floating (Top Right Float)</option>
-                  <option value="top-right">Top Right Corner</option>
-                  <option value="bottom-right">Bottom Right Corner</option>
+                  <option value="floating">Floating (Random subtle position)</option>
                   <option value="center">Screen Center</option>
+                  <option value="top-right">Top-Right Corner</option>
+                  <option value="bottom-right">Bottom-Right Corner</option>
                 </select>
               </div>
             </div>
 
             <div class="setting-row">
               <div class="setting-info">
-                <label>Lock Icon Auto-Fade On Idle</label>
-                <span>Fades the lock icon to invisible/ghost mode when mouse is stationary</span>
+                <label>Lock Icon Auto-Hide Timeout</label>
+                <span>Hides lock icon after mouse inactivity to preserve full immersion.</span>
               </div>
               <div class="setting-control">
                 <select
-                  class="select-input"
+                  class="form-select"
                   value={autohide()}
-                  onChange={(e) => setAutohide(parseInt(e.currentTarget.value, 10))}
+                  onChange={(e) => setAutohide(parseInt(e.currentTarget.value))}
                 >
-                  <option value="0">Never (Always Visible)</option>
-                  <option value="2">After 2 Seconds</option>
-                  <option value="3">After 3 Seconds (Recommended)</option>
-                  <option value="5">After 5 Seconds</option>
+                  <option value="0">Never auto-hide (Always visible)</option>
+                  <option value="2">2 seconds of inactivity</option>
+                  <option value="3">3 seconds of inactivity</option>
+                  <option value="5">5 seconds of inactivity</option>
+                  <option value="10">10 seconds of inactivity</option>
                 </select>
               </div>
             </div>
 
             <div class="setting-row">
               <div class="setting-info">
-                <label>Sound Effects</label>
-                <span>Mechanical click, unlock arpeggio, and blocked tap feedback</span>
+                <label>Audio & Acoustic Feedback</label>
+                <span>Synthesizes WebAudio tones for keypad presses, arming, and unlocks.</span>
               </div>
               <div class="setting-control">
                 <label class="toggle-switch">
@@ -450,7 +599,26 @@ export const Dashboard: Component<DashboardProps> = (props) => {
               </div>
             </div>
 
-            <div class="card-footer">
+            <div class="setting-row">
+              <div class="setting-info">
+                <label>Keep Screen & System Awake</label>
+                <span>
+                  Prevents screen blanking, sleep timers, and OS standby while Shieldr is locked.
+                </span>
+              </div>
+              <div class="setting-control">
+                <label class="toggle-switch">
+                  <input
+                    type="checkbox"
+                    checked={keepAwake()}
+                    onChange={(e) => setKeepAwake(e.currentTarget.checked)}
+                  />
+                  <span class="toggle-slider" />
+                </label>
+              </div>
+            </div>
+
+            <div class="settings-actions">
               <button
                 type="button"
                 class="primary-btn"
@@ -460,12 +628,17 @@ export const Dashboard: Component<DashboardProps> = (props) => {
               </button>
             </div>
           </div>
-        </div>
+        </Motion.div>
       </Show>
 
       {/* Tab 3: Security & Vault */}
       <Show when={activeTab() === "security"}>
-        <div class="tab-content security-tab">
+        <Motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2 }}
+          class="tab-content security-tab"
+        >
           <div class="two-column-cards">
             {/* Change PIN Card */}
             <div class="settings-card">
@@ -583,7 +756,8 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                   />
                 </div>
                 <button type="submit" class="primary-btn">
-                  Reveal Recovery Phrase
+                  <KeyRound size={15} />
+                  <span>Reveal Recovery Phrase</span>
                 </button>
               </form>
               <Show when={revealMsg()}>
@@ -616,17 +790,23 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                     sound.playKeypadBeep();
                   }}
                 >
-                  📋 Copy 12 Words
+                  <Copy size={15} />
+                  <span>Copy 12 Words</span>
                 </button>
               </div>
             </Show>
           </div>
-        </div>
+        </Motion.div>
       </Show>
 
       {/* Tab 4: SQLite Audit Log & Metadata */}
       <Show when={activeTab() === "audit"}>
-        <div class="tab-content audit-tab">
+        <Motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2 }}
+          class="tab-content audit-tab"
+        >
           <div class="settings-card">
             <div class="card-header flex-between">
               <div>
@@ -642,7 +822,8 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                 onClick={loadAuditLogs}
                 disabled={isLoadingLogs()}
               >
-                🔄 Refresh Logs
+                <RefreshCw size={14} class={isLoadingLogs() ? "spin-animation" : ""} />
+                <span>Refresh Logs</span>
               </button>
             </div>
 
@@ -683,7 +864,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
               </table>
             </div>
           </div>
-        </div>
+        </Motion.div>
       </Show>
     </div>
   );
