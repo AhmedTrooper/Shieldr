@@ -149,20 +149,18 @@ export const Tooltip: Component<TooltipProps> = (props) => {
       <KobalteTooltip.Portal>
         <KobalteTooltip.Content
           class={clsx(
-            "shieldr-tooltip-content z-[9999] select-none rounded-lg border px-2.5 py-1.5 text-center font-medium shadow-2xl backdrop-blur-xl transition-all duration-150",
-            "border-cyan-500/20 bg-slate-950/95 text-slate-100",
+            "shieldr-tooltip-content z-[9999] select-none rounded-lg border px-3 py-2 text-center text-[13px] font-medium leading-snug shadow-2xl backdrop-blur-xl transition-all duration-150",
+            "border-cyan-500/30 bg-slate-950/98 text-slate-100",
             // Dynamic position-aware styling via clsx
             {
               "origin-bottom": computedPlacement()?.startsWith("top"),
               "origin-top": computedPlacement()?.startsWith("bottom"),
               "origin-right": computedPlacement()?.startsWith("left"),
               "origin-left": computedPlacement()?.startsWith("right"),
-              "max-w-[210px] text-[11px] leading-tight px-2 py-1":
-                typeof window !== "undefined" &&
-                (window.innerWidth <= 380 || window.innerHeight <= 450),
-              "max-w-[280px] text-xs":
-                typeof window === "undefined" ||
-                (window.innerWidth > 380 && window.innerHeight > 450),
+              "max-w-[260px]":
+                typeof window !== "undefined" && window.innerWidth <= 380,
+              "max-w-[320px]":
+                typeof window === "undefined" || window.innerWidth > 380,
             },
             local.contentClass
           )}
