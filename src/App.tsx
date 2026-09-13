@@ -165,16 +165,14 @@ const App: Component = () => {
     setIsUnlockModalOpen(false);
   };
 
-  // Window close request (enforces password when locked)
+  // Window close request — TitleBar "close to tray" should always hide,
+  // not terminate the app. The TitleBar is only shown when unlocked, so no
+  // credential prompt is needed here.
   const handleCloseRequest = async () => {
-    if (status().is_locked) {
-      setIsUnlockModalOpen(true);
-    } else {
-      try {
-        await tauriBridge.requestCloseWindow();
-      } catch (e) {
-        console.error("Failed to close window:", e);
-      }
+    try {
+      await tauriBridge.requestHideWindow();
+    } catch (e) {
+      console.error("Failed to hide window to tray:", e);
     }
   };
 

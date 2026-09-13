@@ -2,7 +2,7 @@ import { Component } from "solid-js";
 import { clsx } from "clsx";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { SiGithub, SiYoutube } from "solid-icons/si";
-import { RefreshCw, Shield } from "lucide-solid";
+import { RefreshCw, Shield, Minus, X } from "lucide-solid";
 import { tauriBridge } from "../services/tauriBridge";
 import { sound } from "../services/sound";
 import { updaterService } from "../services/updater";
@@ -53,93 +53,119 @@ export const TitleBar: Component<TitleBarProps> = (props) => {
   return (
     <header
       class={clsx(
-        "h-10 min-h-[40px] flex items-center justify-between px-2.5 sm:px-4 md:px-5 lg:px-6 gap-2",
-        "bg-slate-950/80 backdrop-blur-xl border-b border-white/10 select-none relative z-50 transition-all"
+        "h-10 min-h-[40px] flex items-center justify-between gap-2 sm:gap-3",
+        "px-2.5 sm:px-4 md:px-5 lg:px-6",
+        "bg-slate-950/85 backdrop-blur-xl border-b border-white/10 select-none relative z-50 transition-all"
       )}
       data-tauri-drag-region
     >
+      {/* LEFT — window controls + brand */}
       <div class={clsx("flex items-center gap-2 sm:gap-3 min-w-0")} data-tauri-drag-region>
-        <div class={clsx("flex items-center gap-1.5 pr-1 shrink-0")}>
+        <div class={clsx("flex items-center gap-1 sm:gap-1.5 pr-1 sm:pr-2 shrink-0 border-r border-white/10 mr-0.5 sm:mr-1")}>
           <Tooltip content="Close to tray" placement="bottom-start">
             <button
               type="button"
               class={clsx(
-                "w-3 h-3 rounded-full border-none cursor-pointer p-0 flex items-center justify-center transition-all",
-                "bg-[#ff5f56] shadow-[0_0_6px_rgba(255,95,86,0.6),inset_0_1px_0_rgba(255,255,255,0.35)] hover:scale-110 hover:brightness-125"
+                "inline-flex items-center justify-center w-7 h-7 rounded-md cursor-pointer transition-all",
+                "border border-transparent text-slate-400 hover:text-red-400",
+                "hover:bg-red-500/10 hover:border-red-500/25"
               )}
-              aria-label="Close Window"
+              aria-label="Close to Tray"
               onClick={handleClose}
-            />
+            >
+              <X size={14} />
+            </button>
           </Tooltip>
           <Tooltip content="Minimize" placement="bottom">
             <button
               type="button"
               class={clsx(
-                "w-3 h-3 rounded-full border-none cursor-pointer p-0 flex items-center justify-center transition-all",
-                "bg-[#ffbd2e] shadow-[0_0_6px_rgba(255,189,46,0.6),inset_0_1px_0_rgba(255,255,255,0.35)] hover:scale-110 hover:brightness-125"
+                "inline-flex items-center justify-center w-7 h-7 rounded-md cursor-pointer transition-all",
+                "border border-transparent text-slate-400 hover:text-amber-400",
+                "hover:bg-amber-500/10 hover:border-amber-500/25"
               )}
               aria-label="Minimize Window"
               onClick={handleMinimize}
-            />
+            >
+              <Minus size={14} />
+            </button>
           </Tooltip>
         </div>
         <div class={clsx("flex items-center gap-1.5 min-w-0")} data-tauri-drag-region>
-          <Shield size={15} class={clsx("text-blue-400 shrink-0")} />
-          <span class={clsx("text-[13px] font-bold text-slate-200 tracking-tight truncate")}>Shieldr</span>
+          <div class={clsx(
+            "inline-flex items-center justify-center w-5 h-5 rounded-md shrink-0",
+            "bg-gradient-to-br from-blue-500/25 to-blue-600/15 border border-blue-400/25",
+            "shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]"
+          )}>
+            <Shield size={12} class={clsx("text-blue-300")} />
+          </div>
+          <span class={clsx("text-[13px] font-bold text-slate-100 tracking-tight truncate")}>Shieldr</span>
         </div>
       </div>
 
-      <div class={clsx("hidden md:block text-xs text-slate-400 font-medium tracking-tight whitespace-nowrap overflow-hidden text-ellipsis")} data-tauri-drag-region>
+      {/* CENTER — context label (desktop only) */}
+      <div
+        class={clsx(
+          "hidden md:flex items-center gap-1.5 text-[11.5px] text-slate-400 font-medium tracking-tight whitespace-nowrap",
+          "px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.08]"
+        )}
+        data-tauri-drag-region
+      >
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(16,185,129,0.6)] shrink-0" />
         <span>Screen Protection</span>
       </div>
 
-      <div class={clsx("flex items-center shrink-0 gap-1.5")} data-tauri-drag-region>
-        <div class={clsx("flex items-center gap-1")}>
-          <Tooltip content="Check for updates" placement="bottom">
-            <button
-              type="button"
-              class={clsx(
-                "inline-flex items-center justify-center w-7 h-7 rounded-md border border-transparent hover:border-white/15",
-                "bg-transparent hover:bg-white/[0.08] text-slate-400 hover:text-slate-100 cursor-pointer transition-all",
-                "disabled:opacity-40 disabled:pointer-events-none"
-              )}
-              aria-label="Check for Updates"
-              onClick={handleCheckUpdate}
-              disabled={updaterService.state().isChecking}
-            >
-              <RefreshCw
-                size={14}
-                class={clsx(updaterService.state().isChecking && "animate-spin text-zinc-300")}
-              />
-            </button>
-          </Tooltip>
-          <Tooltip content="GitHub" placement="bottom">
-            <button
-              type="button"
-              class={clsx(
-                "inline-flex items-center justify-center w-7 h-7 rounded-md border border-transparent hover:border-white/15",
-                "bg-transparent hover:bg-white/[0.08] text-slate-400 hover:text-slate-100 cursor-pointer transition-all"
-              )}
-              aria-label="GitHub Repository"
-              onClick={handleOpenGithub}
-            >
-              <SiGithub size={14} />
-            </button>
-          </Tooltip>
-          <Tooltip content="YouTube" placement="bottom-end">
-            <button
-              type="button"
-              class={clsx(
-                "inline-flex items-center justify-center w-7 h-7 rounded-md border border-transparent hover:border-white/15",
-                "bg-transparent hover:bg-white/[0.08] text-slate-400 hover:text-slate-100 cursor-pointer transition-all"
-              )}
-              aria-label="YouTube Channel"
-              onClick={handleOpenYoutube}
-            >
-              <SiYoutube size={14} />
-            </button>
-          </Tooltip>
-        </div>
+      {/* RIGHT — utility actions */}
+      <div class={clsx("flex items-center shrink-0 gap-1 sm:gap-1.5")} data-tauri-drag-region>
+        <Tooltip content="Check for updates" placement="bottom">
+          <button
+            type="button"
+            class={clsx(
+              "inline-flex items-center justify-center w-7 h-7 rounded-md border border-transparent hover:border-white/15",
+              "bg-transparent hover:bg-white/[0.08] text-slate-400 hover:text-slate-100 cursor-pointer transition-all",
+              "disabled:opacity-40 disabled:pointer-events-none"
+            )}
+            aria-label="Check for Updates"
+            onClick={handleCheckUpdate}
+            disabled={updaterService.state().isChecking}
+          >
+            <RefreshCw
+              size={13}
+              class={clsx("sm:size-[14px]", updaterService.state().isChecking && "animate-spin text-zinc-300")}
+            />
+          </button>
+        </Tooltip>
+
+        {/* Divider */}
+        <div class={clsx("hidden sm:block w-px h-4 bg-white/10 mx-0.5")} aria-hidden="true" />
+
+        <Tooltip content="GitHub" placement="bottom">
+          <button
+            type="button"
+            class={clsx(
+              "inline-flex items-center justify-center w-7 h-7 rounded-md border border-transparent hover:border-white/15",
+              "bg-transparent hover:bg-white/[0.08] text-slate-400 hover:text-white cursor-pointer transition-all"
+            )}
+            aria-label="GitHub Repository"
+            onClick={handleOpenGithub}
+          >
+            <SiGithub size={13} class="sm:size-[14px]" />
+          </button>
+        </Tooltip>
+
+        <Tooltip content="YouTube" placement="bottom-end">
+          <button
+            type="button"
+            class={clsx(
+              "inline-flex items-center justify-center w-7 h-7 rounded-md border border-transparent hover:border-white/15",
+              "bg-transparent hover:bg-white/[0.08] text-slate-400 hover:text-red-400 cursor-pointer transition-all"
+            )}
+            aria-label="YouTube Channel"
+            onClick={handleOpenYoutube}
+          >
+            <SiYoutube size={13} class="sm:size-[14px]" />
+          </button>
+        </Tooltip>
       </div>
     </header>
   );
