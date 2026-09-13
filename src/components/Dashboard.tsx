@@ -33,6 +33,7 @@ import {
   ShieldPropertiesSchema,
 } from "../schemas";
 import { Tooltip } from "./ui/tooltip";
+import { clsx } from "clsx";
 
 interface DashboardProps {
   status?: ShieldStatus;
@@ -53,12 +54,36 @@ export const Dashboard: Component<DashboardProps> = (props) => {
     return "Ready";
   };
 
-  const statusClass = () => {
-    if (props.status?.is_locked_out) return "status-locked-out";
-    if (props.isLocked || props.status?.is_locked) return "status-armed";
-    if (props.status && !props.status.is_configured) return "status-unconfigured";
-    return "status-ready";
-  };
+  const statusBadgeClasses = () =>
+    clsx(
+      "self-start inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10.5px] font-bold uppercase tracking-wider transition-all mb-2.5",
+      {
+        "bg-emerald-500/15 border border-emerald-500/30 text-emerald-400":
+          !props.status?.is_locked_out &&
+          !(props.isLocked || props.status?.is_locked) &&
+          (props.status?.is_configured ?? true),
+        "bg-blue-500/15 border border-blue-500/35 text-blue-400":
+          (props.isLocked || props.status?.is_locked) && !props.status?.is_locked_out,
+        "bg-red-500/15 border border-red-500/35 text-red-400":
+          props.status?.is_locked_out,
+        "bg-amber-500/15 border border-amber-500/35 text-amber-400":
+          props.status && !props.status.is_configured,
+      }
+    );
+
+  const statusDotClasses = () =>
+    clsx("w-1.5 h-1.5 rounded-full animate-pulse", {
+      "bg-emerald-500 shadow-[0_0_8px_#10b981]":
+        !props.status?.is_locked_out &&
+        !(props.isLocked || props.status?.is_locked) &&
+        (props.status?.is_configured ?? true),
+      "bg-blue-500 shadow-[0_0_8px_#3b82f6]":
+        (props.isLocked || props.status?.is_locked) && !props.status?.is_locked_out,
+      "bg-red-500 shadow-[0_0_8px_#ef4444]":
+        props.status?.is_locked_out,
+      "bg-amber-500 shadow-[0_0_8px_#f59e0b]":
+        props.status && !props.status.is_configured,
+    });
 
   // Countdown locking state (in-memory, never stored)
   const [countdown, setCountdown] = createSignal<number | null>(null);
@@ -313,27 +338,47 @@ export const Dashboard: Component<DashboardProps> = (props) => {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2 }}
-          class="tab-content control-tab"
+          class={clsx("flex flex-1 flex-col gap-4 min-h-0 pb-6")}
         >
-          <div class="hero-card">
-            <div class="hero-left">
-              <span class={`status-indicator-pill ${statusClass()}`}>
-                <span class="status-dot-pulse" />
-                {statusLabel()}
-              </span>
-              <h1 class="hero-title">Screen Protection</h1>
-              <p class="hero-description">
-                Blocks clicks, touches, and keystrokes while media continues playing.
-              </p>
+          {/* Screen Protection Card */}
+          <div
+            class={clsx(
+              "flex flex-col md:flex-row gap-4 md:gap-6 p-4 md:p-6 rounded-xl",
+              "bg-slate-900/80 border border-white/10 shadow-2xl backdrop-blur-md transition-all"
+            )}
+          >
+            <div class={clsx("flex flex-1 md:flex-[1.35] flex-col justify-between w-full")}>
+              <div>
+                <span class={statusBadgeClasses()}>
+                  <span class={statusDotClasses()} />
+                  {statusLabel()}
+                </span>
+                <h1 class={clsx("text-lg sm:text-xl font-extrabold tracking-tight text-white mb-1.5 leading-tight")}>
+                  Screen Protection
+                </h1>
+                <p class={clsx("text-xs sm:text-[13px] text-slate-400 leading-relaxed mb-4")}>
+                  Blocks clicks, touches, and keystrokes while media continues playing.
+                </p>
+              </div>
 
               <Show
                 when={countdown() !== null}
                 fallback={
-                  <div class="lock-actions-cluster">
-                    <Tooltip content="Lock screen immediately" placement="top">
+                  <div class={clsx("flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2.5 w-full")}>
+                    <Tooltip
+                      content="Lock screen immediately"
+                      placement="top"
+                      class={clsx("w-full sm:flex-1 sm:min-w-0 flex")}
+                    >
                       <button
                         type="button"
-                        class="big-lock-btn"
+                        class={clsx(
+                          "w-full h-11 min-h-[44px] px-4 rounded-lg font-bold text-[13.5px] tracking-tight text-white",
+                          "inline-flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer",
+                          "transition-all duration-150 active:scale-[0.985] shadow-lg",
+                          "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600",
+                          "border border-blue-400/40 shadow-blue-600/30 hover:shadow-blue-500/50 hover:-translate-y-0.5"
+                        )}
                         onClick={() => props.onLockNow()}
                         aria-label="Lock Screen Now"
                       >
@@ -341,23 +386,52 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                         <span>Lock Screen Now</span>
                       </button>
                     </Tooltip>
-                    <div class="countdown-lock-row">
-                      <Tooltip content={`Lock screen after ${delaySeconds()}s delay`} placement="top">
+
+                    <div class={clsx("flex items-center gap-2 w-full sm:flex-[1.25] sm:min-w-0")}>
+                      <Tooltip
+                        content={`Lock screen after ${delaySeconds()}s delay`}
+                        placement="top"
+                        class={clsx("flex-1 min-w-0 flex")}
+                      >
                         <button
                           type="button"
-                          class="countdown-lock-btn"
+                          class={clsx(
+                            "w-full h-11 min-h-[44px] px-3.5 rounded-lg font-semibold text-[13px] text-slate-200",
+                            "inline-flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer",
+                            "transition-all duration-150 active:scale-[0.985]",
+                            "bg-slate-800/80 hover:bg-slate-700/90 border border-white/15 hover:border-blue-400/40",
+                            "hover:text-white hover:-translate-y-0.5"
+                          )}
                           onClick={startCountdownLock}
                           aria-label={`Lock in ${delaySeconds()}s Delay`}
                         >
                           <Clock size={16} />
-                          <span>Lock in {delaySeconds()}s Delay</span>
+                          <span>Lock in {delaySeconds()}s</span>
                         </button>
                       </Tooltip>
-                      <Tooltip content="Adjust delay (1-60s, session only)" placement="top">
-                        <div class="delay-adjuster" role="group" aria-label="Delay duration adjuster">
+
+                      <Tooltip
+                        content="Adjust delay (1-60s, session only)"
+                        placement="top"
+                        class={clsx("flex flex-shrink-0")}
+                      >
+                        <div
+                          class={clsx(
+                            "inline-flex items-center gap-1 px-1.5 h-11 min-h-[44px] flex-shrink-0 rounded-lg",
+                            "bg-slate-800/80 border border-white/15 hover:border-blue-500",
+                            "focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500/50 transition-all"
+                          )}
+                          role="group"
+                          aria-label="Delay duration adjuster"
+                        >
                           <button
                             type="button"
-                            class="delay-stepper-btn"
+                            class={clsx(
+                              "w-6 h-6 sm:w-7 sm:h-7 rounded flex items-center justify-center",
+                              "bg-white/10 hover:bg-blue-600 text-slate-200 hover:text-white font-bold text-sm",
+                              "cursor-pointer transition-all active:scale-95",
+                              "disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-white/10"
+                            )}
                             onClick={() => setDelaySeconds((prev) => Math.max(1, prev - 1))}
                             aria-label="Decrease delay by 1 second"
                             disabled={delaySeconds() <= 1}
@@ -375,13 +449,23 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                                 setDelaySeconds(Math.max(1, Math.min(60, val)));
                               }
                             }}
-                            class="delay-input"
+                            class={clsx(
+                              "w-7 text-center bg-transparent border-0 text-blue-400 font-bold text-[13.5px] p-0 outline-none",
+                              "select-text [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            )}
                             aria-label="Delay duration in seconds"
                           />
-                          <span class="delay-sec-label">s</span>
+                          <span class={clsx("text-[11px] font-semibold text-slate-400 mr-0.5 select-none")}>
+                            s
+                          </span>
                           <button
                             type="button"
-                            class="delay-stepper-btn"
+                            class={clsx(
+                              "w-6 h-6 sm:w-7 sm:h-7 rounded flex items-center justify-center",
+                              "bg-white/10 hover:bg-blue-600 text-slate-200 hover:text-white font-bold text-sm",
+                              "cursor-pointer transition-all active:scale-95",
+                              "disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-white/10"
+                            )}
                             onClick={() => setDelaySeconds((prev) => Math.min(60, prev + 1))}
                             aria-label="Increase delay by 1 second"
                             disabled={delaySeconds() >= 60}
@@ -394,15 +478,26 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                   </div>
                 }
               >
-                <div class="countdown-active-box">
-                  <div class="countdown-digits">{countdown()}</div>
-                  <p class="countdown-hint">
+                <div
+                  class={clsx(
+                    "flex items-center gap-3 w-full h-11 min-h-[44px] px-3.5 rounded-lg",
+                    "bg-slate-800/90 border border-white/20 shadow-lg shadow-blue-500/10"
+                  )}
+                >
+                  <div class={clsx("text-xl font-extrabold text-blue-400 min-w-[24px] leading-none")}>
+                    {countdown()}
+                  </div>
+                  <p class={clsx("flex-1 text-[12.5px] font-medium text-blue-200 leading-tight m-0")}>
                     Locking in {countdown()}s...
                   </p>
-                  <Tooltip content="Cancel countdown" placement="bottom">
+                  <Tooltip content="Cancel countdown" placement="bottom" class={clsx("flex flex-shrink-0")}>
                     <button
                       type="button"
-                      class="cancel-countdown-btn"
+                      class={clsx(
+                        "h-7 px-3 rounded text-[11.5px] font-semibold text-red-300",
+                        "bg-red-500/20 hover:bg-red-500/35 border border-red-500/40 hover:text-white",
+                        "cursor-pointer transition-all whitespace-nowrap active:scale-95"
+                      )}
                       onClick={cancelCountdown}
                       aria-label="Cancel Countdown"
                     >
@@ -413,78 +508,112 @@ export const Dashboard: Component<DashboardProps> = (props) => {
               </Show>
             </div>
 
-            <div class="hero-right">
-              <div class="spec-card">
-                <Tooltip content="Keyboard, mouse, and touch inputs blocked" placement="left">
-                  <div class="spec-item">
-                    <div class="spec-item-left">
+            <div class={clsx("flex flex-1 items-stretch w-full mt-2 md:mt-0")}>
+              <div
+                class={clsx(
+                  "w-full flex flex-col justify-around gap-2 p-3 sm:p-3.5 rounded-lg",
+                  "bg-slate-950/60 border border-white/10"
+                )}
+              >
+                <Tooltip
+                  content="Keyboard, mouse, and touch inputs blocked"
+                  placement="left"
+                  class={clsx("w-full flex")}
+                >
+                  <div class={clsx("w-full flex justify-between items-center text-xs py-1.5 px-2 rounded hover:bg-white/[0.04] transition-colors")}>
+                    <div class={clsx("flex items-center gap-2")}>
                       <ShieldCheck size={14} class="text-blue-400" />
-                      <span class="spec-label">Protection</span>
+                      <span class={clsx("text-slate-400 font-medium")}>Protection</span>
                     </div>
-                    <span class="spec-val">Input Blocked</span>
+                    <span class={clsx("font-semibold text-slate-200 text-right")}>Input Blocked</span>
                   </div>
                 </Tooltip>
-                <Tooltip content="Overlay transparency level" placement="left">
-                  <div class="spec-item">
-                    <div class="spec-item-left">
+
+                <Tooltip
+                  content="Overlay transparency level"
+                  placement="left"
+                  class={clsx("w-full flex")}
+                >
+                  <div class={clsx("w-full flex justify-between items-center text-xs py-1.5 px-2 rounded hover:bg-white/[0.04] transition-colors")}>
+                    <div class={clsx("flex items-center gap-2")}>
                       <Layers size={14} class="text-indigo-400" />
-                      <span class="spec-label">Overlay</span>
+                      <span class={clsx("text-slate-400 font-medium")}>Overlay</span>
                     </div>
-                    <span class="spec-val">
+                    <span class={clsx("font-semibold text-slate-200 text-right")}>
                       {Math.round((1 - props.properties.overlay_opacity) * 100)}% Transparent
                     </span>
                   </div>
                 </Tooltip>
-                <Tooltip content="Quick unlock credentials" placement="left">
-                  <div class="spec-item">
-                    <div class="spec-item-left">
+
+                <Tooltip
+                  content="Quick unlock credentials"
+                  placement="left"
+                  class={clsx("w-full flex")}
+                >
+                  <div class={clsx("w-full flex justify-between items-center text-xs py-1.5 px-2 rounded hover:bg-white/[0.04] transition-colors")}>
+                    <div class={clsx("flex items-center gap-2")}>
                       <KeyRound size={14} class="text-amber-400" />
-                      <span class="spec-label">Unlock</span>
+                      <span class={clsx("text-slate-400 font-medium")}>Unlock</span>
                     </div>
-                    <span class="spec-val">PIN / Password</span>
+                    <span class={clsx("font-semibold text-slate-200 text-right")}>PIN / Password</span>
                   </div>
                 </Tooltip>
-                <Tooltip content="Hardware-backed OS vault storage" placement="left">
-                  <div class="spec-item">
-                    <div class="spec-item-left">
+
+                <Tooltip
+                  content="Hardware-backed OS vault storage"
+                  placement="left"
+                  class={clsx("w-full flex")}
+                >
+                  <div class={clsx("w-full flex justify-between items-center text-xs py-1.5 px-2 rounded hover:bg-white/[0.04] transition-colors")}>
+                    <div class={clsx("flex items-center gap-2")}>
                       <Database size={14} class="text-emerald-400" />
-                      <span class="spec-label">Vault</span>
+                      <span class={clsx("text-slate-400 font-medium")}>Vault</span>
                     </div>
-                    <span class="spec-val text-accent">OS Keyring</span>
+                    <span class={clsx("font-semibold text-sky-400 text-right")}>OS Keyring</span>
                   </div>
                 </Tooltip>
               </div>
             </div>
           </div>
 
-          {/* Updater & Community Card */}
-          <div class="updater-card">
-            <div class="updater-left">
-              <div class="updater-title-row">
+          {/* Software Updates Card */}
+          <div
+            class={clsx(
+              "flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 p-4 md:px-5 md:py-4 rounded-xl",
+              "bg-slate-900/70 border border-white/10 shadow-xl backdrop-blur-md transition-colors hover:border-white/20"
+            )}
+          >
+            <div class={clsx("flex-1 min-w-0")}>
+              <div class={clsx("flex items-center gap-2 mb-1")}>
                 <RefreshCw
                   size={18}
-                  class={`text-blue-400 ${updaterService.state().isChecking ? "spin-animation" : ""}`}
+                  class={clsx("text-blue-400", { "animate-spin": updaterService.state().isChecking })}
                 />
-                <h3 class="updater-title">Software Updates</h3>
-                <span class="version-tag">v{updaterService.state().currentVersion}</span>
+                <h3 class={clsx("text-[15px] font-semibold text-white m-0")}>Software Updates</h3>
+                <span class={clsx("text-[11px] font-semibold font-mono px-2 py-0.5 rounded-full bg-white/10 text-slate-200 border border-white/15")}>
+                  v{updaterService.state().currentVersion}
+                </span>
               </div>
-              <p class="updater-desc">
+              <p class={clsx("text-[12.5px] text-slate-400 mb-2 leading-relaxed")}>
                 Checks official signed releases from GitHub.
               </p>
 
               <Show when={updaterService.state().updateAvailable && updaterService.state().updateInfo}>
-                <div class="update-banner">
-                  <div class="update-banner-header">
+                <div class={clsx("p-3 rounded-lg bg-emerald-500/15 border border-emerald-500/30 mt-2")}>
+                  <div class={clsx("flex items-center gap-1.5 text-[13px] text-emerald-300 font-bold mb-1")}>
                     <CheckCircle2 size={16} class="text-emerald-400" />
                     <strong>New version {updaterService.state().updateInfo?.version} is available!</strong>
                   </div>
                   <Show when={updaterService.state().updateInfo?.body}>
-                    <p class="update-notes">{updaterService.state().updateInfo?.body}</p>
+                    <p class={clsx("text-xs text-slate-200 mb-2")}>{updaterService.state().updateInfo?.body}</p>
                   </Show>
                   <Show when={!updaterService.state().isDownloaded}>
                     <button
                       type="button"
-                      class="download-update-btn"
+                      class={clsx(
+                        "inline-flex items-center justify-center gap-1.5 h-[38px] px-3.5 rounded text-xs font-semibold text-white",
+                        "bg-blue-600 hover:bg-blue-500 transition-colors cursor-pointer"
+                      )}
                       onClick={() => updaterService.downloadAndInstallUpdate()}
                       disabled={updaterService.state().isDownloading}
                     >
@@ -497,7 +626,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                     </button>
                   </Show>
                   <Show when={updaterService.state().isDownloaded}>
-                    <div class="update-ready-box">
+                    <div class={clsx("flex items-center gap-1.5 text-xs text-emerald-400")}>
                       <Check size={16} class="text-emerald-400" />
                       <span>Update downloaded! Restart Shieldr to complete installation.</span>
                     </div>
@@ -512,42 +641,51 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                   !updaterService.state().error
                 }
               >
-                <div class="up-to-date-row">
+                <div class={clsx("inline-flex items-center gap-1.5 text-xs text-emerald-400 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20")}>
                   <CheckCircle2 size={14} class="text-emerald-400" />
                   <span>Latest version installed</span>
                 </div>
               </Show>
 
               <Show when={updaterService.state().error}>
-                <div class="update-error-row">
+                <div class={clsx("inline-flex items-center gap-1.5 text-xs text-amber-400 px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20")}>
                   <AlertCircle size={14} class="text-amber-400" />
                   <span>{updaterService.state().error}</span>
                 </div>
               </Show>
             </div>
 
-            <div class="updater-right">
-              <Tooltip content="Check for updates" placement="top">
+            <div class={clsx("flex flex-col items-stretch md:items-end gap-2 flex-shrink-0 w-full md:w-auto")}>
+              <Tooltip content="Check for updates" placement="top" class={clsx("w-full md:w-auto flex")}>
                 <button
                   type="button"
-                  class="check-update-btn"
+                  class={clsx(
+                    "w-full md:w-auto h-[38px] px-4 rounded-lg text-[12.5px] font-semibold text-slate-200",
+                    "inline-flex items-center justify-center gap-2 bg-white/[0.07] hover:bg-white/[0.12]",
+                    "border border-white/15 hover:border-blue-400/40 transition-all cursor-pointer",
+                    "disabled:opacity-50 disabled:cursor-not-allowed"
+                  )}
                   onClick={() => updaterService.checkForUpdates(false)}
                   disabled={updaterService.state().isChecking}
                   aria-label="Check for Updates"
                 >
                   <RefreshCw
                     size={15}
-                    class={updaterService.state().isChecking ? "spin-animation" : ""}
+                    class={clsx({ "animate-spin": updaterService.state().isChecking })}
                   />
                   <span>{updaterService.state().isChecking ? "Checking..." : "Check Updates"}</span>
                 </button>
               </Tooltip>
 
-              <div class="community-links">
-                <Tooltip content="GitHub repository" placement="top">
+              <div class={clsx("grid grid-cols-2 md:flex items-center gap-2 w-full md:w-auto")}>
+                <Tooltip content="GitHub repository" placement="top" class={clsx("w-full md:w-auto flex")}>
                   <button
                     type="button"
-                    class="community-btn github-btn"
+                    class={clsx(
+                      "w-full md:w-auto h-[34px] px-3 rounded-md text-xs font-medium text-slate-400 hover:text-white",
+                      "inline-flex items-center justify-center gap-1.5 bg-slate-950/60 hover:bg-slate-900",
+                      "border border-white/10 hover:border-white/20 transition-all cursor-pointer whitespace-nowrap"
+                    )}
                     onClick={() => openUrl("https://github.com/AhmedTrooper/Shieldr")}
                     aria-label="GitHub Repository"
                   >
@@ -556,10 +694,14 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                     <ExternalLink size={12} class="opacity-60" />
                   </button>
                 </Tooltip>
-                <Tooltip content="YouTube tutorials" placement="top">
+                <Tooltip content="YouTube tutorials" placement="top" class={clsx("w-full md:w-auto flex")}>
                   <button
                     type="button"
-                    class="community-btn youtube-btn"
+                    class={clsx(
+                      "w-full md:w-auto h-[34px] px-3 rounded-md text-xs font-medium text-slate-400 hover:text-red-400",
+                      "inline-flex items-center justify-center gap-1.5 bg-slate-950/60 hover:bg-slate-900",
+                      "border border-white/10 hover:border-white/20 transition-all cursor-pointer whitespace-nowrap"
+                    )}
                     onClick={() => openUrl("https://www.youtube.com/@AhmedTrooper")}
                     aria-label="YouTube Channel"
                   >
@@ -572,29 +714,68 @@ export const Dashboard: Component<DashboardProps> = (props) => {
             </div>
           </div>
 
-          <div class="features-grid">
-            <Tooltip content="Blocks mouse clicks, taps, drag gestures, and system hotkeys" placement="top">
-              <div class="feature-tile interactive-tile">
-                <div class="tile-icon-wrap text-blue-400">
+          {/* Features Grid */}
+          <div class={clsx("grid grid-cols-1 sm:grid-cols-3 gap-3 w-full")}>
+            <Tooltip
+              content="Blocks mouse clicks, taps, drag gestures, and system hotkeys"
+              placement="top"
+              class={clsx("w-full flex")}
+            >
+              <div
+                class={clsx(
+                  "w-full h-14 min-h-[56px] px-4 rounded-lg bg-slate-900/80 hover:bg-slate-800/90",
+                  "border border-white/10 hover:border-blue-400/40 shadow-lg shadow-black/40 hover:shadow-blue-500/10",
+                  "flex items-center gap-3 transition-all duration-200 hover:-translate-y-0.5 cursor-pointer group"
+                )}
+              >
+                <div class={clsx("w-8 h-8 rounded flex items-center justify-center bg-white/[0.05] border border-white/10 group-hover:border-blue-400/40 group-hover:scale-105 transition-all flex-shrink-0 text-blue-400")}>
                   <MousePointerClick size={18} />
                 </div>
-                <h3>Input Shield</h3>
+                <h3 class={clsx("text-[13px] font-semibold text-slate-200 group-hover:text-white m-0 tracking-tight whitespace-nowrap")}>
+                  Input Shield
+                </h3>
               </div>
             </Tooltip>
-            <Tooltip content="Requires security PIN to dismiss, minimize, or close" placement="top">
-              <div class="feature-tile interactive-tile">
-                <div class="tile-icon-wrap text-emerald-400">
+
+            <Tooltip
+              content="Requires security PIN to dismiss, minimize, or close"
+              placement="top"
+              class={clsx("w-full flex")}
+            >
+              <div
+                class={clsx(
+                  "w-full h-14 min-h-[56px] px-4 rounded-lg bg-slate-900/80 hover:bg-slate-800/90",
+                  "border border-white/10 hover:border-emerald-400/40 shadow-lg shadow-black/40 hover:shadow-emerald-500/10",
+                  "flex items-center gap-3 transition-all duration-200 hover:-translate-y-0.5 cursor-pointer group"
+                )}
+              >
+                <div class={clsx("w-8 h-8 rounded flex items-center justify-center bg-white/[0.05] border border-white/10 group-hover:border-emerald-400/40 group-hover:scale-105 transition-all flex-shrink-0 text-emerald-400")}>
                   <ShieldCheck size={18} />
                 </div>
-                <h3>PIN Protected</h3>
+                <h3 class={clsx("text-[13px] font-semibold text-slate-200 group-hover:text-white m-0 tracking-tight whitespace-nowrap")}>
+                  PIN Protected
+                </h3>
               </div>
             </Tooltip>
-            <Tooltip content="Discreet floating padlock fades away during inactivity" placement="top">
-              <div class="feature-tile interactive-tile">
-                <div class="tile-icon-wrap text-purple-400">
+
+            <Tooltip
+              content="Discreet floating padlock fades away during inactivity"
+              placement="top"
+              class={clsx("w-full flex")}
+            >
+              <div
+                class={clsx(
+                  "w-full h-14 min-h-[56px] px-4 rounded-lg bg-slate-900/80 hover:bg-slate-800/90",
+                  "border border-white/10 hover:border-purple-400/40 shadow-lg shadow-black/40 hover:shadow-purple-500/10",
+                  "flex items-center gap-3 transition-all duration-200 hover:-translate-y-0.5 cursor-pointer group"
+                )}
+              >
+                <div class={clsx("w-8 h-8 rounded flex items-center justify-center bg-white/[0.05] border border-white/10 group-hover:border-purple-400/40 group-hover:scale-105 transition-all flex-shrink-0 text-purple-400")}>
                   <Sparkles size={18} />
                 </div>
-                <h3>Auto-Fade</h3>
+                <h3 class={clsx("text-[13px] font-semibold text-slate-200 group-hover:text-white m-0 tracking-tight whitespace-nowrap")}>
+                  Auto-Fade
+                </h3>
               </div>
             </Tooltip>
           </div>

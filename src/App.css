@@ -1373,33 +1373,43 @@ button {
   width: 100%;
 }
 
+.big-lock-tooltip {
+  width: 100%;
+  display: flex !important;
+}
+
 .big-lock-btn {
   width: 100%;
-  padding: 12px 18px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0 18px;
   border-radius: var(--radius-sm);
   background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-  border: 1px solid rgba(96, 165, 250, 0.35);
+  border: 1px solid rgba(96, 165, 250, 0.4);
   color: #ffffff;
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 700;
+  letter-spacing: -0.1px;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4), 0 0 20px var(--accent-blue-glow);
+  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.35), 0 0 1px rgba(96, 165, 250, 0.5);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   text-align: center;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  box-sizing: border-box;
+  white-space: nowrap;
 }
 
 .big-lock-btn:hover {
   background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5), 0 0 28px rgba(59, 130, 246, 0.55);
+  box-shadow: 0 4px 18px rgba(37, 99, 235, 0.5), 0 0 20px rgba(59, 130, 246, 0.4);
   transform: translateY(-1px);
 }
 
 .big-lock-btn:active {
-  transform: scale(0.98);
+  transform: scale(0.985);
 }
 
 .countdown-lock-row {
@@ -1407,16 +1417,20 @@ button {
   align-items: center;
   gap: 8px;
   width: 100%;
+  box-sizing: border-box;
 }
 
-.countdown-lock-row .countdown-lock-btn {
-  flex: 1;
+.countdown-lock-tooltip {
+  flex: 1 1 0;
   min-width: 0;
+  display: flex !important;
 }
 
 .countdown-lock-btn {
   width: 100%;
-  padding: 10px 16px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0 14px;
   border-radius: var(--radius-sm);
   background: rgba(30, 41, 59, 0.7);
   border: 1px solid var(--border-glass-bright);
@@ -1430,6 +1444,8 @@ button {
   align-items: center;
   justify-content: center;
   gap: 7px;
+  box-sizing: border-box;
+  white-space: nowrap;
 }
 
 .countdown-lock-btn:hover {
@@ -1439,16 +1455,27 @@ button {
   transform: translateY(-1px);
 }
 
+.countdown-lock-btn:active {
+  transform: scale(0.985);
+}
+
+.delay-adjuster-tooltip {
+  display: flex !important;
+  flex-shrink: 0;
+}
+
 .delay-adjuster {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
-  padding: 3px 6px;
+  gap: 3px;
+  padding: 0 6px;
   border-radius: var(--radius-sm);
   background: rgba(30, 41, 59, 0.7);
   border: 1px solid var(--border-glass-bright);
-  height: 38px;
+  height: 44px;
+  min-height: 44px;
   flex-shrink: 0;
+  box-sizing: border-box;
   transition: all 0.2s ease;
 }
 
@@ -1460,8 +1487,8 @@ button {
 }
 
 .delay-stepper-btn {
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   border-radius: var(--radius-xs);
   border: none;
   background: rgba(255, 255, 255, 0.08);
@@ -1474,12 +1501,13 @@ button {
   justify-content: center;
   padding: 0;
   transition: all 0.15s ease;
+  flex-shrink: 0;
 }
 
 .delay-stepper-btn:hover:not(:disabled) {
   background: var(--accent-blue);
   color: #ffffff;
-  transform: scale(1.08);
+  transform: scale(1.05);
 }
 
 .delay-stepper-btn:disabled {
@@ -1520,27 +1548,40 @@ button {
   gap: 12px;
   background: rgba(30, 41, 59, 0.85);
   border: 1px solid var(--border-glass-bright);
-  padding: 12px 14px;
+  padding: 0 14px;
+  height: 44px;
+  min-height: 44px;
   border-radius: var(--radius-sm);
   box-shadow: 0 0 18px var(--accent-blue-subtle);
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .countdown-digits {
-  font-size: 28px;
+  font-size: 20px;
   font-weight: 800;
   color: #60a5fa;
-  min-width: 32px;
+  min-width: 24px;
+  line-height: 1;
 }
 
 .countdown-hint {
   flex: 1;
-  font-size: 12px;
+  font-size: 12.5px;
+  font-weight: 500;
   color: #bfdbfe;
-  line-height: 1.35;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.cancel-countdown-tooltip {
+  display: flex !important;
+  flex-shrink: 0;
 }
 
 .cancel-countdown-btn {
-  padding: 6px 12px;
+  height: 28px;
+  padding: 0 12px;
   border-radius: var(--radius-xs);
   background: rgba(239, 68, 68, 0.2);
   border: 1px solid rgba(239, 68, 68, 0.4);
@@ -1549,7 +1590,12 @@ button {
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   transition: all 0.15s ease;
+  box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 .cancel-countdown-btn:hover {
@@ -1560,7 +1606,7 @@ button {
 .hero-right {
   width: 100%;
   display: flex;
-  align-items: center;
+  align-items: stretch;
 }
 
 .spec-card {
@@ -1568,24 +1614,33 @@ button {
   background: rgba(10, 15, 28, 0.65);
   border: 1px solid var(--border-glass);
   border-radius: var(--radius-sm);
-  padding: 14px 12px;
+  padding: 12px 14px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
+  box-sizing: border-box;
+  justify-content: center;
+}
+
+.spec-card .w-full {
+  width: 100%;
+  display: flex !important;
 }
 
 .spec-item {
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-size: 12px;
-  padding: 3px 4px;
+  padding: 5px 8px;
   border-radius: var(--radius-xs);
   transition: background 0.15s ease;
+  box-sizing: border-box;
 }
 
 .spec-item:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .spec-item-left {
@@ -1613,19 +1668,29 @@ button {
   display: grid;
   grid-template-columns: 1fr;
   gap: 12px;
+  width: 100%;
+}
+
+.features-grid .w-full {
+  width: 100%;
+  display: flex !important;
 }
 
 .feature-tile {
+  width: 100%;
+  height: 56px;
+  min-height: 56px;
   background: var(--bg-card);
   border: 1px solid var(--border-glass);
   border-radius: var(--radius-sm);
-  padding: 14px 16px;
+  padding: 0 16px;
   box-shadow: var(--shadow-card);
   display: flex;
   align-items: center;
   gap: 12px;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: default;
+  box-sizing: border-box;
 }
 
 .feature-tile.interactive-tile {
@@ -1640,8 +1705,8 @@ button {
 }
 
 .tile-icon-wrap {
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   border-radius: var(--radius-xs);
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--border-glass);
@@ -2406,16 +2471,20 @@ button {
 .download-update-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  padding: 6px 12px;
+  height: 38px;
+  min-height: 38px;
+  padding: 0 14px;
   border-radius: var(--radius-xs);
   background: var(--accent-blue);
   color: white;
   border: none;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   transition: background 0.15s ease;
+  box-sizing: border-box;
 }
 
 .download-update-btn:hover {
@@ -2435,26 +2504,37 @@ button {
   flex-direction: column;
   gap: 8px;
   align-items: flex-end;
+  flex-shrink: 0;
+}
+
+.check-update-tooltip {
+  display: flex !important;
 }
 
 .check-update-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 7px 14px;
+  justify-content: center;
+  gap: 7px;
+  height: 38px;
+  min-height: 38px;
+  padding: 0 16px;
   border-radius: var(--radius-sm);
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid var(--border-glass-bright);
   color: var(--text-main);
   font-size: 12.5px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
+  box-sizing: border-box;
+  white-space: nowrap;
 }
 
 .check-update-btn:hover {
   background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.25);
+  border-color: rgba(96, 165, 250, 0.4);
+  color: #ffffff;
 }
 
 .check-update-btn:disabled {
@@ -2464,21 +2544,32 @@ button {
 
 .community-links {
   display: flex;
-  gap: 6px;
+  align-items: center;
+  gap: 8px;
+}
+
+.community-tooltip {
+  display: flex !important;
 }
 
 .community-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  padding: 5px 10px;
+  height: 34px;
+  min-height: 34px;
+  padding: 0 12px;
   border-radius: var(--radius-xs);
   background: rgba(10, 15, 28, 0.6);
   border: 1px solid var(--border-glass);
   color: var(--text-muted);
-  font-size: 11.5px;
+  font-size: 12px;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.15s ease;
+  box-sizing: border-box;
+  white-space: nowrap;
 }
 
 .community-btn:hover {
