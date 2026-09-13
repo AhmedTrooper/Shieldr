@@ -45,6 +45,19 @@ export const AuditLogEntrySchema = z.object({
 export type AuditLogEntry = z.infer<typeof AuditLogEntrySchema>;
 
 /**
+ * Zod schema for paginated SQLite audit log entries
+ */
+export const PaginatedAuditLogsSchema = z.object({
+  entries: z.array(AuditLogEntrySchema),
+  total: z.number(),
+  page: z.number(),
+  page_size: z.number(),
+  total_pages: z.number(),
+});
+
+export type PaginatedAuditLogs = z.infer<typeof PaginatedAuditLogsSchema>;
+
+/**
  * Zod schema for backend error payloads
  */
 export const AppErrorPayloadSchema = z.object({

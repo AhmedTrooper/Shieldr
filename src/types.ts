@@ -2,6 +2,7 @@ export type {
   ShieldProperties,
   ShieldStatus,
   AuditLogEntry,
+  PaginatedAuditLogs,
   AppErrorPayload,
   SetupSecurityInput,
   ChangePinInput,

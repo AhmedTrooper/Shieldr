@@ -50,6 +50,15 @@ pub struct AuditLogEntry {
     pub timestamp: String,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PaginatedAuditLogs {
+    pub entries: Vec<AuditLogEntry>,
+    pub total: u64,
+    pub page: u32,
+    pub page_size: u32,
+    pub total_pages: u32,
+}
+
 #[derive(Clone)]
 pub struct SqliteStore {
     conn: Arc<Mutex<Connection>>,
@@ -285,6 +294,56 @@ impl SqliteStore {
         Ok(logs)
     }
 
+    /// Fetches audit logs with SQL-level pagination (LIMIT + OFFSET) and total count.
+    pub fn get_audit_logs_paginated(
+        &self,
+        page: u32,
+        page_size: u32,
+    ) -> AppResult<PaginatedAuditLogs> {
+        let conn = self.lock_conn()?;
+        let total_i64: i64 =
+            conn.query_row("SELECT COUNT(*) FROM audit_logs;", [], |r| r.get(0))?;
+        let total = total_i64.max(0) as u64;
+
+        let page = page.max(1);
+        let page_size = page_size.clamp(1, 100);
+        let offset = (page - 1) * page_size;
+        let total_pages = if total == 0 {
+            1
+        } else {
+            ((total as f64) / (page_size as f64)).ceil() as u32
+        };
+
+        let mut stmt = conn.prepare(
+            "SELECT id, event_type, details, timestamp
+             FROM audit_logs
+             ORDER BY id DESC
+             LIMIT ?1 OFFSET ?2;",
+        )?;
+
+        let rows = stmt.query_map(params![page_size, offset], |row| {
+            Ok(AuditLogEntry {
+                id: row.get(0)?,
+                event_type: row.get(1)?,
+                details: row.get(2)?,
+                timestamp: row.get(3)?,
+            })
+        })?;
+
+        let mut entries = Vec::new();
+        for item in rows {
+            entries.push(item?);
+        }
+
+        Ok(PaginatedAuditLogs {
+            entries,
+            total,
+            page,
+            page_size,
+            total_pages,
+        })
+    }
+
     /// Checks if the system is currently locked out.
     /// Returns Some(remaining_seconds) if locked out, None otherwise.
     pub fn check_lockout(&self) -> AppResult<Option<u64>> {
@@ -403,6 +462,15 @@ mod tests {
         assert_eq!(logs.len(), 1);
         assert_eq!(logs[0].event_type, "TEST_EVENT");
         assert_eq!(logs[0].details, "Sample detail");
+
+        let paginated = store
+            .get_audit_logs_paginated(1, 10)
+            .expect("Should query paginated audit logs");
+        assert_eq!(paginated.total, 1);
+        assert_eq!(paginated.page, 1);
+        assert_eq!(paginated.page_size, 10);
+        assert_eq!(paginated.total_pages, 1);
+        assert_eq!(paginated.entries.len(), 1);
 
         // Rate limiter test
         let (attempts, is_locked, _) = store.record_failed_attempt(3, 10).expect("Record attempt");

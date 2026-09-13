@@ -16,6 +16,8 @@ import {
   AlertCircle,
   Download,
   ExternalLink,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-solid";
 import { SiGithub, SiYoutube } from "solid-icons/si";
 import { AuditLogEntry, ShieldProperties, ShieldStatus } from "../types";
@@ -104,6 +106,9 @@ export const Dashboard: Component<DashboardProps> = (props) => {
   // Audit Logs State
   const [logs, setLogs] = createSignal<AuditLogEntry[]>([]);
   const [isLoadingLogs, setIsLoadingLogs] = createSignal(false);
+  const [auditPage, setAuditPage] = createSignal(1);
+  const [auditTotalPages, setAuditTotalPages] = createSignal(1);
+  const [auditTotalEntries, setAuditTotalEntries] = createSignal(0);
 
   const startCountdownLock = () => {
     sound.playKeypadBeep();
@@ -283,13 +288,14 @@ export const Dashboard: Component<DashboardProps> = (props) => {
   };
 
 
-  const loadAuditLogs = async () => {
+  const loadAuditLogs = async (targetPage = auditPage()) => {
     setIsLoadingLogs(true);
     try {
-      const entries = await tauriBridge.getAuditLogs(30);
-      // B-046: Always coerce to an array — a malformed backend response that
-      // returns null/undefined must not crash the <For> renderer downstream.
-      setLogs(Array.isArray(entries) ? entries : []);
+      const res = await tauriBridge.getAuditLogs(targetPage, 10);
+      setLogs(Array.isArray(res.entries) ? res.entries : []);
+      setAuditPage(res.page);
+      setAuditTotalPages(Math.max(1, res.total_pages));
+      setAuditTotalEntries(res.total);
     } catch (e) {
       console.error("Failed to load audit logs:", e);
       setLogs([]);
@@ -299,7 +305,13 @@ export const Dashboard: Component<DashboardProps> = (props) => {
   };
 
   onMount(() => {
-    loadAuditLogs();
+    loadAuditLogs(1);
+  });
+
+  createEffect(() => {
+    if (activeTab() === "audit") {
+      loadAuditLogs(auditPage());
+    }
   });
 
   // B-031 / B-026: When the user navigates away from a tab with a half-filled
@@ -970,7 +982,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                     "bg-white/[0.06] hover:bg-white/[0.12] border border-white/15 transition-all cursor-pointer",
                     "inline-flex items-center gap-1.5 disabled:opacity-50"
                   )}
-                  onClick={loadAuditLogs}
+                  onClick={() => loadAuditLogs()}
                   disabled={isLoadingLogs()}
                   aria-label="Refresh Audit Logs"
                 >
@@ -991,6 +1003,13 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                   </tr>
                 </thead>
                 <tbody>
+                  <Show when={logs().length === 0}>
+                    <tr>
+                      <td colspan={4} class="py-8 text-center text-slate-500 font-mono text-xs">
+                        No audit events recorded yet.
+                      </td>
+                    </tr>
+                  </Show>
                   <For each={logs()}>
                     {(entry) => (
                       <tr class={clsx("border-b border-white/[0.05] hover:bg-white/[0.03] transition-colors")}>
@@ -1001,14 +1020,14 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                               "inline-flex items-center px-1.5 sm:px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider",
                               {
                                 "bg-emerald-500/15 border border-emerald-500/30 text-emerald-400":
-                                  entry.event_type.includes("SUCCESS") || entry.event_type.includes("UNLOCKED"),
+                                   entry.event_type.includes("SUCCESS") || entry.event_type.includes("UNLOCKED"),
                                 "bg-red-500/15 border border-red-500/30 text-red-400":
-                                  entry.event_type.includes("FAILED") || entry.event_type.includes("DENIED"),
+                                   entry.event_type.includes("FAILED") || entry.event_type.includes("DENIED"),
                                 "bg-blue-500/15 border border-blue-500/30 text-blue-400":
-                                  !entry.event_type.includes("SUCCESS") &&
-                                  !entry.event_type.includes("UNLOCKED") &&
-                                  !entry.event_type.includes("FAILED") &&
-                                  !entry.event_type.includes("DENIED"),
+                                   !entry.event_type.includes("SUCCESS") &&
+                                   !entry.event_type.includes("UNLOCKED") &&
+                                   !entry.event_type.includes("FAILED") &&
+                                   !entry.event_type.includes("DENIED"),
                               }
                             )}
                           >
@@ -1024,6 +1043,66 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                   </For>
                 </tbody>
               </table>
+            </div>
+
+            {/* Pagination Controls (10 entries per page) */}
+            <div class={clsx("flex items-center justify-between gap-3 pt-1 px-1 flex-wrap text-[11px] sm:text-xs text-slate-400")}>
+              <div class="font-mono">
+                <Show
+                  when={auditTotalEntries() > 0}
+                  fallback={<span>0 events</span>}
+                >
+                  <span>
+                    Showing{" "}
+                    <strong class="text-slate-200">
+                      {(auditPage() - 1) * 10 + 1}
+                    </strong>{" "}
+                    to{" "}
+                    <strong class="text-slate-200">
+                      {Math.min(auditPage() * 10, auditTotalEntries())}
+                    </strong>{" "}
+                    of{" "}
+                    <strong class="text-slate-200">{auditTotalEntries()}</strong>{" "}
+                    events
+                  </span>
+                </Show>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  class={clsx(
+                    "h-7 sm:h-8 px-2 sm:px-2.5 rounded-md font-medium text-slate-300 hover:text-white",
+                    "bg-white/[0.06] hover:bg-white/[0.12] border border-white/15 transition-all cursor-pointer",
+                    "inline-flex items-center gap-1 disabled:opacity-40 disabled:cursor-not-allowed"
+                  )}
+                  onClick={() => loadAuditLogs(auditPage() - 1)}
+                  disabled={auditPage() <= 1 || isLoadingLogs()}
+                  aria-label="Previous Page"
+                >
+                  <ChevronLeft size={13} class="sm:size-[14px]" />
+                  <span>Prev</span>
+                </button>
+
+                <span class="px-2 font-mono text-slate-300">
+                  Page {auditPage()} of {auditTotalPages()}
+                </span>
+
+                <button
+                  type="button"
+                  class={clsx(
+                    "h-7 sm:h-8 px-2 sm:px-2.5 rounded-md font-medium text-slate-300 hover:text-white",
+                    "bg-white/[0.06] hover:bg-white/[0.12] border border-white/15 transition-all cursor-pointer",
+                    "inline-flex items-center gap-1 disabled:opacity-40 disabled:cursor-not-allowed"
+                  )}
+                  onClick={() => loadAuditLogs(auditPage() + 1)}
+                  disabled={auditPage() >= auditTotalPages() || isLoadingLogs()}
+                  aria-label="Next Page"
+                >
+                  <span>Next</span>
+                  <ChevronRight size={13} class="sm:size-[14px]" />
+                </button>
+              </div>
             </div>
           </div>
         </Motion.div>

@@ -1,7 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { z } from "zod";
-import { AppErrorPayload, AuditLogEntry, ShieldProperties, ShieldStatus } from "../types";
-import { AuditLogEntrySchema, ShieldStatusSchema } from "../schemas";
+import { AppErrorPayload, PaginatedAuditLogs, ShieldProperties, ShieldStatus } from "../types";
+import { PaginatedAuditLogsSchema, ShieldStatusSchema } from "../schemas";
 
 export class TauriError extends Error {
   public code: string;
@@ -135,10 +135,10 @@ export const tauriBridge = {
     }
   },
 
-  async getAuditLogs(limit?: number): Promise<AuditLogEntry[]> {
+  async getAuditLogs(page: number = 1, pageSize: number = 10): Promise<PaginatedAuditLogs> {
     try {
-      const raw = await invoke<unknown>("get_audit_logs", { limit });
-      return z.array(AuditLogEntrySchema).parse(raw);
+      const raw = await invoke<unknown>("get_audit_logs", { page, pageSize });
+      return PaginatedAuditLogsSchema.parse(raw);
     } catch (e) {
       return handleInvokeError(e);
     }

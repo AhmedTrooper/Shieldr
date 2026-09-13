@@ -9,7 +9,7 @@ use zeroize::Zeroizing;
 use crate::shortcut_interceptor;
 
 use crate::{
-    db::{AuditLogEntry, ShieldProperties},
+    db::{PaginatedAuditLogs, ShieldProperties},
     error::AppError,
     AppState,
 };
@@ -278,9 +278,12 @@ pub async fn save_properties(
 #[tauri::command]
 pub async fn get_audit_logs(
     state: State<'_, AppState>,
-    limit: Option<u32>,
-) -> Result<Vec<AuditLogEntry>, AppError> {
-    state.vault.db().get_audit_logs(limit.unwrap_or(50))
+    page: Option<u32>,
+    page_size: Option<u32>,
+) -> Result<PaginatedAuditLogs, AppError> {
+    let page = page.unwrap_or(1);
+    let page_size = page_size.unwrap_or(10);
+    state.vault.db().get_audit_logs_paginated(page, page_size)
 }
 
 #[tauri::command]
