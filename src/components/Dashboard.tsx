@@ -27,6 +27,7 @@ import {
   ChangeMasterPasswordSchema,
   ShieldPropertiesSchema,
 } from "../schemas";
+import { Tooltip } from "./ui/tooltip";
 
 interface DashboardProps {
   properties: ShieldProperties;
@@ -55,6 +56,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
   const [revealMasterPass, setRevealMasterPass] = createSignal("");
   const [revealedPhrase, setRevealedPhrase] = createSignal<string | null>(null);
   const [revealMsg, setRevealMsg] = createSignal<string | null>(null);
+  const [copiedPhrase, setCopiedPhrase] = createSignal(false);
 
   // Display Settings
   const [opacity, setOpacity] = createSignal(props.properties.overlay_opacity);
@@ -228,41 +230,53 @@ export const Dashboard: Component<DashboardProps> = (props) => {
     <div class="dashboard-shell">
       {/* Tab Navigation */}
       <nav class="dashboard-tabs">
-        <button
-          type="button"
-          class={`tab-btn ${activeTab() === "control" ? "active" : ""}`}
-          onClick={() => setActiveTab("control")}
-        >
-          <Shield size={16} />
-          <span>Control Center</span>
-        </button>
-        <button
-          type="button"
-          class={`tab-btn ${activeTab() === "display" ? "active" : ""}`}
-          onClick={() => setActiveTab("display")}
-        >
-          <Sliders size={16} />
-          <span>Display & Overlay</span>
-        </button>
-        <button
-          type="button"
-          class={`tab-btn ${activeTab() === "security" ? "active" : ""}`}
-          onClick={() => setActiveTab("security")}
-        >
-          <KeyRound size={16} />
-          <span>Security & Vault</span>
-        </button>
-        <button
-          type="button"
-          class={`tab-btn ${activeTab() === "audit" ? "active" : ""}`}
-          onClick={() => {
-            setActiveTab("audit");
-            loadAuditLogs();
-          }}
-        >
-          <FileText size={16} />
-          <span>SQLite Audit Log</span>
-        </button>
+        <Tooltip content="Control Center & Shield Arming" placement="bottom">
+          <button
+            type="button"
+            class={`tab-btn ${activeTab() === "control" ? "active" : ""}`}
+            onClick={() => setActiveTab("control")}
+            aria-label="Control Center"
+          >
+            <Shield size={18} />
+            <span>Control Center</span>
+          </button>
+        </Tooltip>
+        <Tooltip content="Display, Overlay Tint & Blur Settings" placement="bottom">
+          <button
+            type="button"
+            class={`tab-btn ${activeTab() === "display" ? "active" : ""}`}
+            onClick={() => setActiveTab("display")}
+            aria-label="Display & Overlay"
+          >
+            <Sliders size={18} />
+            <span>Display & Overlay</span>
+          </button>
+        </Tooltip>
+        <Tooltip content="Security PIN, Password & Recovery Phrase" placement="bottom">
+          <button
+            type="button"
+            class={`tab-btn ${activeTab() === "security" ? "active" : ""}`}
+            onClick={() => setActiveTab("security")}
+            aria-label="Security & Vault"
+          >
+            <KeyRound size={18} />
+            <span>Security & Vault</span>
+          </button>
+        </Tooltip>
+        <Tooltip content="SQLite Security Audit Logs & History" placement="bottom">
+          <button
+            type="button"
+            class={`tab-btn ${activeTab() === "audit" ? "active" : ""}`}
+            onClick={() => {
+              setActiveTab("audit");
+              loadAuditLogs();
+            }}
+            aria-label="SQLite Audit Log"
+          >
+            <FileText size={18} />
+            <span>Audit Trail</span>
+          </button>
+        </Tooltip>
       </nav>
 
       {/* Tab 1: Control Center */}
@@ -286,23 +300,28 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                 when={countdown() !== null}
                 fallback={
                   <div class="lock-actions-cluster">
-                    <button
-                      type="button"
-                      class="big-lock-btn"
-                      onClick={() => props.onLockNow()}
-                    >
-                      <Lock size={18} />
-                      <span>Lock Screen Now</span>
-                    </button>
-                    <button
-                      type="button"
-                      class="countdown-lock-btn"
-                      onClick={startCountdownLock}
-                      title="Gives you 3 seconds to switch windows before locking"
-                    >
-                      <Clock size={16} />
-                      <span>Lock in 3s Delay</span>
-                    </button>
+                    <Tooltip content="Lock screen behind transparent child-proof touch guard" placement="top">
+                      <button
+                        type="button"
+                        class="big-lock-btn"
+                        onClick={() => props.onLockNow()}
+                        aria-label="Lock Screen Now"
+                      >
+                        <Lock size={18} />
+                        <span>Lock Screen Now</span>
+                      </button>
+                    </Tooltip>
+                    <Tooltip content="3-second delay allows switching to your video or presentation" placement="top">
+                      <button
+                        type="button"
+                        class="countdown-lock-btn"
+                        onClick={startCountdownLock}
+                        aria-label="Lock in 3s Delay"
+                      >
+                        <Clock size={16} />
+                        <span>Lock in 3s Delay</span>
+                      </button>
+                    </Tooltip>
                   </div>
                 }
               >
@@ -311,13 +330,16 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                   <p class="countdown-hint">
                     Switch to your video or app! Locking screen...
                   </p>
-                  <button
-                    type="button"
-                    class="cancel-countdown-btn"
-                    onClick={cancelCountdown}
-                  >
-                    Cancel
-                  </button>
+                  <Tooltip content="Cancel 3-second arming countdown" placement="bottom">
+                    <button
+                      type="button"
+                      class="cancel-countdown-btn"
+                      onClick={cancelCountdown}
+                      aria-label="Cancel Countdown"
+                    >
+                      Cancel
+                    </button>
+                  </Tooltip>
                 </div>
               </Show>
             </div>
@@ -416,38 +438,47 @@ export const Dashboard: Component<DashboardProps> = (props) => {
             </div>
 
             <div class="updater-right">
-              <button
-                type="button"
-                class="check-update-btn"
-                onClick={() => updaterService.checkForUpdates(false)}
-                disabled={updaterService.state().isChecking}
-              >
-                <RefreshCw
-                  size={14}
-                  class={updaterService.state().isChecking ? "spin-animation" : ""}
-                />
-                <span>{updaterService.state().isChecking ? "Checking..." : "Check for Updates"}</span>
-              </button>
+              <Tooltip content="Check GitHub for official latest releases" placement="top">
+                <button
+                  type="button"
+                  class="check-update-btn"
+                  onClick={() => updaterService.checkForUpdates(false)}
+                  disabled={updaterService.state().isChecking}
+                  aria-label="Check for Updates"
+                >
+                  <RefreshCw
+                    size={15}
+                    class={updaterService.state().isChecking ? "spin-animation" : ""}
+                  />
+                  <span>{updaterService.state().isChecking ? "Checking..." : "Check for Updates"}</span>
+                </button>
+              </Tooltip>
 
               <div class="community-links">
-                <button
-                  type="button"
-                  class="community-btn github-btn"
-                  onClick={() => openUrl("https://github.com/AhmedTrooper/Shieldr")}
-                >
-                  <SiGithub size={15} />
-                  <span>GitHub Repository</span>
-                  <ExternalLink size={12} class="opacity-60" />
-                </button>
-                <button
-                  type="button"
-                  class="community-btn youtube-btn"
-                  onClick={() => openUrl("https://www.youtube.com")}
-                >
-                  <SiYoutube size={15} />
-                  <span>YouTube Channel</span>
-                  <ExternalLink size={12} class="opacity-60" />
-                </button>
+                <Tooltip content="Open official Shieldr GitHub repository" placement="top">
+                  <button
+                    type="button"
+                    class="community-btn github-btn"
+                    onClick={() => openUrl("https://github.com/AhmedTrooper/Shieldr")}
+                    aria-label="GitHub Repository"
+                  >
+                    <SiGithub size={16} />
+                    <span>GitHub</span>
+                    <ExternalLink size={12} class="opacity-60" />
+                  </button>
+                </Tooltip>
+                <Tooltip content="Watch YouTube video tutorials and demos" placement="top">
+                  <button
+                    type="button"
+                    class="community-btn youtube-btn"
+                    onClick={() => openUrl("https://www.youtube.com/@AhmedTrooper")}
+                    aria-label="YouTube Channel"
+                  >
+                    <SiYoutube size={16} />
+                    <span>YouTube</span>
+                    <ExternalLink size={12} class="opacity-60" />
+                  </button>
+                </Tooltip>
               </div>
             </div>
           </div>
@@ -588,14 +619,17 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                 <span>Synthesizes WebAudio tones for keypad presses, arming, and unlocks.</span>
               </div>
               <div class="setting-control">
-                <label class="toggle-switch">
-                  <input
-                    type="checkbox"
-                    checked={soundEnabled()}
-                    onChange={(e) => setSoundEnabled(e.currentTarget.checked)}
-                  />
-                  <span class="toggle-slider" />
-                </label>
+                <Tooltip content={soundEnabled() ? "Sound feedback is active" : "Sound feedback is muted"} placement="left">
+                  <label class="toggle-switch">
+                    <input
+                      type="checkbox"
+                      checked={soundEnabled()}
+                      onChange={(e) => setSoundEnabled(e.currentTarget.checked)}
+                      aria-label="Audio & Acoustic Feedback"
+                    />
+                    <span class="toggle-slider" />
+                  </label>
+                </Tooltip>
               </div>
             </div>
 
@@ -607,25 +641,31 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                 </span>
               </div>
               <div class="setting-control">
-                <label class="toggle-switch">
-                  <input
-                    type="checkbox"
-                    checked={keepAwake()}
-                    onChange={(e) => setKeepAwake(e.currentTarget.checked)}
-                  />
-                  <span class="toggle-slider" />
-                </label>
+                <Tooltip content={keepAwake() ? "Keep awake active (sleep prevented)" : "Keep awake OFF"} placement="left">
+                  <label class="toggle-switch">
+                    <input
+                      type="checkbox"
+                      checked={keepAwake()}
+                      onChange={(e) => setKeepAwake(e.currentTarget.checked)}
+                      aria-label="Keep Screen & System Awake"
+                    />
+                    <span class="toggle-slider" />
+                  </label>
+                </Tooltip>
               </div>
             </div>
 
             <div class="settings-actions">
-              <button
-                type="button"
-                class="primary-btn"
-                onClick={handleSaveDisplayProperties}
-              >
-                Save Display Settings
-              </button>
+              <Tooltip content="Persist display & behavior settings into SQLite" placement="top">
+                <button
+                  type="button"
+                  class="primary-btn"
+                  onClick={handleSaveDisplayProperties}
+                  aria-label="Save Display Settings"
+                >
+                  Save Display Settings
+                </button>
+              </Tooltip>
             </div>
           </div>
         </Motion.div>
@@ -777,22 +817,27 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                     )}
                   </For>
                 </div>
-                <button
-                  type="button"
-                  class="copy-phrase-btn"
-                  onClick={async () => {
-                    const phrase = revealedPhrase() || "";
-                    try {
-                      await writeText(phrase);
-                    } catch {
-                      await navigator.clipboard.writeText(phrase);
-                    }
-                    sound.playKeypadBeep();
-                  }}
-                >
-                  <Copy size={15} />
-                  <span>Copy 12 Words</span>
-                </button>
+                <Tooltip content={copiedPhrase() ? "Copied 12 words to clipboard!" : "Copy 12-word recovery phrase"} placement="top">
+                  <button
+                    type="button"
+                    class="copy-phrase-btn"
+                    onClick={async () => {
+                      const phrase = revealedPhrase() || "";
+                      try {
+                        await writeText(phrase);
+                      } catch {
+                        await navigator.clipboard.writeText(phrase);
+                      }
+                      setCopiedPhrase(true);
+                      setTimeout(() => setCopiedPhrase(false), 2500);
+                      sound.playKeypadBeep();
+                    }}
+                    aria-label="Copy Recovery Phrase"
+                  >
+                    {copiedPhrase() ? <Check size={16} class="text-emerald-400" /> : <Copy size={16} />}
+                    <span>{copiedPhrase() ? "Copied to Clipboard!" : "Copy 12 Words"}</span>
+                  </button>
+                </Tooltip>
               </div>
             </Show>
           </div>
@@ -816,15 +861,18 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                   and properties, never secret values!
                 </p>
               </div>
-              <button
-                type="button"
-                class="refresh-btn"
-                onClick={loadAuditLogs}
-                disabled={isLoadingLogs()}
-              >
-                <RefreshCw size={14} class={isLoadingLogs() ? "spin-animation" : ""} />
-                <span>Refresh Logs</span>
-              </button>
+              <Tooltip content="Query SQLite database for latest events" placement="left">
+                <button
+                  type="button"
+                  class="refresh-btn"
+                  onClick={loadAuditLogs}
+                  disabled={isLoadingLogs()}
+                  aria-label="Refresh Audit Logs"
+                >
+                  <RefreshCw size={15} class={isLoadingLogs() ? "spin-animation" : ""} />
+                  <span>Refresh Logs</span>
+                </button>
+              </Tooltip>
             </div>
 
             <div class="audit-table-wrapper">

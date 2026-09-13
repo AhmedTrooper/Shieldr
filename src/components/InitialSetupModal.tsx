@@ -2,6 +2,7 @@ import { Component, createSignal, For, Show } from "solid-js";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { sound } from "../services/sound";
 import { SetupSecuritySchema } from "../schemas";
+import { Tooltip } from "./ui/tooltip";
 
 interface InitialSetupModalProps {
   isOpen: boolean;
@@ -193,17 +194,20 @@ export const InitialSetupModal: Component<InitialSetupModalProps> = (props) => {
             </div>
 
             <div class="copy-bar">
-              <button
-                type="button"
-                class={`copy-phrase-btn ${hasCopiedPhrase() ? "copied-state" : "must-copy-pulse"}`}
-                onClick={copyToClipboard}
-              >
-                {copied()
-                  ? "✓ Copied to Clipboard!"
-                  : hasCopiedPhrase()
-                  ? "✓ Phrase Copied (Click to Copy Again)"
-                  : "📋 Step 1: Copy All 12 Words (Required)"}
-              </button>
+              <Tooltip content="Copy 12-word recovery phrase to clipboard" placement="top">
+                <button
+                  type="button"
+                  class={`copy-phrase-btn ${hasCopiedPhrase() ? "copied-state" : "must-copy-pulse"}`}
+                  onClick={copyToClipboard}
+                  aria-label="Copy Recovery Phrase"
+                >
+                  {copied()
+                    ? "✓ Copied to Clipboard!"
+                    : hasCopiedPhrase()
+                    ? "✓ Phrase Copied (Click to Copy Again)"
+                    : "📋 Step 1: Copy All 12 Words (Required)"}
+                </button>
+              </Tooltip>
             </div>
 
             <label class="confirm-checkbox-row">
@@ -215,18 +219,30 @@ export const InitialSetupModal: Component<InitialSetupModalProps> = (props) => {
               <span>I have safely written down or stored my recovery phrase.</span>
             </label>
 
-            <button
-              type="button"
-              class="primary-btn full-width"
-              disabled={!hasCopiedPhrase() || !confirmedBackup()}
-              onClick={handleFinish}
+            <Tooltip
+              content={
+                !hasCopiedPhrase()
+                  ? "You must copy the recovery phrase first"
+                  : !confirmedBackup()
+                  ? "Please check the confirmation box above"
+                  : "Launch Shieldr and activate protection"
+              }
+              placement="top"
             >
-              {!hasCopiedPhrase()
-                ? "⚠️ Copy Phrase to Clipboard to Continue"
-                : !confirmedBackup()
-                ? "Check Confirmation Box to Continue"
-                : "Finish Setup & Launch Shieldr →"}
-            </button>
+              <button
+                type="button"
+                class="primary-btn full-width"
+                disabled={!hasCopiedPhrase() || !confirmedBackup()}
+                onClick={handleFinish}
+                aria-label="Finish Setup"
+              >
+                {!hasCopiedPhrase()
+                  ? "⚠️ Copy Phrase to Clipboard to Continue"
+                  : !confirmedBackup()
+                  ? "Check Confirmation Box to Continue"
+                  : "Finish Setup & Launch Shieldr →"}
+              </button>
+            </Tooltip>
           </Show>
         </div>
       </div>

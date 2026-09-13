@@ -1,5 +1,6 @@
 import { Component, createSignal, For, onCleanup, onMount, Show } from "solid-js";
 import { sound } from "../services/sound";
+import { Tooltip } from "./ui/tooltip";
 
 interface UnlockModalProps {
   isOpen: boolean;
@@ -206,30 +207,37 @@ export const UnlockModal: Component<UnlockModalProps> = (props) => {
                   </button>
                 )}
               </For>
-              <button
-                type="button"
-                class="numpad-key fn-key"
-                disabled={props.isLockedOut || isSubmitting() || pin().length === 0}
-                onClick={handleClear}
-              >
-                C
-              </button>
+              <Tooltip content="Clear entered digits" placement="bottom">
+                <button
+                  type="button"
+                  class="numpad-key fn-key"
+                  disabled={props.isLockedOut || isSubmitting() || pin().length === 0}
+                  onClick={handleClear}
+                  aria-label="Clear PIN"
+                >
+                  C
+                </button>
+              </Tooltip>
               <button
                 type="button"
                 class="numpad-key"
                 disabled={props.isLockedOut || isSubmitting()}
                 onClick={() => handleDigit("0")}
+                aria-label="0"
               >
                 0
               </button>
-              <button
-                type="button"
-                class="numpad-key fn-key"
-                disabled={props.isLockedOut || isSubmitting() || pin().length === 0}
-                onClick={handleBackspace}
-              >
-                ⌫
-              </button>
+              <Tooltip content="Backspace (delete last digit)" placement="bottom">
+                <button
+                  type="button"
+                  class="numpad-key fn-key"
+                  disabled={props.isLockedOut || isSubmitting() || pin().length === 0}
+                  onClick={handleBackspace}
+                  aria-label="Backspace"
+                >
+                  ⌫
+                </button>
+              </Tooltip>
             </div>
           </Show>
 
@@ -268,24 +276,28 @@ export const UnlockModal: Component<UnlockModalProps> = (props) => {
             </button>
 
             <div class="secondary-actions-row">
-              <button
-                type="button"
-                class="action-pill-btn"
-                title="Unlock and hide window"
-                disabled={props.isLockedOut || isSubmitting()}
-                onClick={() => submitUnlock("hide")}
-              >
-                Unlock & Hide
-              </button>
-              <button
-                type="button"
-                class="action-pill-btn danger-pill"
-                title="Unlock and close application"
-                disabled={props.isLockedOut || isSubmitting()}
-                onClick={() => submitUnlock("close")}
-              >
-                Unlock & Close
-              </button>
+              <Tooltip content="Unlock screen and minimize Shieldr to system tray" placement="top">
+                <button
+                  type="button"
+                  class="action-pill-btn"
+                  disabled={props.isLockedOut || isSubmitting()}
+                  onClick={() => submitUnlock("hide")}
+                  aria-label="Unlock & Hide"
+                >
+                  Unlock & Hide
+                </button>
+              </Tooltip>
+              <Tooltip content="Unlock screen and completely quit Shieldr" placement="top">
+                <button
+                  type="button"
+                  class="action-pill-btn danger-pill"
+                  disabled={props.isLockedOut || isSubmitting()}
+                  onClick={() => submitUnlock("close")}
+                  aria-label="Unlock & Close"
+                >
+                  Unlock & Close
+                </button>
+              </Tooltip>
             </div>
           </div>
 
@@ -311,14 +323,16 @@ export const UnlockModal: Component<UnlockModalProps> = (props) => {
             </button>
           </div>
 
-          <button
-            type="button"
-            class="dismiss-shield-btn"
-            onClick={props.onDismiss}
-            title="Keep Shield Locked"
-          >
-            ✕ Keep Locked
-          </button>
+          <Tooltip content="Dismiss modal and keep touchscreen guarded" placement="top">
+            <button
+              type="button"
+              class="dismiss-shield-btn"
+              onClick={props.onDismiss}
+              aria-label="Keep Shield Locked"
+            >
+              ✕ Keep Locked
+            </button>
+          </Tooltip>
         </div>
       </div>
     </Show>

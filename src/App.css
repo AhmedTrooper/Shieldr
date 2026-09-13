@@ -2175,7 +2175,166 @@ button {
   color: #f87171;
 }
 
-@media (max-width: 600px) {
+/* ==========================================================================
+   TOOLTIP STYLING & POSITIONING (MOBILE TO DESKTOP)
+   ========================================================================== */
+
+.shieldr-tooltip-content {
+  background: rgba(8, 12, 22, 0.96) !important;
+  border: 1px solid rgba(59, 130, 246, 0.35) !important;
+  color: #f1f5f9 !important;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  animation: tooltip-scale-in 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  z-index: 99999 !important;
+}
+
+@keyframes tooltip-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.shieldr-tooltip-arrow {
+  fill: rgba(8, 12, 22, 0.96);
+  stroke: rgba(59, 130, 246, 0.35);
+  stroke-width: 1px;
+}
+
+/* ==========================================================================
+   ULTRA-COMPACT (300PX WIDTH) & MOBILE RESPONSIVE ADAPTATIONS
+   ========================================================================== */
+
+@media (max-width: 480px) {
+  .dashboard-shell {
+    padding: 10px 8px;
+    gap: 10px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .titlebar-center,
+  .security-chip {
+    display: none !important;
+  }
+
+  .custom-titlebar {
+    padding: 0 8px;
+    height: 38px;
+  }
+
+  .dashboard-tabs {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    padding: 3px;
+    border-radius: var(--radius-sm);
+    width: 100%;
+  }
+
+  .dashboard-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tab-btn {
+    flex: 1 1 0;
+    min-width: 42px;
+    padding: 7px 6px;
+    justify-content: center;
+    font-size: 11px;
+  }
+
+  .hero-card {
+    padding: 14px 12px;
+    gap: 14px;
+  }
+
+  .hero-title {
+    font-size: 18px;
+  }
+
+  .hero-description {
+    font-size: 11.5px;
+    line-height: 1.45;
+  }
+
+  .lock-actions-cluster {
+    flex-direction: column;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .big-lock-btn,
+  .countdown-lock-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 11px 14px;
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .two-column-cards {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .setting-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding: 12px 0;
+  }
+
+  .setting-info {
+    max-width: 100%;
+  }
+
+  .setting-control {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .slider-control {
+    width: 100%;
+  }
+
+  .slider-control input[type="range"] {
+    flex: 1;
+    width: 100%;
+  }
+
+  .form-select {
+    width: 100%;
+  }
+
+  .mnemonic-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+
+  .mnemonic-word-card {
+    padding: 6px 8px;
+    font-size: 11.5px;
+  }
+
+  .audit-table th,
+  .audit-table td {
+    padding: 8px 6px;
+    font-size: 11px;
+  }
+
   .updater-card {
     flex-direction: column;
     align-items: stretch;
@@ -2195,3 +2354,176 @@ button {
     justify-content: center;
   }
 }
+
+/* Specific styling for 300px Ultra-Compact Viewport */
+@media (max-width: 360px) {
+  .custom-titlebar {
+    padding: 0 6px;
+    height: 36px;
+  }
+
+  .brand-pill {
+    display: none;
+  }
+
+  .brand-title {
+    font-size: 13px;
+  }
+
+  .dashboard-shell {
+    padding: 8px 6px;
+    gap: 8px;
+  }
+
+  /* Compact tabs: show clear standard icons with tooltip on hover/touch */
+  .tab-btn {
+    padding: 6px 4px;
+  }
+
+  .tab-btn span {
+    display: none;
+  }
+
+  .tab-btn svg {
+    margin: 0 auto;
+  }
+
+  .hero-card {
+    padding: 12px 10px;
+  }
+
+  .hero-title {
+    font-size: 16px;
+  }
+
+  .spec-item {
+    font-size: 10.5px;
+  }
+
+  .updater-card {
+    padding: 10px;
+  }
+
+  .community-btn span,
+  .check-update-btn span {
+    font-size: 11px;
+  }
+}
+
+/* ==========================================================================
+   400PX COMPACT HEIGHT ADAPTATIONS
+   ========================================================================== */
+
+@media (max-height: 450px) {
+  .custom-titlebar {
+    height: 34px;
+  }
+
+  .dashboard-shell {
+    padding: 6px 8px;
+    gap: 8px;
+  }
+
+  .hero-card {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+
+  .hero-title {
+    font-size: 16px;
+    margin-bottom: 2px;
+  }
+
+  .hero-description {
+    font-size: 11px;
+    line-height: 1.35;
+    margin-bottom: 6px;
+  }
+
+  .big-lock-btn,
+  .countdown-lock-btn {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .updater-card {
+    padding: 8px 10px;
+    gap: 8px;
+  }
+
+  /* Modals on 400px height */
+  .modal-backdrop {
+    padding: 4px;
+    align-items: center;
+  }
+
+  .unlock-card,
+  .setup-card,
+  .recovery-card {
+    padding: 8px 10px;
+    max-height: calc(100vh - 8px);
+    width: 96vw;
+    max-width: 295px;
+    overflow-y: auto;
+  }
+
+  .modal-padlock-svg {
+    width: 24px;
+    height: 24px;
+    margin-bottom: 2px;
+  }
+
+  .unlock-title,
+  .modal-heading {
+    font-size: 13.5px;
+    margin-bottom: 2px;
+  }
+
+  .unlock-subtitle,
+  .modal-description {
+    font-size: 10px;
+    margin-bottom: 4px;
+  }
+
+  .pin-dots-container {
+    margin-bottom: 6px;
+    gap: 6px;
+  }
+
+  .pin-dot {
+    width: 8px;
+    height: 8px;
+  }
+
+  .numpad-grid {
+    gap: 4px;
+    margin-bottom: 6px;
+    max-width: 240px;
+  }
+
+  .numpad-key {
+    height: 34px;
+    font-size: 16px;
+    border-radius: var(--radius-xs);
+  }
+
+  .primary-unlock-btn {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  .action-pill-btn {
+    padding: 5px 6px;
+    font-size: 10px;
+  }
+
+  .modal-footer-links {
+    margin-top: 4px;
+  }
+
+  .dismiss-shield-btn {
+    margin-top: 2px;
+    font-size: 10px;
+  }
+}
+

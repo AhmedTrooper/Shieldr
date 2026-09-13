@@ -5,6 +5,7 @@ import { RefreshCw, Shield } from "lucide-solid";
 import { tauriBridge } from "../services/tauriBridge";
 import { sound } from "../services/sound";
 import { updaterService } from "../services/updater";
+import { Tooltip } from "./ui/tooltip";
 
 interface TitleBarProps {
   isLocked: boolean;
@@ -38,7 +39,7 @@ export const TitleBar: Component<TitleBarProps> = (props) => {
   const handleOpenYoutube = async () => {
     sound.playKeypadBeep();
     try {
-      await openUrl("https://www.youtube.com");
+      await openUrl("https://www.youtube.com/@AhmedTrooper");
     } catch (e) {
       console.error("Failed to open YouTube:", e);
     }
@@ -53,21 +54,25 @@ export const TitleBar: Component<TitleBarProps> = (props) => {
     <header class="custom-titlebar" data-tauri-drag-region>
       <div class="titlebar-left" data-tauri-drag-region>
         <div class="window-controls">
-          <button
-            type="button"
-            class="win-btn win-close"
-            title="Close Window"
-            onClick={handleClose}
-          />
-          <button
-            type="button"
-            class="win-btn win-minimize"
-            title="Minimize Window"
-            onClick={handleMinimize}
-          />
+          <Tooltip content="Close or hide window to system tray" placement="bottom-start">
+            <button
+              type="button"
+              class="win-btn win-close"
+              aria-label="Close Window"
+              onClick={handleClose}
+            />
+          </Tooltip>
+          <Tooltip content="Minimize window" placement="bottom">
+            <button
+              type="button"
+              class="win-btn win-minimize"
+              aria-label="Minimize Window"
+              onClick={handleMinimize}
+            />
+          </Tooltip>
         </div>
         <div class="app-brand" data-tauri-drag-region>
-          <Shield size={16} class="text-blue-400" />
+          <Shield size={16} class="text-blue-400 brand-icon" />
           <span class="brand-title">Shieldr</span>
           <span class="brand-pill">{props.isLocked ? "Armed" : "Standby"}</span>
         </div>
@@ -79,38 +84,43 @@ export const TitleBar: Component<TitleBarProps> = (props) => {
 
       <div class="titlebar-right" data-tauri-drag-region>
         <div class="titlebar-actions">
-          <button
-            type="button"
-            class="titlebar-icon-btn"
-            title="Check for Updates"
-            onClick={handleCheckUpdate}
-            disabled={updaterService.state().isChecking}
-          >
-            <RefreshCw
-              size={13}
-              class={updaterService.state().isChecking ? "spin-animation text-blue-400" : ""}
-            />
-          </button>
-          <button
-            type="button"
-            class="titlebar-icon-btn"
-            title="GitHub Repository"
-            onClick={handleOpenGithub}
-          >
-            <SiGithub size={13} />
-          </button>
-          <button
-            type="button"
-            class="titlebar-icon-btn"
-            title="YouTube Demos & Guides"
-            onClick={handleOpenYoutube}
-          >
-            <SiYoutube size={13} />
-          </button>
+          <Tooltip content="Check for Software Updates" placement="bottom">
+            <button
+              type="button"
+              class="titlebar-icon-btn"
+              aria-label="Check for Updates"
+              onClick={handleCheckUpdate}
+              disabled={updaterService.state().isChecking}
+            >
+              <RefreshCw
+                size={15}
+                class={updaterService.state().isChecking ? "spin-animation text-blue-400" : ""}
+              />
+            </button>
+          </Tooltip>
+          <Tooltip content="GitHub Repository & Code" placement="bottom">
+            <button
+              type="button"
+              class="titlebar-icon-btn"
+              aria-label="GitHub Repository"
+              onClick={handleOpenGithub}
+            >
+              <SiGithub size={15} />
+            </button>
+          </Tooltip>
+          <Tooltip content="YouTube Community & Tutorials" placement="bottom-end">
+            <button
+              type="button"
+              class="titlebar-icon-btn"
+              aria-label="YouTube Channel"
+              onClick={handleOpenYoutube}
+            >
+              <SiYoutube size={15} />
+            </button>
+          </Tooltip>
         </div>
         <span class="security-chip">Encrypted Vault</span>
       </div>
     </header>
   );
 };
-
