@@ -288,7 +288,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
   });
 
   return (
-    <div class={clsx("flex flex-col flex-1 w-full max-w-5xl mx-auto p-3 sm:p-4 md:p-5 gap-3 sm:gap-4 overflow-y-auto min-h-0")}>
+    <div class={clsx("flex flex-col flex-1 w-full p-3.5 sm:p-5 md:p-6 lg:p-8 gap-3.5 sm:gap-4 md:gap-5 overflow-y-auto min-h-0")}>
       {/* Tab Navigation */}
       <nav class={clsx("flex items-center gap-1 p-1 rounded-xl bg-slate-900/80 border border-white/10 shadow-lg backdrop-blur-md w-full shrink-0")}>
         <Tooltip content="Control center" placement="bottom" class={clsx("flex-1 min-w-0 flex")}>

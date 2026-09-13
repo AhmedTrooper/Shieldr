@@ -54,7 +54,7 @@ export const TitleBar: Component<TitleBarProps> = (props) => {
   return (
     <header
       class={clsx(
-        "h-10 min-h-[40px] flex items-center justify-between px-3.5",
+        "h-10 min-h-[40px] flex items-center justify-between px-3.5 sm:px-5 md:px-6 lg:px-8",
         "bg-slate-950/80 backdrop-blur-xl border-b border-white/10 select-none relative z-50 transition-all"
       )}
       data-tauri-drag-region
