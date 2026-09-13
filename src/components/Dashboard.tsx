@@ -85,6 +85,18 @@ export const Dashboard: Component<DashboardProps> = (props) => {
         props.status && !props.status.is_configured,
     });
 
+  const tabBtnClasses = (tab: "control" | "display" | "security" | "audit") =>
+    clsx(
+      "w-full min-h-[44px] sm:min-h-[46px] py-1.5 px-1 sm:px-3 rounded-lg text-xs sm:text-[13px] font-semibold tracking-tight",
+      "inline-flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 whitespace-nowrap cursor-pointer transition-all duration-150 select-none",
+      {
+        "bg-blue-600 text-white shadow-lg shadow-blue-600/30 border border-blue-400/40":
+          activeTab() === tab,
+        "bg-transparent text-slate-400 hover:text-slate-200 hover:bg-white/[0.06] border border-transparent":
+          activeTab() !== tab,
+      }
+    );
+
   // Countdown locking state (in-memory, never stored)
   const [countdown, setCountdown] = createSignal<number | null>(null);
   const [delaySeconds, setDelaySeconds] = createSignal<number>(5);
@@ -276,58 +288,58 @@ export const Dashboard: Component<DashboardProps> = (props) => {
   });
 
   return (
-    <div class="dashboard-shell">
+    <div class={clsx("flex flex-col flex-1 w-full max-w-[1200px] mx-auto p-2.5 sm:p-4 md:p-6 lg:p-8 gap-2.5 sm:gap-4 overflow-y-auto")}>
       {/* Tab Navigation */}
-      <nav class="dashboard-tabs">
-        <Tooltip content="Control center" placement="bottom" class="tab-tooltip-item">
+      <nav class={clsx("flex items-center gap-1 sm:gap-1.5 p-1 sm:p-1.5 rounded-xl bg-slate-900/80 border border-white/10 shadow-xl backdrop-blur-md w-full")}>
+        <Tooltip content="Control center" placement="bottom" class={clsx("flex-1 min-w-0 flex")}>
           <button
             type="button"
-            class={`tab-btn ${activeTab() === "control" ? "active" : ""}`}
+            class={tabBtnClasses("control")}
             onClick={() => setActiveTab("control")}
             aria-label="Control Center"
           >
-            <Shield size={18} class="tab-icon" />
-            <span class="tab-label-full">Control Center</span>
-            <span class="tab-label-short">Control</span>
+            <Shield size={18} class={clsx("flex-shrink-0")} />
+            <span class={clsx("hidden sm:inline")}>Control Center</span>
+            <span class={clsx("inline sm:hidden text-[11px]")}>Control</span>
           </button>
         </Tooltip>
-        <Tooltip content="Display & overlay" placement="bottom" class="tab-tooltip-item">
+        <Tooltip content="Display & overlay" placement="bottom" class={clsx("flex-1 min-w-0 flex")}>
           <button
             type="button"
-            class={`tab-btn ${activeTab() === "display" ? "active" : ""}`}
+            class={tabBtnClasses("display")}
             onClick={() => setActiveTab("display")}
             aria-label="Display & Overlay"
           >
-            <Sliders size={18} class="tab-icon" />
-            <span class="tab-label-full">Display & Overlay</span>
-            <span class="tab-label-short">Display</span>
+            <Sliders size={18} class={clsx("flex-shrink-0")} />
+            <span class={clsx("hidden sm:inline")}>Display & Overlay</span>
+            <span class={clsx("inline sm:hidden text-[11px]")}>Display</span>
           </button>
         </Tooltip>
-        <Tooltip content="Security & vault" placement="bottom" class="tab-tooltip-item">
+        <Tooltip content="Security & vault" placement="bottom" class={clsx("flex-1 min-w-0 flex")}>
           <button
             type="button"
-            class={`tab-btn ${activeTab() === "security" ? "active" : ""}`}
+            class={tabBtnClasses("security")}
             onClick={() => setActiveTab("security")}
             aria-label="Security & Vault"
           >
-            <KeyRound size={18} class="tab-icon" />
-            <span class="tab-label-full">Security & Vault</span>
-            <span class="tab-label-short">Security</span>
+            <KeyRound size={18} class={clsx("flex-shrink-0")} />
+            <span class={clsx("hidden sm:inline")}>Security & Vault</span>
+            <span class={clsx("inline sm:hidden text-[11px]")}>Security</span>
           </button>
         </Tooltip>
-        <Tooltip content="Audit logs" placement="bottom" class="tab-tooltip-item">
+        <Tooltip content="Audit logs" placement="bottom" class={clsx("flex-1 min-w-0 flex")}>
           <button
             type="button"
-            class={`tab-btn ${activeTab() === "audit" ? "active" : ""}`}
+            class={tabBtnClasses("audit")}
             onClick={() => {
               setActiveTab("audit");
               loadAuditLogs();
             }}
             aria-label="Audit Log"
           >
-            <FileText size={18} class="tab-icon" />
-            <span class="tab-label-full">Audit Log</span>
-            <span class="tab-label-short">Audit</span>
+            <FileText size={18} class={clsx("flex-shrink-0")} />
+            <span class={clsx("hidden sm:inline")}>Audit Log</span>
+            <span class={clsx("inline sm:hidden text-[11px]")}>Audit</span>
           </button>
         </Tooltip>
       </nav>
@@ -522,7 +534,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                 >
                   <div class={clsx("w-full flex justify-between items-center text-xs py-1.5 px-2 rounded hover:bg-white/[0.04] transition-colors")}>
                     <div class={clsx("flex items-center gap-2")}>
-                      <ShieldCheck size={14} class="text-blue-400" />
+                      <ShieldCheck size={14} class={clsx("text-blue-400")} />
                       <span class={clsx("text-slate-400 font-medium")}>Protection</span>
                     </div>
                     <span class={clsx("font-semibold text-slate-200 text-right")}>Input Blocked</span>
@@ -536,7 +548,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                 >
                   <div class={clsx("w-full flex justify-between items-center text-xs py-1.5 px-2 rounded hover:bg-white/[0.04] transition-colors")}>
                     <div class={clsx("flex items-center gap-2")}>
-                      <Layers size={14} class="text-indigo-400" />
+                      <Layers size={14} class={clsx("text-indigo-400")} />
                       <span class={clsx("text-slate-400 font-medium")}>Overlay</span>
                     </div>
                     <span class={clsx("font-semibold text-slate-200 text-right")}>
@@ -552,7 +564,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                 >
                   <div class={clsx("w-full flex justify-between items-center text-xs py-1.5 px-2 rounded hover:bg-white/[0.04] transition-colors")}>
                     <div class={clsx("flex items-center gap-2")}>
-                      <KeyRound size={14} class="text-amber-400" />
+                      <KeyRound size={14} class={clsx("text-amber-400")} />
                       <span class={clsx("text-slate-400 font-medium")}>Unlock</span>
                     </div>
                     <span class={clsx("font-semibold text-slate-200 text-right")}>PIN / Password</span>
@@ -566,7 +578,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                 >
                   <div class={clsx("w-full flex justify-between items-center text-xs py-1.5 px-2 rounded hover:bg-white/[0.04] transition-colors")}>
                     <div class={clsx("flex items-center gap-2")}>
-                      <Database size={14} class="text-emerald-400" />
+                      <Database size={14} class={clsx("text-emerald-400")} />
                       <span class={clsx("text-slate-400 font-medium")}>Vault</span>
                     </div>
                     <span class={clsx("font-semibold text-sky-400 text-right")}>OS Keyring</span>
@@ -601,7 +613,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
               <Show when={updaterService.state().updateAvailable && updaterService.state().updateInfo}>
                 <div class={clsx("p-3 rounded-lg bg-emerald-500/15 border border-emerald-500/30 mt-2")}>
                   <div class={clsx("flex items-center gap-1.5 text-[13px] text-emerald-300 font-bold mb-1")}>
-                    <CheckCircle2 size={16} class="text-emerald-400" />
+                    <CheckCircle2 size={16} class={clsx("text-emerald-400")} />
                     <strong>New version {updaterService.state().updateInfo?.version} is available!</strong>
                   </div>
                   <Show when={updaterService.state().updateInfo?.body}>
@@ -627,7 +639,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                   </Show>
                   <Show when={updaterService.state().isDownloaded}>
                     <div class={clsx("flex items-center gap-1.5 text-xs text-emerald-400")}>
-                      <Check size={16} class="text-emerald-400" />
+                      <Check size={16} class={clsx("text-emerald-400")} />
                       <span>Update downloaded! Restart Shieldr to complete installation.</span>
                     </div>
                   </Show>
@@ -642,14 +654,14 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                 }
               >
                 <div class={clsx("inline-flex items-center gap-1.5 text-xs text-emerald-400 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20")}>
-                  <CheckCircle2 size={14} class="text-emerald-400" />
+                  <CheckCircle2 size={14} class={clsx("text-emerald-400")} />
                   <span>Latest version installed</span>
                 </div>
               </Show>
 
               <Show when={updaterService.state().error}>
                 <div class={clsx("inline-flex items-center gap-1.5 text-xs text-amber-400 px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20")}>
-                  <AlertCircle size={14} class="text-amber-400" />
+                  <AlertCircle size={14} class={clsx("text-amber-400")} />
                   <span>{updaterService.state().error}</span>
                 </div>
               </Show>
@@ -691,7 +703,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                   >
                     <SiGithub size={16} />
                     <span>GitHub</span>
-                    <ExternalLink size={12} class="opacity-60" />
+                    <ExternalLink size={12} class={clsx("opacity-60")} />
                   </button>
                 </Tooltip>
                 <Tooltip content="YouTube tutorials" placement="top" class={clsx("w-full md:w-auto flex")}>
@@ -707,7 +719,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                   >
                     <SiYoutube size={16} />
                     <span>YouTube</span>
-                    <ExternalLink size={12} class="opacity-60" />
+                    <ExternalLink size={12} class={clsx("opacity-60")} />
                   </button>
                 </Tooltip>
               </div>
@@ -789,26 +801,29 @@ export const Dashboard: Component<DashboardProps> = (props) => {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2 }}
-          class="tab-content settings-tab"
+          class={clsx("flex flex-1 flex-col gap-4 min-h-0 pb-6")}
         >
-          <div class="settings-card">
-            <div class="card-header">
-              <h2>Display & Overlay</h2>
-              <p>Configure transparency, blur, and lock icon behavior.</p>
+          <div class={clsx("flex flex-col gap-4 p-4 md:p-6 rounded-xl bg-slate-900/80 border border-white/10 shadow-2xl backdrop-blur-md")}>
+            <div class={clsx("flex flex-col gap-1 pb-2 border-b border-white/10")}>
+              <h2 class={clsx("text-base sm:text-lg font-bold tracking-tight text-white m-0")}>Display & Overlay</h2>
+              <p class={clsx("text-xs text-slate-400 m-0")}>Configure transparency, blur, and lock icon behavior.</p>
             </div>
 
             <Show when={saveDisplayMsg()}>
-              <div class="success-banner">{saveDisplayMsg()}</div>
+              <div class={clsx("p-2.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-semibold flex items-center gap-2")}>
+                <CheckCircle2 size={14} class={clsx("text-emerald-400")} />
+                <span>{saveDisplayMsg()}</span>
+              </div>
             </Show>
 
-            <div class="setting-row">
-              <div class="setting-info">
-                <label>Overlay Tint</label>
-                <span>
+            <div class={clsx("flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3 border-b border-white/[0.07]")}>
+              <div class={clsx("flex flex-col gap-0.5 sm:max-w-[65%]")}>
+                <label class={clsx("text-[13px] font-semibold text-slate-200")}>Overlay Tint</label>
+                <span class={clsx("text-xs text-slate-400 leading-relaxed")}>
                   Darkness level of the transparent screen guard ({Math.round(opacity() * 100)}%)
                 </span>
               </div>
-              <div class="setting-control slider-control">
+              <div class={clsx("flex items-center gap-3 w-full sm:w-auto")}>
                 <input
                   type="range"
                   min="0"
@@ -816,19 +831,22 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                   step="0.01"
                   value={opacity()}
                   onInput={(e) => setOpacity(parseFloat(e.currentTarget.value))}
+                  class={clsx("w-full sm:w-36 h-2 rounded-lg bg-slate-800 accent-blue-500 cursor-pointer")}
                 />
-                <span class="slider-badge">{Math.round(opacity() * 100)}%</span>
+                <span class={clsx("min-w-[44px] text-right font-mono font-bold text-xs text-blue-400 px-1.5 py-0.5 rounded bg-white/[0.06] border border-white/10")}>
+                  {Math.round(opacity() * 100)}%
+                </span>
               </div>
             </div>
 
-            <div class="setting-row">
-              <div class="setting-info">
-                <label>Background Blur</label>
-                <span>
+            <div class={clsx("flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3 border-b border-white/[0.07]")}>
+              <div class={clsx("flex flex-col gap-0.5 sm:max-w-[65%]")}>
+                <label class={clsx("text-[13px] font-semibold text-slate-200")}>Background Blur</label>
+                <span class={clsx("text-xs text-slate-400 leading-relaxed")}>
                   Frosted glass blur effect ({blur()}px)
                 </span>
               </div>
-              <div class="setting-control slider-control">
+              <div class={clsx("flex items-center gap-3 w-full sm:w-auto")}>
                 <input
                   type="range"
                   min="0"
@@ -836,19 +854,22 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                   step="1"
                   value={blur()}
                   onInput={(e) => setBlur(parseInt(e.currentTarget.value))}
+                  class={clsx("w-full sm:w-36 h-2 rounded-lg bg-slate-800 accent-blue-500 cursor-pointer")}
                 />
-                <span class="slider-badge">{blur()}px</span>
+                <span class={clsx("min-w-[44px] text-right font-mono font-bold text-xs text-blue-400 px-1.5 py-0.5 rounded bg-white/[0.06] border border-white/10")}>
+                  {blur()}px
+                </span>
               </div>
             </div>
 
-            <div class="setting-row">
-              <div class="setting-info">
-                <label>Unlock Icon Position</label>
-                <span>Placement of the click-to-unlock trigger</span>
+            <div class={clsx("flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3 border-b border-white/[0.07]")}>
+              <div class={clsx("flex flex-col gap-0.5 sm:max-w-[65%]")}>
+                <label class={clsx("text-[13px] font-semibold text-slate-200")}>Unlock Icon Position</label>
+                <span class={clsx("text-xs text-slate-400 leading-relaxed")}>Placement of the click-to-unlock trigger</span>
               </div>
-              <div class="setting-control">
+              <div class={clsx("w-full sm:w-auto")}>
                 <select
-                  class="form-select"
+                  class={clsx("w-full sm:w-44 h-9 px-3 rounded-lg bg-slate-800 border border-white/15 text-slate-200 text-xs font-semibold outline-none hover:border-blue-400/50 focus:border-blue-500 transition-colors cursor-pointer")}
                   value={position()}
                   onChange={(e) =>
                     setPosition(e.currentTarget.value as ShieldProperties["lock_icon_position"])
@@ -862,14 +883,14 @@ export const Dashboard: Component<DashboardProps> = (props) => {
               </div>
             </div>
 
-            <div class="setting-row">
-              <div class="setting-info">
-                <label>Auto-Hide Timeout</label>
-                <span>Hide lock icon after mouse inactivity</span>
+            <div class={clsx("flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3 border-b border-white/[0.07]")}>
+              <div class={clsx("flex flex-col gap-0.5 sm:max-w-[65%]")}>
+                <label class={clsx("text-[13px] font-semibold text-slate-200")}>Auto-Hide Timeout</label>
+                <span class={clsx("text-xs text-slate-400 leading-relaxed")}>Hide lock icon after mouse inactivity</span>
               </div>
-              <div class="setting-control">
+              <div class={clsx("w-full sm:w-auto")}>
                 <select
-                  class="form-select"
+                  class={clsx("w-full sm:w-44 h-9 px-3 rounded-lg bg-slate-800 border border-white/15 text-slate-200 text-xs font-semibold outline-none hover:border-blue-400/50 focus:border-blue-500 transition-colors cursor-pointer")}
                   value={autohide()}
                   onChange={(e) => setAutohide(parseInt(e.currentTarget.value))}
                 >
@@ -882,53 +903,69 @@ export const Dashboard: Component<DashboardProps> = (props) => {
               </div>
             </div>
 
-            <div class="setting-row">
-              <div class="setting-info">
-                <label>Sound Feedback</label>
-                <span>Audio tones for keypad and unlock actions</span>
+            <div class={clsx("flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3 border-b border-white/[0.07]")}>
+              <div class={clsx("flex flex-col gap-0.5 sm:max-w-[65%]")}>
+                <label class={clsx("text-[13px] font-semibold text-slate-200")}>Sound Feedback</label>
+                <span class={clsx("text-xs text-slate-400 leading-relaxed")}>Audio tones for keypad and unlock actions</span>
               </div>
-              <div class="setting-control">
+              <div class={clsx("w-full sm:w-auto flex justify-start sm:justify-end")}>
                 <Tooltip content={soundEnabled() ? "Sound enabled" : "Sound disabled"} placement="left">
-                  <label class="toggle-switch">
+                  <label class={clsx("relative inline-flex items-center cursor-pointer")}>
                     <input
                       type="checkbox"
                       checked={soundEnabled()}
                       onChange={(e) => setSoundEnabled(e.currentTarget.checked)}
                       aria-label="Sound Feedback"
+                      class={clsx("sr-only peer")}
                     />
-                    <span class="toggle-slider" />
+                    <div class={clsx(
+                      "w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer",
+                      "peer-checked:after:translate-x-full peer-checked:after:border-white",
+                      "after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all",
+                      "peer-checked:bg-blue-600 border border-white/20"
+                    )} />
                   </label>
                 </Tooltip>
               </div>
             </div>
 
-            <div class="setting-row">
-              <div class="setting-info">
-                <label>Keep Awake</label>
-                <span>
+            <div class={clsx("flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3 border-b border-white/[0.07]")}>
+              <div class={clsx("flex flex-col gap-0.5 sm:max-w-[65%]")}>
+                <label class={clsx("text-[13px] font-semibold text-slate-200")}>Keep Awake</label>
+                <span class={clsx("text-xs text-slate-400 leading-relaxed")}>
                   Prevent sleep and display turn-off while locked
                 </span>
               </div>
-              <div class="setting-control">
+              <div class={clsx("w-full sm:w-auto flex justify-start sm:justify-end")}>
                 <Tooltip content={keepAwake() ? "Keep awake enabled" : "Keep awake disabled"} placement="left">
-                  <label class="toggle-switch">
+                  <label class={clsx("relative inline-flex items-center cursor-pointer")}>
                     <input
                       type="checkbox"
                       checked={keepAwake()}
                       onChange={(e) => setKeepAwake(e.currentTarget.checked)}
                       aria-label="Keep Awake"
+                      class={clsx("sr-only peer")}
                     />
-                    <span class="toggle-slider" />
+                    <div class={clsx(
+                      "w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer",
+                      "peer-checked:after:translate-x-full peer-checked:after:border-white",
+                      "after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all",
+                      "peer-checked:bg-blue-600 border border-white/20"
+                    )} />
                   </label>
                 </Tooltip>
               </div>
             </div>
 
-            <div class="settings-actions">
+            <div class={clsx("flex justify-end pt-2")}>
               <Tooltip content="Save display settings" placement="top">
                 <button
                   type="button"
-                  class="primary-btn"
+                  class={clsx(
+                    "h-10 min-h-[40px] px-5 rounded-lg text-xs sm:text-[13px] font-bold text-white",
+                    "bg-blue-600 hover:bg-blue-500 active:scale-[0.985] shadow-lg shadow-blue-600/30",
+                    "border border-blue-400/40 transition-all cursor-pointer inline-flex items-center justify-center gap-2"
+                  )}
                   onClick={handleSaveDisplayProperties}
                   aria-label="Save Settings"
                 >
@@ -946,97 +983,105 @@ export const Dashboard: Component<DashboardProps> = (props) => {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2 }}
-          class="tab-content security-tab"
+          class={clsx("flex flex-1 flex-col gap-4 min-h-0 pb-6")}
         >
-          <div class="two-column-cards">
+          <div class={clsx("grid grid-cols-1 md:grid-cols-2 gap-4")}>
             {/* Change PIN Card */}
-            <div class="settings-card">
-              <div class="card-header">
-                <h3>Change PIN</h3>
-                <p>Update your 4-8 digit quick-unlock code.</p>
+            <div class={clsx("flex flex-col gap-3 p-4 md:p-5 rounded-xl bg-slate-900/80 border border-white/10 shadow-2xl backdrop-blur-md")}>
+              <div class={clsx("flex flex-col gap-1 pb-2 border-b border-white/10")}>
+                <h3 class={clsx("text-base font-bold tracking-tight text-white m-0")}>Change PIN</h3>
+                <p class={clsx("text-xs text-slate-400 m-0")}>Update your 4-8 digit quick-unlock code.</p>
               </div>
 
               <Show when={pinChangeMsg()}>
                 <div
-                  class={
-                    pinChangeMsg()?.type === "success"
-                      ? "success-banner"
-                      : "error-banner"
-                  }
+                  class={clsx("p-2.5 rounded-lg text-xs font-semibold flex items-center gap-2", {
+                    "bg-emerald-500/15 border border-emerald-500/30 text-emerald-400":
+                      pinChangeMsg()?.type === "success",
+                    "bg-red-500/15 border border-red-500/30 text-red-400":
+                      pinChangeMsg()?.type !== "success",
+                  })}
                 >
                   {pinChangeMsg()?.text}
                 </div>
               </Show>
 
-              <form onSubmit={handleChangePin} class="compact-form">
-                <div class="form-group">
-                  <label>Current PIN or Password</label>
+              <form onSubmit={handleChangePin} class={clsx("flex flex-col gap-3 mt-1")}>
+                <div class={clsx("flex flex-col gap-1")}>
+                  <label class={clsx("text-xs font-semibold text-slate-300")}>Current PIN or Password</label>
                   <input
                     type="password"
-                    class="form-input"
+                    class={clsx("w-full h-10 px-3 rounded-lg bg-slate-950/80 border border-white/15 text-white text-xs sm:text-[13px] font-mono outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-slate-600")}
                     value={currentCred()}
                     onInput={(e) => setCurrentCred(e.currentTarget.value)}
                     required
                   />
                 </div>
-                <div class="form-group">
-                  <label>New PIN (4-8 digits)</label>
+                <div class={clsx("flex flex-col gap-1")}>
+                  <label class={clsx("text-xs font-semibold text-slate-300")}>New PIN (4-8 digits)</label>
                   <input
                     type="password"
-                    class="form-input"
+                    class={clsx("w-full h-10 px-3 rounded-lg bg-slate-950/80 border border-white/15 text-white text-xs sm:text-[13px] font-mono outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-slate-600")}
                     maxLength={8}
                     value={newPin()}
                     onInput={(e) => setNewPin(e.currentTarget.value)}
                     required
                   />
                 </div>
-                <button type="submit" class="secondary-btn">
+                <button
+                  type="submit"
+                  class={clsx("w-full h-10 min-h-[40px] px-4 rounded-lg text-xs font-semibold text-slate-200 hover:text-white bg-slate-800 hover:bg-slate-700/90 border border-white/15 hover:border-blue-400/40 transition-all cursor-pointer inline-flex items-center justify-center gap-2 active:scale-[0.985]")}
+                >
                   Update PIN
                 </button>
               </form>
             </div>
 
             {/* Change Master Password Card */}
-            <div class="settings-card">
-              <div class="card-header">
-                <h3>Change Master Password</h3>
-                <p>Emergency recovery password.</p>
+            <div class={clsx("flex flex-col gap-3 p-4 md:p-5 rounded-xl bg-slate-900/80 border border-white/10 shadow-2xl backdrop-blur-md")}>
+              <div class={clsx("flex flex-col gap-1 pb-2 border-b border-white/10")}>
+                <h3 class={clsx("text-base font-bold tracking-tight text-white m-0")}>Change Master Password</h3>
+                <p class={clsx("text-xs text-slate-400 m-0")}>Emergency recovery password.</p>
               </div>
 
               <Show when={masterChangeMsg()}>
                 <div
-                  class={
-                    masterChangeMsg()?.type === "success"
-                      ? "success-banner"
-                      : "error-banner"
-                  }
+                  class={clsx("p-2.5 rounded-lg text-xs font-semibold flex items-center gap-2", {
+                    "bg-emerald-500/15 border border-emerald-500/30 text-emerald-400":
+                      masterChangeMsg()?.type === "success",
+                    "bg-red-500/15 border border-red-500/30 text-red-400":
+                      masterChangeMsg()?.type !== "success",
+                  })}
                 >
                   {masterChangeMsg()?.text}
                 </div>
               </Show>
 
-              <form onSubmit={handleChangeMasterPassword} class="compact-form">
-                <div class="form-group">
-                  <label>Current Master Password</label>
+              <form onSubmit={handleChangeMasterPassword} class={clsx("flex flex-col gap-3 mt-1")}>
+                <div class={clsx("flex flex-col gap-1")}>
+                  <label class={clsx("text-xs font-semibold text-slate-300")}>Current Master Password</label>
                   <input
                     type="password"
-                    class="form-input"
+                    class={clsx("w-full h-10 px-3 rounded-lg bg-slate-950/80 border border-white/15 text-white text-xs sm:text-[13px] font-mono outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-slate-600")}
                     value={currentMaster()}
                     onInput={(e) => setCurrentMaster(e.currentTarget.value)}
                     required
                   />
                 </div>
-                <div class="form-group">
-                  <label>New Master Password (6+ chars)</label>
+                <div class={clsx("flex flex-col gap-1")}>
+                  <label class={clsx("text-xs font-semibold text-slate-300")}>New Master Password (6+ chars)</label>
                   <input
                     type="password"
-                    class="form-input"
+                    class={clsx("w-full h-10 px-3 rounded-lg bg-slate-950/80 border border-white/15 text-white text-xs sm:text-[13px] font-mono outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-slate-600")}
                     value={newMaster()}
                     onInput={(e) => setNewMaster(e.currentTarget.value)}
                     required
                   />
                 </div>
-                <button type="submit" class="secondary-btn">
+                <button
+                  type="submit"
+                  class={clsx("w-full h-10 min-h-[40px] px-4 rounded-lg text-xs font-semibold text-slate-200 hover:text-white bg-slate-800 hover:bg-slate-700/90 border border-white/15 hover:border-blue-400/40 transition-all cursor-pointer inline-flex items-center justify-center gap-2 active:scale-[0.985]")}
+                >
                   Update Password
                 </button>
               </form>
@@ -1044,44 +1089,53 @@ export const Dashboard: Component<DashboardProps> = (props) => {
           </div>
 
           {/* Backup Recovery Phrase Card */}
-          <div class="settings-card full-width-card">
-            <div class="card-header">
-              <h3>12-Word Recovery Phrase</h3>
-              <p>
+          <div class={clsx("flex flex-col gap-3 p-4 md:p-5 rounded-xl bg-slate-900/80 border border-white/10 shadow-2xl backdrop-blur-md mt-4")}>
+            <div class={clsx("flex flex-col gap-1 pb-2 border-b border-white/10")}>
+              <h3 class={clsx("text-base font-bold tracking-tight text-white m-0")}>12-Word Recovery Phrase</h3>
+              <p class={clsx("text-xs text-slate-400 m-0")}>
                 Enter your master password to view your backup phrase.
               </p>
             </div>
 
             <Show when={!revealedPhrase()}>
-              <form onSubmit={handleRevealPhrase} class="reveal-form">
-                <div class="form-group flex-1">
+              <form onSubmit={handleRevealPhrase} class={clsx("flex flex-col sm:flex-row gap-2 mt-1")}>
+                <div class={clsx("flex-1")}>
                   <input
                     type="password"
-                    class="form-input"
+                    class={clsx("w-full h-10 px-3 rounded-lg bg-slate-950/80 border border-white/15 text-white text-xs sm:text-[13px] font-mono outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-slate-500")}
                     placeholder="Enter Master Password..."
                     value={revealMasterPass()}
                     onInput={(e) => setRevealMasterPass(e.currentTarget.value)}
                     required
                   />
                 </div>
-                <button type="submit" class="primary-btn">
+                <button
+                  type="submit"
+                  class={clsx(
+                    "h-10 min-h-[40px] px-4 rounded-lg text-xs font-bold text-white",
+                    "bg-blue-600 hover:bg-blue-500 border border-blue-400/40 shadow-md shadow-blue-600/30",
+                    "transition-all cursor-pointer inline-flex items-center justify-center gap-1.5 whitespace-nowrap active:scale-[0.985]"
+                  )}
+                >
                   <KeyRound size={15} />
                   <span>Reveal Phrase</span>
                 </button>
               </form>
               <Show when={revealMsg()}>
-                <div class="error-banner">{revealMsg()}</div>
+                <div class={clsx("p-2.5 rounded-lg bg-red-500/15 border border-red-500/30 text-red-400 text-xs font-semibold mt-2")}>
+                  {revealMsg()}
+                </div>
               </Show>
             </Show>
 
             <Show when={revealedPhrase()}>
-              <div class="revealed-phrase-box">
-                <div class="mnemonic-grid">
+              <div class={clsx("flex flex-col gap-3 mt-2")}>
+                <div class={clsx("grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2")}>
                   <For each={revealedPhrase()?.split(/\s+/) || []}>
                     {(word, idx) => (
-                      <div class="mnemonic-word-card">
-                        <span class="word-idx">{idx() + 1}</span>
-                        <span class="word-text">{word}</span>
+                      <div class={clsx("flex items-center gap-2 px-2.5 py-2 rounded-lg bg-slate-950/70 border border-white/10 text-xs font-mono select-text")}>
+                        <span class={clsx("text-slate-500 font-bold select-none text-[10.5px]")}>{idx() + 1}</span>
+                        <span class={clsx("text-emerald-400 font-semibold")}>{word}</span>
                       </div>
                     )}
                   </For>
@@ -1089,7 +1143,11 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                 <Tooltip content={copiedPhrase() ? "Copied to clipboard" : "Copy 12-word phrase"} placement="top">
                   <button
                     type="button"
-                    class="copy-phrase-btn"
+                    class={clsx(
+                      "self-start h-9 px-4 rounded-lg text-xs font-semibold text-slate-200 hover:text-white",
+                      "bg-slate-800 hover:bg-slate-700 border border-white/15 hover:border-blue-400/40",
+                      "transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-[0.985]"
+                    )}
                     onClick={async () => {
                       const phrase = revealedPhrase() || "";
                       try {
@@ -1103,7 +1161,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                     }}
                     aria-label="Copy Recovery Phrase"
                   >
-                    {copiedPhrase() ? <Check size={16} class="text-emerald-400" /> : <Copy size={16} />}
+                    {copiedPhrase() ? <Check size={16} class={clsx("text-emerald-400")} /> : <Copy size={16} />}
                     <span>{copiedPhrase() ? "Copied!" : "Copy 12 Words"}</span>
                   </button>
                 </Tooltip>
@@ -1119,60 +1177,73 @@ export const Dashboard: Component<DashboardProps> = (props) => {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2 }}
-          class="tab-content audit-tab"
+          class={clsx("flex flex-1 flex-col gap-4 min-h-0 pb-6")}
         >
-          <div class="settings-card">
-            <div class="card-header flex-between">
+          <div class={clsx("flex flex-col gap-4 p-4 md:p-6 rounded-xl bg-slate-900/80 border border-white/10 shadow-2xl backdrop-blur-md")}>
+            <div class={clsx("flex items-center justify-between gap-4 pb-2 border-b border-white/10")}>
               <div>
-                <h2>Audit Log</h2>
-                <p>
+                <h2 class={clsx("text-base sm:text-lg font-bold tracking-tight text-white m-0")}>Audit Log</h2>
+                <p class={clsx("text-xs text-slate-400 m-0")}>
                   Security events and access history.
                 </p>
               </div>
               <Tooltip content="Refresh audit log" placement="left">
                 <button
                   type="button"
-                  class="refresh-btn"
+                  class={clsx(
+                    "h-8 px-3 rounded-lg text-xs font-semibold text-slate-300 hover:text-white",
+                    "bg-white/[0.06] hover:bg-white/[0.12] border border-white/15 transition-all cursor-pointer",
+                    "inline-flex items-center gap-1.5 disabled:opacity-50"
+                  )}
                   onClick={loadAuditLogs}
                   disabled={isLoadingLogs()}
                   aria-label="Refresh Audit Logs"
                 >
-                  <RefreshCw size={15} class={isLoadingLogs() ? "spin-animation" : ""} />
+                  <RefreshCw size={15} class={clsx({ "animate-spin": isLoadingLogs() })} />
                   <span>Refresh</span>
                 </button>
               </Tooltip>
             </div>
 
-            <div class="audit-table-wrapper">
-              <table class="audit-table">
+            <div class={clsx("w-full overflow-x-auto rounded-lg border border-white/10 bg-slate-950/60")}>
+              <table class={clsx("w-full text-left text-xs border-collapse")}>
                 <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Event Type</th>
-                    <th>Details</th>
-                    <th>Timestamp</th>
+                  <tr class={clsx("border-b border-white/10 bg-slate-900/90 text-slate-400 font-semibold")}>
+                    <th class={clsx("py-2.5 px-3 whitespace-nowrap")}>ID</th>
+                    <th class={clsx("py-2.5 px-3 whitespace-nowrap")}>Event Type</th>
+                    <th class={clsx("py-2.5 px-3 whitespace-nowrap")}>Details</th>
+                    <th class={clsx("py-2.5 px-3 whitespace-nowrap")}>Timestamp</th>
                   </tr>
                 </thead>
                 <tbody>
                   <For each={logs()}>
                     {(entry) => (
-                      <tr>
-                        <td class="id-col">#{entry.id}</td>
-                        <td>
+                      <tr class={clsx("border-b border-white/[0.05] hover:bg-white/[0.02] transition-colors")}>
+                        <td class={clsx("py-2 px-3 text-slate-400 font-mono")}>#{entry.id}</td>
+                        <td class={clsx("py-2 px-3 whitespace-nowrap")}>
                           <span
-                            class={`event-tag ${
-                              entry.event_type.includes("SUCCESS") || entry.event_type.includes("UNLOCKED")
-                                ? "tag-green"
-                                : entry.event_type.includes("FAILED") || entry.event_type.includes("DENIED")
-                                ? "tag-red"
-                                : "tag-blue"
-                            }`}
+                            class={clsx(
+                              "inline-flex items-center px-2 py-0.5 rounded text-[10.5px] font-bold uppercase tracking-wider",
+                              {
+                                "bg-emerald-500/15 border border-emerald-500/30 text-emerald-400":
+                                  entry.event_type.includes("SUCCESS") || entry.event_type.includes("UNLOCKED"),
+                                "bg-red-500/15 border border-red-500/30 text-red-400":
+                                  entry.event_type.includes("FAILED") || entry.event_type.includes("DENIED"),
+                                "bg-blue-500/15 border border-blue-500/30 text-blue-400":
+                                  !entry.event_type.includes("SUCCESS") &&
+                                  !entry.event_type.includes("UNLOCKED") &&
+                                  !entry.event_type.includes("FAILED") &&
+                                  !entry.event_type.includes("DENIED"),
+                              }
+                            )}
                           >
                             {entry.event_type}
                           </span>
                         </td>
-                        <td class="details-col">{entry.details}</td>
-                        <td class="time-col">{new Date(entry.timestamp).toLocaleString()}</td>
+                        <td class={clsx("py-2 px-3 text-slate-300 font-mono")}>{entry.details}</td>
+                        <td class={clsx("py-2 px-3 text-slate-400 whitespace-nowrap font-mono text-[11px]")}>
+                          {new Date(entry.timestamp).toLocaleString()}
+                        </td>
                       </tr>
                     )}
                   </For>
