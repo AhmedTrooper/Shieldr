@@ -4,6 +4,8 @@ pub mod db;
 pub mod error;
 pub mod keyring_store;
 pub mod stronghold_store;
+#[cfg(desktop)]
+pub mod tray;
 pub mod vault;
 
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -96,6 +98,11 @@ pub fn run() {
                         }
                     }
                 });
+            }
+
+            #[cfg(desktop)]
+            {
+                tray::setup_tray(app)?;
             }
 
             Ok(())
