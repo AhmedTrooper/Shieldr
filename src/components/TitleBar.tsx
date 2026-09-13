@@ -54,19 +54,19 @@ export const TitleBar: Component<TitleBarProps> = (props) => {
   return (
     <header
       class={clsx(
-        "h-[42px] min-h-[42px] flex items-center justify-between px-3",
+        "h-10 min-h-[40px] flex items-center justify-between px-3.5",
         "bg-slate-950/80 backdrop-blur-xl border-b border-white/10 select-none relative z-50 transition-all"
       )}
       data-tauri-drag-region
     >
       <div class={clsx("flex items-center gap-3 min-w-0")} data-tauri-drag-region>
-        <div class={clsx("flex items-center gap-1.5 pr-1")}>
+        <div class={clsx("flex items-center gap-1.5 pr-1.5")}>
           <Tooltip content="Close to tray" placement="bottom-start">
             <button
               type="button"
               class={clsx(
                 "w-3 h-3 rounded-full border-none cursor-pointer p-0 flex items-center justify-center transition-all",
-                "bg-[#ff5f56] shadow-[0_0_6px_rgba(255,95,86,0.6),inset_0_1px_0_rgba(255,255,255,0.35)] hover:scale-115 hover:brightness-125"
+                "bg-[#ff5f56] shadow-[0_0_6px_rgba(255,95,86,0.6),inset_0_1px_0_rgba(255,255,255,0.35)] hover:scale-110 hover:brightness-125"
               )}
               aria-label="Close Window"
               onClick={handleClose}
@@ -77,7 +77,7 @@ export const TitleBar: Component<TitleBarProps> = (props) => {
               type="button"
               class={clsx(
                 "w-3 h-3 rounded-full border-none cursor-pointer p-0 flex items-center justify-center transition-all",
-                "bg-[#ffbd2e] shadow-[0_0_6px_rgba(255,189,46,0.6),inset_0_1px_0_rgba(255,255,255,0.35)] hover:scale-115 hover:brightness-125"
+                "bg-[#ffbd2e] shadow-[0_0_6px_rgba(255,189,46,0.6),inset_0_1px_0_rgba(255,255,255,0.35)] hover:scale-110 hover:brightness-125"
               )}
               aria-label="Minimize Window"
               onClick={handleMinimize}
@@ -85,11 +85,11 @@ export const TitleBar: Component<TitleBarProps> = (props) => {
           </Tooltip>
         </div>
         <div class={clsx("flex items-center gap-1.5")} data-tauri-drag-region>
-          <Shield size={16} class={clsx("text-blue-400 shrink-0")} />
-          <span class={clsx("text-[13.5px] font-bold text-slate-200 tracking-tight")}>Shieldr</span>
+          <Shield size={15} class={clsx("text-blue-400 shrink-0")} />
+          <span class={clsx("text-[13px] font-bold text-slate-200 tracking-tight")}>Shieldr</span>
           <span
             class={clsx(
-              "text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full border",
+              "text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border",
               props.isLocked
                 ? "bg-amber-500/15 text-amber-400 border-amber-500/30"
                 : "bg-blue-500/15 text-blue-400 border-blue-500/25"
@@ -110,7 +110,7 @@ export const TitleBar: Component<TitleBarProps> = (props) => {
             <button
               type="button"
               class={clsx(
-                "inline-flex items-center justify-center w-6 h-6 rounded border border-transparent hover:border-white/15",
+                "inline-flex items-center justify-center w-7 h-7 rounded-md border border-transparent hover:border-white/15",
                 "bg-transparent hover:bg-white/[0.08] text-slate-400 hover:text-slate-100 cursor-pointer transition-all",
                 "disabled:opacity-40 disabled:pointer-events-none"
               )}
@@ -128,7 +128,7 @@ export const TitleBar: Component<TitleBarProps> = (props) => {
             <button
               type="button"
               class={clsx(
-                "inline-flex items-center justify-center w-6 h-6 rounded border border-transparent hover:border-white/15",
+                "inline-flex items-center justify-center w-7 h-7 rounded-md border border-transparent hover:border-white/15",
                 "bg-transparent hover:bg-white/[0.08] text-slate-400 hover:text-slate-100 cursor-pointer transition-all"
               )}
               aria-label="GitHub Repository"
@@ -141,7 +141,7 @@ export const TitleBar: Component<TitleBarProps> = (props) => {
             <button
               type="button"
               class={clsx(
-                "inline-flex items-center justify-center w-6 h-6 rounded border border-transparent hover:border-white/15",
+                "inline-flex items-center justify-center w-7 h-7 rounded-md border border-transparent hover:border-white/15",
                 "bg-transparent hover:bg-white/[0.08] text-slate-400 hover:text-slate-100 cursor-pointer transition-all"
               )}
               aria-label="YouTube Channel"
@@ -151,7 +151,7 @@ export const TitleBar: Component<TitleBarProps> = (props) => {
             </button>
           </Tooltip>
         </div>
-        <span class={clsx("text-[9.5px] font-semibold text-slate-400 bg-white/[0.05] px-2 py-0.5 rounded border border-white/10 whitespace-nowrap")}>
+        <span class={clsx("text-[10px] font-semibold text-slate-400 bg-white/[0.05] px-2.5 py-0.5 rounded-full border border-white/10 whitespace-nowrap")}>
           Encrypted
         </span>
       </div>

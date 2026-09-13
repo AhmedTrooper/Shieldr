@@ -101,9 +101,9 @@ export const InitialSetupModal: Component<InitialSetupModalProps> = (props) => {
       >
         <div
           class={clsx(
-            "my-auto w-full max-w-[420px] max-h-[calc(100vh-16px)] min-h-0",
+            "my-auto w-full max-w-[400px] max-h-[calc(100vh-16px)] min-h-0",
             "flex flex-col items-center overflow-y-auto overflow-x-hidden box-border",
-            "bg-slate-900/95 border border-white/15 rounded-xl shadow-2xl shadow-black/80 p-4 sm:p-5 relative",
+            "bg-slate-900/95 border border-white/15 rounded-2xl shadow-2xl shadow-black/80 p-5 sm:p-6 relative",
             "animate-[cardPop_0.22s_cubic-bezier(0.16,1,0.3,1)]"
           )}
           onClick={(e) => e.stopPropagation()}
@@ -132,7 +132,7 @@ export const InitialSetupModal: Component<InitialSetupModalProps> = (props) => {
                   <input
                     type="password"
                     class={clsx(
-                      "w-full h-9 px-3 rounded-lg bg-slate-950/70 border border-white/15 hover:border-white/25 focus:border-blue-500 focus:outline-none",
+                      "w-full h-10 min-h-[40px] px-3 rounded-lg bg-slate-950/70 border border-white/15 hover:border-white/25 focus:border-blue-500 focus:outline-none",
                       "text-xs text-zinc-100 placeholder:text-zinc-500 tracking-widest text-center transition-colors"
                     )}
                     maxLength={8}
@@ -149,7 +149,7 @@ export const InitialSetupModal: Component<InitialSetupModalProps> = (props) => {
                   <input
                     type="password"
                     class={clsx(
-                      "w-full h-9 px-3 rounded-lg bg-slate-950/70 border border-white/15 hover:border-white/25 focus:border-blue-500 focus:outline-none",
+                      "w-full h-10 min-h-[40px] px-3 rounded-lg bg-slate-950/70 border border-white/15 hover:border-white/25 focus:border-blue-500 focus:outline-none",
                       "text-xs text-zinc-100 placeholder:text-zinc-500 tracking-widest text-center transition-colors"
                     )}
                     maxLength={8}
@@ -167,7 +167,7 @@ export const InitialSetupModal: Component<InitialSetupModalProps> = (props) => {
                 <input
                   type="password"
                   class={clsx(
-                    "w-full h-9 px-3 rounded-lg bg-slate-950/70 border border-white/15 hover:border-white/25 focus:border-blue-500 focus:outline-none",
+                    "w-full h-10 min-h-[40px] px-3 rounded-lg bg-slate-950/70 border border-white/15 hover:border-white/25 focus:border-blue-500 focus:outline-none",
                     "text-xs text-zinc-100 placeholder:text-zinc-500 transition-colors"
                   )}
                   placeholder="At least 6 characters..."
@@ -190,7 +190,7 @@ export const InitialSetupModal: Component<InitialSetupModalProps> = (props) => {
               <button
                 type="submit"
                 class={clsx(
-                  "w-full h-10 px-4 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 active:scale-[0.985]",
+                  "w-full h-10 min-h-[40px] px-4 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 active:scale-[0.985]",
                   "text-white text-xs font-semibold tracking-tight shadow-lg shadow-blue-500/25 border border-blue-400/35 transition-all",
                   "flex items-center justify-center gap-2 cursor-pointer disabled:opacity-45 disabled:pointer-events-none disabled:shadow-none mt-1"
                 )}
@@ -222,7 +222,7 @@ export const InitialSetupModal: Component<InitialSetupModalProps> = (props) => {
             <div class={clsx("grid grid-cols-2 sm:grid-cols-3 gap-2 w-full mb-3")}>
               <For each={words()}>
                 {(word, idx) => (
-                  <div class={clsx("flex items-center gap-2 p-2 rounded-lg bg-slate-950/70 border border-white/10 shadow-sm")}>
+                  <div class={clsx("flex items-center gap-2 py-1.5 px-2.5 rounded-lg bg-slate-950/70 border border-white/10 shadow-sm")}>
                     <span class={clsx("text-[11px] font-mono font-bold text-slate-400 w-5 text-right")}>{idx() + 1}.</span>
                     <span class={clsx("text-xs font-mono font-medium text-slate-200 truncate")}>{word}</span>
                   </div>
@@ -235,7 +235,7 @@ export const InitialSetupModal: Component<InitialSetupModalProps> = (props) => {
                 <button
                   type="button"
                   class={clsx(
-                    "w-full h-9 px-3 rounded-lg border text-xs font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer",
+                    "w-full h-9 min-h-[36px] px-3 rounded-lg border text-xs font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer",
                     copied()
                       ? "border-emerald-500 bg-emerald-500/15 text-emerald-300"
                       : hasCopiedPhrase()
@@ -289,7 +289,7 @@ export const InitialSetupModal: Component<InitialSetupModalProps> = (props) => {
               <button
                 type="button"
                 class={clsx(
-                  "w-full h-10 px-4 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 active:scale-[0.985]",
+                  "w-full h-10 min-h-[40px] px-4 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 active:scale-[0.985]",
                   "text-white text-xs font-semibold tracking-tight shadow-lg shadow-blue-500/25 border border-blue-400/35 transition-all",
                   "flex items-center justify-center gap-2 cursor-pointer disabled:opacity-45 disabled:pointer-events-none disabled:shadow-none"
                 )}

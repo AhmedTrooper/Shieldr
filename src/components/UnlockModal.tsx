@@ -116,9 +116,9 @@ export const UnlockModal: Component<UnlockModalProps> = (props) => {
       >
         <div
           class={clsx(
-            "my-auto w-full max-w-[360px] max-h-[calc(100vh-16px)] min-h-0",
+            "my-auto w-full max-w-[340px] max-h-[calc(100vh-16px)] min-h-0",
             "flex flex-col items-center overflow-y-auto overflow-x-hidden box-border",
-            "bg-slate-900/95 border border-white/15 rounded-xl shadow-2xl shadow-black/80 p-3.5 sm:p-4 relative",
+            "bg-slate-900/95 border border-white/15 rounded-2xl shadow-2xl shadow-black/80 p-4 sm:p-5 relative",
             "animate-[cardPop_0.22s_cubic-bezier(0.16,1,0.3,1)] transition-all",
             isShaking() && "animate-[shakeElastic_0.45s_cubic-bezier(0.36,0.07,0.19,0.97)_both] border-red-500/80",
             isSuccess() && "border-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.35)]"
@@ -213,13 +213,13 @@ export const UnlockModal: Component<UnlockModalProps> = (props) => {
             </div>
 
             {/* Virtual Numpad */}
-            <div class={clsx("grid grid-cols-3 gap-1.5 w-full max-w-[250px] mb-2.5")}>
+            <div class={clsx("grid grid-cols-3 gap-1.5 w-full max-w-[240px] mb-3")}>
               <For each={["1", "2", "3", "4", "5", "6", "7", "8", "9"]}>
                 {(num) => (
                   <button
                     type="button"
                     class={clsx(
-                      "h-9 rounded-md bg-white/[0.06] hover:bg-white/[0.14] active:bg-blue-600 active:scale-95",
+                      "h-9.5 min-h-[38px] rounded-lg bg-white/[0.06] hover:bg-white/[0.14] active:bg-blue-600 active:scale-95",
                       "border border-white/10 hover:border-white/20 text-zinc-100 text-base font-semibold cursor-pointer",
                       "flex items-center justify-center shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] transition-all",
                       "disabled:opacity-40 disabled:pointer-events-none"
@@ -235,7 +235,7 @@ export const UnlockModal: Component<UnlockModalProps> = (props) => {
                 <button
                   type="button"
                   class={clsx(
-                    "h-9 rounded-md bg-white/[0.06] hover:bg-white/[0.14] active:bg-blue-600 active:scale-95",
+                    "h-9.5 min-h-[38px] rounded-lg bg-white/[0.06] hover:bg-white/[0.14] active:bg-blue-600 active:scale-95",
                     "border border-white/10 hover:border-white/20 text-xs font-semibold text-zinc-400 cursor-pointer",
                     "flex items-center justify-center shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] transition-all",
                     "disabled:opacity-40 disabled:pointer-events-none"
@@ -250,7 +250,7 @@ export const UnlockModal: Component<UnlockModalProps> = (props) => {
               <button
                 type="button"
                 class={clsx(
-                  "h-9 rounded-md bg-white/[0.06] hover:bg-white/[0.14] active:bg-blue-600 active:scale-95",
+                  "h-9.5 min-h-[38px] rounded-lg bg-white/[0.06] hover:bg-white/[0.14] active:bg-blue-600 active:scale-95",
                   "border border-white/10 hover:border-white/20 text-zinc-100 text-base font-semibold cursor-pointer",
                   "flex items-center justify-center shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] transition-all",
                   "disabled:opacity-40 disabled:pointer-events-none"
@@ -265,7 +265,7 @@ export const UnlockModal: Component<UnlockModalProps> = (props) => {
                 <button
                   type="button"
                   class={clsx(
-                    "h-9 rounded-md bg-white/[0.06] hover:bg-white/[0.14] active:bg-blue-600 active:scale-95",
+                    "h-9.5 min-h-[38px] rounded-lg bg-white/[0.06] hover:bg-white/[0.14] active:bg-blue-600 active:scale-95",
                     "border border-white/10 hover:border-white/20 text-zinc-400 cursor-pointer",
                     "flex items-center justify-center shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] transition-all",
                     "disabled:opacity-40 disabled:pointer-events-none"
@@ -282,7 +282,7 @@ export const UnlockModal: Component<UnlockModalProps> = (props) => {
 
           {/* Master Password Mode */}
           <Show when={useMasterPassword()}>
-            <div class={clsx("w-full mb-2.5")}>
+            <div class={clsx("w-full mb-3")}>
               <input
                 type="password"
                 class={clsx(
@@ -306,7 +306,7 @@ export const UnlockModal: Component<UnlockModalProps> = (props) => {
             <button
               type="button"
               class={clsx(
-                "w-full h-10 px-4 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 active:scale-[0.985]",
+                "w-full h-10 min-h-[40px] px-4 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 active:scale-[0.985]",
                 "text-white text-xs font-semibold tracking-tight shadow-lg shadow-blue-500/25 border border-blue-400/35 transition-all",
                 "flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-45 disabled:pointer-events-none disabled:shadow-none"
               )}
@@ -326,7 +326,7 @@ export const UnlockModal: Component<UnlockModalProps> = (props) => {
                 <button
                   type="button"
                   class={clsx(
-                    "w-full h-[34px] px-2.5 rounded-lg bg-slate-800/65 hover:bg-slate-700/85 border border-white/15 hover:border-white/25",
+                    "w-full h-9 min-h-[36px] px-2.5 rounded-lg bg-slate-800/65 hover:bg-slate-700/85 border border-white/15 hover:border-white/25",
                     "text-slate-200 text-xs font-medium cursor-pointer transition-all flex items-center justify-center gap-1.5 whitespace-nowrap",
                     "shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] disabled:opacity-45 disabled:pointer-events-none"
                   )}
@@ -341,7 +341,7 @@ export const UnlockModal: Component<UnlockModalProps> = (props) => {
                 <button
                   type="button"
                   class={clsx(
-                    "w-full h-[34px] px-2.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/25 hover:border-red-500/50",
+                    "w-full h-9 min-h-[36px] px-2.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/25 hover:border-red-500/50",
                     "text-red-400 text-xs font-medium cursor-pointer transition-all flex items-center justify-center gap-1.5 whitespace-nowrap",
                     "disabled:opacity-45 disabled:pointer-events-none"
                   )}

@@ -71,13 +71,13 @@ export const RecoveryModal: Component<RecoveryModalProps> = (props) => {
           class={clsx(
             "my-auto w-full max-w-[400px] max-h-[calc(100vh-16px)] min-h-0",
             "flex flex-col items-center overflow-y-auto overflow-x-hidden box-border",
-            "bg-slate-900/95 border border-white/15 rounded-xl shadow-2xl shadow-black/80 p-4 sm:p-5 relative",
+            "bg-slate-900/95 border border-white/15 rounded-2xl shadow-2xl shadow-black/80 p-5 sm:p-6 relative",
             "animate-[cardPop_0.22s_cubic-bezier(0.16,1,0.3,1)] transition-all",
             isSuccess() && "border-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.35)]"
           )}
           onClick={(e) => e.stopPropagation()}
         >
-          <div class={clsx("inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold tracking-wide uppercase bg-amber-500/15 border border-amber-500/30 text-amber-400 mb-2")}>
+          <div class={clsx("inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold tracking-wide uppercase bg-amber-500/15 border border-amber-500/30 text-amber-400 mb-2")}>
             <ShieldAlert size={13} />
             <span>Recovery</span>
           </div>
@@ -113,8 +113,8 @@ export const RecoveryModal: Component<RecoveryModalProps> = (props) => {
               </div>
               <textarea
                 class={clsx(
-                  "w-full p-2.5 rounded-lg bg-slate-950/70 border border-white/15 hover:border-white/25 focus:border-blue-500 focus:outline-none",
-                  "text-xs font-mono text-zinc-100 placeholder:text-zinc-500 min-h-[75px] resize-y transition-colors"
+                  "w-full p-3 rounded-lg bg-slate-950/70 border border-white/15 hover:border-white/25 focus:border-blue-500 focus:outline-none",
+                  "text-xs font-mono text-zinc-100 placeholder:text-zinc-500 min-h-[85px] resize-y transition-colors"
                 )}
                 rows={3}
                 placeholder="Enter 12 words separated by spaces..."
@@ -130,7 +130,7 @@ export const RecoveryModal: Component<RecoveryModalProps> = (props) => {
                 <input
                   type="password"
                   class={clsx(
-                    "w-full h-9 px-3 rounded-lg bg-slate-950/70 border border-white/15 hover:border-white/25 focus:border-blue-500 focus:outline-none",
+                    "w-full h-10 min-h-[40px] px-3 rounded-lg bg-slate-950/70 border border-white/15 hover:border-white/25 focus:border-blue-500 focus:outline-none",
                     "text-xs text-zinc-100 placeholder:text-zinc-500 tracking-widest text-center transition-colors"
                   )}
                   maxLength={8}
@@ -146,7 +146,7 @@ export const RecoveryModal: Component<RecoveryModalProps> = (props) => {
                 <input
                   type="password"
                   class={clsx(
-                    "w-full h-9 px-3 rounded-lg bg-slate-950/70 border border-white/15 hover:border-white/25 focus:border-blue-500 focus:outline-none",
+                    "w-full h-10 min-h-[40px] px-3 rounded-lg bg-slate-950/70 border border-white/15 hover:border-white/25 focus:border-blue-500 focus:outline-none",
                     "text-xs text-zinc-100 placeholder:text-zinc-500 tracking-widest text-center transition-colors"
                   )}
                   maxLength={8}
@@ -162,7 +162,7 @@ export const RecoveryModal: Component<RecoveryModalProps> = (props) => {
               <button
                 type="button"
                 class={clsx(
-                  "w-full h-10 px-3 rounded-lg bg-slate-800/65 hover:bg-slate-700/85 border border-white/15 hover:border-white/25",
+                  "w-full h-10 min-h-[40px] px-3 rounded-lg bg-slate-800/65 hover:bg-slate-700/85 border border-white/15 hover:border-white/25",
                   "text-slate-200 text-xs font-semibold cursor-pointer transition-all flex items-center justify-center disabled:opacity-45 disabled:pointer-events-none"
                 )}
                 onClick={props.onClose}
@@ -173,7 +173,7 @@ export const RecoveryModal: Component<RecoveryModalProps> = (props) => {
               <button
                 type="submit"
                 class={clsx(
-                  "w-full h-10 px-3 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 active:scale-[0.985]",
+                  "w-full h-10 min-h-[40px] px-3 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 active:scale-[0.985]",
                   "text-white text-xs font-semibold tracking-tight shadow-lg shadow-blue-500/25 border border-blue-400/35 transition-all",
                   "flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-45 disabled:pointer-events-none disabled:shadow-none"
                 )}
