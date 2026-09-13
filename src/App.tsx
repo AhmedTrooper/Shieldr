@@ -1,4 +1,5 @@
 import { Component, createSignal, onCleanup, onMount, Show } from "solid-js";
+import { clsx } from "clsx";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import { ShieldProperties, ShieldStatus } from "./types";
 import { tauriBridge } from "./services/tauriBridge";
@@ -180,9 +181,12 @@ const App: Component = () => {
 
   return (
     <main
-      class={`app-container ${
-        status().is_locked ? "locked-view" : "unlocked-view"
-      }`}
+      class={clsx(
+        "w-full h-full relative flex flex-col overflow-hidden",
+        status().is_locked
+          ? "!bg-transparent"
+          : "bg-slate-950 bg-[radial-gradient(circle_at_15%_15%,rgba(59,130,246,0.12)_0%,transparent_45%),radial-gradient(circle_at_85%_85%,rgba(16,185,129,0.08)_0%,transparent_45%),radial-gradient(circle_at_50%_50%,rgba(99,102,241,0.06)_0%,transparent_60%)]"
+      )}
     >
       {/* Frameless Custom Titlebar (Shown when Unlocked) */}
       <Show when={!status().is_locked}>

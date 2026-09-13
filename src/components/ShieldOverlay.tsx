@@ -1,4 +1,5 @@
 import { Component, createSignal, For, onCleanup, onMount } from "solid-js";
+import { clsx } from "clsx";
 import { sound } from "../services/sound";
 
 interface Ripple {
@@ -68,7 +69,7 @@ export const ShieldOverlay: Component<ShieldOverlayProps> = (props) => {
 
   return (
     <div
-      class="shield-fullscreen-blocker"
+      class={clsx("fixed inset-0 w-screen h-screen z-[999] cursor-default touch-none pointer-events-auto overflow-hidden")}
       style={{
         "background-color": `rgba(0, 0, 0, ${props.opacity})`,
         "backdrop-filter": props.blur > 0 ? `blur(${props.blur}px)` : "none",
@@ -80,7 +81,11 @@ export const ShieldOverlay: Component<ShieldOverlayProps> = (props) => {
       <For each={ripples()}>
         {(ripple) => (
           <span
-            class="touch-block-ripple"
+            class={clsx(
+              "absolute w-[100px] h-[100px] rounded-full -translate-x-1/2 -translate-y-1/2 scale-0",
+              "bg-[radial-gradient(circle,rgba(255,255,255,0.4)_0%,rgba(255,255,255,0)_70%)]",
+              "animate-[rippleExpand_0.7s_cubic-bezier(0.1,0.8,0.3,1)_forwards] pointer-events-none"
+            )}
             style={{
               left: `${ripple.x}px`,
               top: `${ripple.y}px`,

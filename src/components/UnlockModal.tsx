@@ -1,4 +1,6 @@
 import { Component, createSignal, For, onCleanup, onMount, Show } from "solid-js";
+import { clsx } from "clsx";
+import { AlertTriangle, Delete, X } from "lucide-solid";
 import { sound } from "../services/sound";
 import { Tooltip } from "./ui/tooltip";
 
@@ -105,29 +107,42 @@ export const UnlockModal: Component<UnlockModalProps> = (props) => {
 
   return (
     <Show when={props.isOpen}>
-      <div class="modal-backdrop" onClick={props.onDismiss}>
+      <div
+        class={clsx(
+          "fixed inset-0 w-full h-full bg-black/80 backdrop-blur-md z-[1100]",
+          "flex justify-center items-start overflow-y-auto overflow-x-hidden p-2 sm:p-4 box-border animate-[fadeIn_0.2s_ease-out]"
+        )}
+        onClick={props.onDismiss}
+      >
         <div
-          class={`unlock-card ${isShaking() ? "shake-card" : ""} ${
-            isSuccess() ? "success-card" : ""
-          }`}
+          class={clsx(
+            "my-auto w-full max-w-[360px] max-h-[calc(100vh-16px)] min-h-0",
+            "flex flex-col items-center overflow-y-auto overflow-x-hidden box-border",
+            "bg-slate-900/95 border border-white/15 rounded-xl shadow-2xl shadow-black/80 p-3.5 sm:p-4 relative",
+            "animate-[cardPop_0.22s_cubic-bezier(0.16,1,0.3,1)] transition-all",
+            isShaking() && "animate-[shakeElastic_0.45s_cubic-bezier(0.36,0.07,0.19,0.97)_both] border-red-500/80",
+            isSuccess() && "border-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.35)]"
+          )}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header Icon with SVG shackle animation */}
-          <div class="unlock-icon-wrap">
+          <div class={clsx("mb-2 flex items-center justify-center")}>
             <svg
-              class={`modal-padlock-svg ${isSuccess() ? "shackle-open" : "shackle-closed"}`}
+              class={clsx("w-9 h-9 text-zinc-300 transition-all duration-350")}
               viewBox="0 0 48 48"
               fill="none"
             >
               <path
-                class="shackle"
+                class={clsx(
+                  "transition-all duration-350 ease-out origin-[16px_22px]",
+                  isSuccess() ? "-translate-y-2 rotate-[15deg] text-emerald-400" : "text-zinc-300"
+                )}
                 d="M16 22V14C16 9.58172 19.5817 6 24 6C28.4183 6 32 9.58172 32 14V22"
                 stroke="currentColor"
                 stroke-width="4.5"
                 stroke-linecap="round"
               />
               <rect
-                class="body"
                 x="10"
                 y="20"
                 width="28"
@@ -148,10 +163,10 @@ export const UnlockModal: Component<UnlockModalProps> = (props) => {
             </svg>
           </div>
 
-          <h2 class="unlock-title">
+          <h2 class={clsx("text-base font-bold text-zinc-100 mb-0.5 text-center tracking-tight")}>
             {isSuccess() ? "Unlocked" : "Enter PIN"}
           </h2>
-          <p class="unlock-subtitle">
+          <p class={clsx("text-[11px] text-zinc-400 mb-2.5 text-center leading-normal")}>
             {isSuccess()
               ? "Restoring access..."
               : "Screen protection is active."}
@@ -159,13 +174,13 @@ export const UnlockModal: Component<UnlockModalProps> = (props) => {
 
           {/* Lockout banner */}
           <Show when={props.isLockedOut}>
-            <div class="lockout-alert">
-              <span class="alert-icon">⚠️</span>
+            <div class={clsx("w-full flex items-center gap-2.5 bg-red-500/15 border border-red-500/35 rounded-lg p-2.5 mb-2.5 text-red-300 text-xs")}>
+              <AlertTriangle size={18} class={clsx("text-amber-400 shrink-0")} />
               <div>
                 <strong>Locked Out</strong>
                 <p>
                   Too many attempts. Wait{" "}
-                  <span class="countdown-highlight">
+                  <span class={clsx("font-bold text-white")}>
                     {props.lockoutRemainingSecs ?? 30}s
                   </span>
                 </p>
@@ -175,31 +190,40 @@ export const UnlockModal: Component<UnlockModalProps> = (props) => {
 
           {/* Error Message */}
           <Show when={errorMessage() && !props.isLockedOut}>
-            <div class="error-banner">{errorMessage()}</div>
+            <div class={clsx("w-full bg-red-500/15 border border-red-500/30 text-red-300 py-1.5 px-2.5 rounded-lg text-xs mb-2.5 text-center")}>
+              {errorMessage()}
+            </div>
           </Show>
 
           {/* Standard PIN Mode */}
           <Show when={!useMasterPassword()}>
             {/* PIN Dots Display */}
-            <div class="pin-dots-container">
+            <div class={clsx("flex justify-center items-center gap-2.5 mb-3")}>
               <For each={[0, 1, 2, 3]}>
                 {(idx) => (
                   <div
-                    class={`pin-dot ${
-                      pin().length > idx ? "filled" : ""
-                    } ${pin().length === idx ? "active" : ""}`}
+                    class={clsx(
+                      "w-2.5 h-2.5 rounded-full border border-white/30 bg-transparent transition-all duration-180",
+                      pin().length > idx && "bg-blue-500 border-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.6)] scale-115",
+                      pin().length === idx && "border-white"
+                    )}
                   />
                 )}
               </For>
             </div>
 
             {/* Virtual Numpad */}
-            <div class="numpad-grid">
+            <div class={clsx("grid grid-cols-3 gap-1.5 w-full max-w-[250px] mb-2.5")}>
               <For each={["1", "2", "3", "4", "5", "6", "7", "8", "9"]}>
                 {(num) => (
                   <button
                     type="button"
-                    class="numpad-key"
+                    class={clsx(
+                      "h-9 rounded-md bg-white/[0.06] hover:bg-white/[0.14] active:bg-blue-600 active:scale-95",
+                      "border border-white/10 hover:border-white/20 text-zinc-100 text-base font-semibold cursor-pointer",
+                      "flex items-center justify-center shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] transition-all",
+                      "disabled:opacity-40 disabled:pointer-events-none"
+                    )}
                     disabled={props.isLockedOut || isSubmitting()}
                     onClick={() => handleDigit(num)}
                   >
@@ -210,7 +234,12 @@ export const UnlockModal: Component<UnlockModalProps> = (props) => {
               <Tooltip content="Clear entered digits" placement="bottom">
                 <button
                   type="button"
-                  class="numpad-key fn-key"
+                  class={clsx(
+                    "h-9 rounded-md bg-white/[0.06] hover:bg-white/[0.14] active:bg-blue-600 active:scale-95",
+                    "border border-white/10 hover:border-white/20 text-xs font-semibold text-zinc-400 cursor-pointer",
+                    "flex items-center justify-center shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] transition-all",
+                    "disabled:opacity-40 disabled:pointer-events-none"
+                  )}
                   disabled={props.isLockedOut || isSubmitting() || pin().length === 0}
                   onClick={handleClear}
                   aria-label="Clear PIN"
@@ -220,7 +249,12 @@ export const UnlockModal: Component<UnlockModalProps> = (props) => {
               </Tooltip>
               <button
                 type="button"
-                class="numpad-key"
+                class={clsx(
+                  "h-9 rounded-md bg-white/[0.06] hover:bg-white/[0.14] active:bg-blue-600 active:scale-95",
+                  "border border-white/10 hover:border-white/20 text-zinc-100 text-base font-semibold cursor-pointer",
+                  "flex items-center justify-center shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] transition-all",
+                  "disabled:opacity-40 disabled:pointer-events-none"
+                )}
                 disabled={props.isLockedOut || isSubmitting()}
                 onClick={() => handleDigit("0")}
                 aria-label="0"
@@ -230,12 +264,17 @@ export const UnlockModal: Component<UnlockModalProps> = (props) => {
               <Tooltip content="Backspace (delete last digit)" placement="bottom">
                 <button
                   type="button"
-                  class="numpad-key fn-key"
+                  class={clsx(
+                    "h-9 rounded-md bg-white/[0.06] hover:bg-white/[0.14] active:bg-blue-600 active:scale-95",
+                    "border border-white/10 hover:border-white/20 text-zinc-400 cursor-pointer",
+                    "flex items-center justify-center shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] transition-all",
+                    "disabled:opacity-40 disabled:pointer-events-none"
+                  )}
                   disabled={props.isLockedOut || isSubmitting() || pin().length === 0}
                   onClick={handleBackspace}
                   aria-label="Backspace"
                 >
-                  ⌫
+                  <Delete size={16} />
                 </button>
               </Tooltip>
             </div>
@@ -243,10 +282,13 @@ export const UnlockModal: Component<UnlockModalProps> = (props) => {
 
           {/* Master Password Mode */}
           <Show when={useMasterPassword()}>
-            <div class="master-pass-wrap">
+            <div class={clsx("w-full mb-2.5")}>
               <input
                 type="password"
-                class="master-input"
+                class={clsx(
+                  "w-full h-10 px-3 rounded-lg bg-slate-950/70 border border-white/15",
+                  "focus:border-blue-500 focus:outline-none text-xs text-zinc-100 placeholder:text-zinc-500 transition-colors"
+                )}
                 placeholder="Enter Master Password..."
                 value={password()}
                 onInput={(e) => {
@@ -260,10 +302,14 @@ export const UnlockModal: Component<UnlockModalProps> = (props) => {
           </Show>
 
           {/* Primary Unlock Buttons */}
-          <div class="action-buttons-stack">
+          <div class={clsx("w-full flex flex-col gap-1.5")}>
             <button
               type="button"
-              class="primary-unlock-btn"
+              class={clsx(
+                "w-full h-10 px-4 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 active:scale-[0.985]",
+                "text-white text-xs font-semibold tracking-tight shadow-lg shadow-blue-500/25 border border-blue-400/35 transition-all",
+                "flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-45 disabled:pointer-events-none disabled:shadow-none"
+              )}
               disabled={
                 props.isLockedOut ||
                 isSubmitting() ||
@@ -275,11 +321,15 @@ export const UnlockModal: Component<UnlockModalProps> = (props) => {
               {isSubmitting() ? "Verifying..." : "Unlock"}
             </button>
 
-            <div class="secondary-actions-row">
+            <div class={clsx("grid grid-cols-2 gap-1.5 w-full")}>
               <Tooltip content="Unlock and hide to tray" placement="top">
                 <button
                   type="button"
-                  class="action-pill-btn"
+                  class={clsx(
+                    "w-full h-[34px] px-2.5 rounded-lg bg-slate-800/65 hover:bg-slate-700/85 border border-white/15 hover:border-white/25",
+                    "text-slate-200 text-xs font-medium cursor-pointer transition-all flex items-center justify-center gap-1.5 whitespace-nowrap",
+                    "shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] disabled:opacity-45 disabled:pointer-events-none"
+                  )}
                   disabled={props.isLockedOut || isSubmitting()}
                   onClick={() => submitUnlock("hide")}
                   aria-label="Hide to Tray"
@@ -290,7 +340,11 @@ export const UnlockModal: Component<UnlockModalProps> = (props) => {
               <Tooltip content="Unlock and quit application" placement="top">
                 <button
                   type="button"
-                  class="action-pill-btn danger-pill"
+                  class={clsx(
+                    "w-full h-[34px] px-2.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/25 hover:border-red-500/50",
+                    "text-red-400 text-xs font-medium cursor-pointer transition-all flex items-center justify-center gap-1.5 whitespace-nowrap",
+                    "disabled:opacity-45 disabled:pointer-events-none"
+                  )}
                   disabled={props.isLockedOut || isSubmitting()}
                   onClick={() => submitUnlock("close")}
                   aria-label="Quit Application"
@@ -302,10 +356,10 @@ export const UnlockModal: Component<UnlockModalProps> = (props) => {
           </div>
 
           {/* Bottom Links */}
-          <div class="modal-footer-links">
+          <div class={clsx("flex items-center justify-center gap-1.5 mt-2 flex-wrap text-xs")}>
             <button
               type="button"
-              class="text-link"
+              class={clsx("bg-transparent border-none text-zinc-400 hover:text-zinc-200 text-xs cursor-pointer transition-colors hover:underline")}
               onClick={() => {
                 setUseMasterPassword(!useMasterPassword());
                 setErrorMessage(null);
@@ -313,10 +367,10 @@ export const UnlockModal: Component<UnlockModalProps> = (props) => {
             >
               {useMasterPassword() ? "Use PIN" : "Use Master Password"}
             </button>
-            <span class="link-divider">•</span>
+            <span class={clsx("text-zinc-600 text-[9px]")}>•</span>
             <button
               type="button"
-              class="text-link accent"
+              class={clsx("bg-transparent border-none text-zinc-300 hover:text-white text-xs font-medium cursor-pointer transition-colors hover:underline")}
               onClick={props.onRequestRecovery}
             >
               Forgot PIN?
@@ -326,11 +380,12 @@ export const UnlockModal: Component<UnlockModalProps> = (props) => {
           <Tooltip content="Dismiss modal" placement="top">
             <button
               type="button"
-              class="dismiss-shield-btn"
+              class={clsx("mt-1.5 bg-transparent border-none text-zinc-500 hover:text-zinc-300 text-xs cursor-pointer transition-colors inline-flex items-center gap-1")}
               onClick={props.onDismiss}
               aria-label="Keep Locked"
             >
-              ✕ Dismiss
+              <X size={12} />
+              <span>Dismiss</span>
             </button>
           </Tooltip>
         </div>

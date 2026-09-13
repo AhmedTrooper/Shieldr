@@ -165,7 +165,7 @@ export const Tooltip: Component<TooltipProps> = (props) => {
             local.contentClass
           )}
         >
-          <KobalteTooltip.Arrow class="shieldr-tooltip-arrow" />
+          <KobalteTooltip.Arrow class={clsx("shieldr-tooltip-arrow fill-slate-900/98 stroke-slate-700/60")} />
           {local.content}
         </KobalteTooltip.Content>
       </KobalteTooltip.Portal>

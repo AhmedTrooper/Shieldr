@@ -1,4 +1,5 @@
 import { Component } from "solid-js";
+import { clsx } from "clsx";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { SiGithub, SiYoutube } from "solid-icons/si";
 import { RefreshCw, Shield } from "lucide-solid";
@@ -51,13 +52,22 @@ export const TitleBar: Component<TitleBarProps> = (props) => {
   };
 
   return (
-    <header class="custom-titlebar" data-tauri-drag-region>
-      <div class="titlebar-left" data-tauri-drag-region>
-        <div class="window-controls">
+    <header
+      class={clsx(
+        "h-[42px] min-h-[42px] flex items-center justify-between px-3",
+        "bg-slate-950/80 backdrop-blur-xl border-b border-white/10 select-none relative z-50 transition-all"
+      )}
+      data-tauri-drag-region
+    >
+      <div class={clsx("flex items-center gap-3 min-w-0")} data-tauri-drag-region>
+        <div class={clsx("flex items-center gap-1.5 pr-1")}>
           <Tooltip content="Close to tray" placement="bottom-start">
             <button
               type="button"
-              class="win-btn win-close"
+              class={clsx(
+                "w-3 h-3 rounded-full border-none cursor-pointer p-0 flex items-center justify-center transition-all",
+                "bg-[#ff5f56] shadow-[0_0_6px_rgba(255,95,86,0.6),inset_0_1px_0_rgba(255,255,255,0.35)] hover:scale-115 hover:brightness-125"
+              )}
               aria-label="Close Window"
               onClick={handleClose}
             />
@@ -65,61 +75,85 @@ export const TitleBar: Component<TitleBarProps> = (props) => {
           <Tooltip content="Minimize" placement="bottom">
             <button
               type="button"
-              class="win-btn win-minimize"
+              class={clsx(
+                "w-3 h-3 rounded-full border-none cursor-pointer p-0 flex items-center justify-center transition-all",
+                "bg-[#ffbd2e] shadow-[0_0_6px_rgba(255,189,46,0.6),inset_0_1px_0_rgba(255,255,255,0.35)] hover:scale-115 hover:brightness-125"
+              )}
               aria-label="Minimize Window"
               onClick={handleMinimize}
             />
           </Tooltip>
         </div>
-        <div class="app-brand" data-tauri-drag-region>
-          <Shield size={16} class="text-zinc-200 brand-icon" />
-          <span class="brand-title">Shieldr</span>
-          <span class="brand-pill">{props.isLocked ? "Armed" : "Ready"}</span>
+        <div class={clsx("flex items-center gap-1.5")} data-tauri-drag-region>
+          <Shield size={16} class={clsx("text-blue-400 shrink-0")} />
+          <span class={clsx("text-[13.5px] font-bold text-slate-200 tracking-tight")}>Shieldr</span>
+          <span
+            class={clsx(
+              "text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full border",
+              props.isLocked
+                ? "bg-amber-500/15 text-amber-400 border-amber-500/30"
+                : "bg-blue-500/15 text-blue-400 border-blue-500/25"
+            )}
+          >
+            {props.isLocked ? "Armed" : "Ready"}
+          </span>
         </div>
       </div>
 
-      <div class="titlebar-center" data-tauri-drag-region>
-        <span class="title-subtext">Screen Protection</span>
+      <div class={clsx("hidden sm:block text-xs text-slate-400 font-medium tracking-tight whitespace-nowrap overflow-hidden text-ellipsis")} data-tauri-drag-region>
+        <span>Screen Protection</span>
       </div>
 
-      <div class="titlebar-right" data-tauri-drag-region>
-        <div class="titlebar-actions">
+      <div class={clsx("hidden sm:flex items-center shrink-0 gap-2")} data-tauri-drag-region>
+        <div class={clsx("flex items-center gap-1 mr-1")}>
           <Tooltip content="Check for updates" placement="bottom">
             <button
               type="button"
-              class="titlebar-icon-btn"
+              class={clsx(
+                "inline-flex items-center justify-center w-6 h-6 rounded border border-transparent hover:border-white/15",
+                "bg-transparent hover:bg-white/[0.08] text-slate-400 hover:text-slate-100 cursor-pointer transition-all",
+                "disabled:opacity-40 disabled:pointer-events-none"
+              )}
               aria-label="Check for Updates"
               onClick={handleCheckUpdate}
               disabled={updaterService.state().isChecking}
             >
               <RefreshCw
-                size={15}
-                class={updaterService.state().isChecking ? "spin-animation text-zinc-300" : ""}
+                size={14}
+                class={clsx(updaterService.state().isChecking && "animate-spin text-zinc-300")}
               />
             </button>
           </Tooltip>
           <Tooltip content="GitHub" placement="bottom">
             <button
               type="button"
-              class="titlebar-icon-btn"
+              class={clsx(
+                "inline-flex items-center justify-center w-6 h-6 rounded border border-transparent hover:border-white/15",
+                "bg-transparent hover:bg-white/[0.08] text-slate-400 hover:text-slate-100 cursor-pointer transition-all"
+              )}
               aria-label="GitHub Repository"
               onClick={handleOpenGithub}
             >
-              <SiGithub size={15} />
+              <SiGithub size={14} />
             </button>
           </Tooltip>
           <Tooltip content="YouTube" placement="bottom-end">
             <button
               type="button"
-              class="titlebar-icon-btn"
+              class={clsx(
+                "inline-flex items-center justify-center w-6 h-6 rounded border border-transparent hover:border-white/15",
+                "bg-transparent hover:bg-white/[0.08] text-slate-400 hover:text-slate-100 cursor-pointer transition-all"
+              )}
               aria-label="YouTube Channel"
               onClick={handleOpenYoutube}
             >
-              <SiYoutube size={15} />
+              <SiYoutube size={14} />
             </button>
           </Tooltip>
         </div>
-        <span class="security-chip">Encrypted</span>
+        <span class={clsx("text-[9.5px] font-semibold text-slate-400 bg-white/[0.05] px-2 py-0.5 rounded border border-white/10 whitespace-nowrap")}>
+          Encrypted
+        </span>
       </div>
     </header>
   );

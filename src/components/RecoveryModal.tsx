@@ -1,4 +1,6 @@
 import { Component, createSignal, Show } from "solid-js";
+import { clsx } from "clsx";
+import { KeyRound, ShieldAlert } from "lucide-solid";
 import { sound } from "../services/sound";
 import { RecoveryPhraseResetSchema } from "../schemas";
 
@@ -58,32 +60,62 @@ export const RecoveryModal: Component<RecoveryModalProps> = (props) => {
 
   return (
     <Show when={props.isOpen}>
-      <div class="modal-backdrop" onClick={props.onClose}>
-        <div class="recovery-card" onClick={(e) => e.stopPropagation()}>
-          <div class="recovery-badge">Recovery</div>
-          <h2 class="modal-heading">Reset PIN</h2>
-          <p class="modal-description">
+      <div
+        class={clsx(
+          "fixed inset-0 w-full h-full bg-black/80 backdrop-blur-md z-[1100]",
+          "flex justify-center items-start overflow-y-auto overflow-x-hidden p-2 sm:p-4 box-border animate-[fadeIn_0.2s_ease-out]"
+        )}
+        onClick={props.onClose}
+      >
+        <div
+          class={clsx(
+            "my-auto w-full max-w-[400px] max-h-[calc(100vh-16px)] min-h-0",
+            "flex flex-col items-center overflow-y-auto overflow-x-hidden box-border",
+            "bg-slate-900/95 border border-white/15 rounded-xl shadow-2xl shadow-black/80 p-4 sm:p-5 relative",
+            "animate-[cardPop_0.22s_cubic-bezier(0.16,1,0.3,1)] transition-all",
+            isSuccess() && "border-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.35)]"
+          )}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div class={clsx("inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold tracking-wide uppercase bg-amber-500/15 border border-amber-500/30 text-amber-400 mb-2")}>
+            <ShieldAlert size={13} />
+            <span>Recovery</span>
+          </div>
+          <h2 class={clsx("text-base font-bold text-zinc-100 mb-0.5 text-center tracking-tight")}>Reset PIN</h2>
+          <p class={clsx("text-xs text-zinc-400 mb-3 text-center leading-relaxed")}>
             Enter your 12-word recovery phrase to set a new PIN.
           </p>
 
           <Show when={errorMsg()}>
-            <div class="error-banner">{errorMsg()}</div>
+            <div class={clsx("w-full bg-red-500/15 border border-red-500/30 text-red-300 py-2 px-3 rounded-lg text-xs mb-3 text-center")}>
+              {errorMsg()}
+            </div>
           </Show>
 
           <Show when={isSuccess()}>
-            <div class="success-banner">✓ PIN reset! Restoring access...</div>
+            <div class={clsx("w-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 py-2 px-3 rounded-lg text-xs mb-3 text-center font-medium")}>
+              ✓ PIN reset! Restoring access...
+            </div>
           </Show>
 
-          <form onSubmit={handleReset} class="recovery-form">
-            <div class="form-group">
-              <div class="label-row">
-                <label>12-Word Recovery Phrase</label>
-                <span class={`word-counter ${wordCount() === 12 ? "valid" : ""}`}>
+          <form onSubmit={handleReset} class={clsx("w-full flex flex-col gap-3")}>
+            <div class={clsx("flex flex-col gap-1.5")}>
+              <div class={clsx("flex items-center justify-between")}>
+                <label class={clsx("text-xs font-semibold text-slate-200")}>12-Word Recovery Phrase</label>
+                <span
+                  class={clsx(
+                    "text-[11px] font-semibold px-2 py-0.5 rounded-full bg-white/[0.06] text-zinc-400 border border-white/10 transition-colors",
+                    wordCount() === 12 && "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
+                  )}
+                >
                   {wordCount()}/12 words
                 </span>
               </div>
               <textarea
-                class="recovery-textarea"
+                class={clsx(
+                  "w-full p-2.5 rounded-lg bg-slate-950/70 border border-white/15 hover:border-white/25 focus:border-blue-500 focus:outline-none",
+                  "text-xs font-mono text-zinc-100 placeholder:text-zinc-500 min-h-[75px] resize-y transition-colors"
+                )}
                 rows={3}
                 placeholder="Enter 12 words separated by spaces..."
                 value={phraseInput()}
@@ -92,12 +124,15 @@ export const RecoveryModal: Component<RecoveryModalProps> = (props) => {
               />
             </div>
 
-            <div class="form-grid-2">
-              <div class="form-group">
-                <label>New PIN (4-8 digits)</label>
+            <div class={clsx("grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full")}>
+              <div class={clsx("flex flex-col gap-1.5")}>
+                <label class={clsx("text-xs font-semibold text-slate-200")}>New PIN (4-8 digits)</label>
                 <input
                   type="password"
-                  class="form-input"
+                  class={clsx(
+                    "w-full h-9 px-3 rounded-lg bg-slate-950/70 border border-white/15 hover:border-white/25 focus:border-blue-500 focus:outline-none",
+                    "text-xs text-zinc-100 placeholder:text-zinc-500 tracking-widest text-center transition-colors"
+                  )}
                   maxLength={8}
                   placeholder="••••"
                   value={newPin()}
@@ -106,11 +141,14 @@ export const RecoveryModal: Component<RecoveryModalProps> = (props) => {
                 />
               </div>
 
-              <div class="form-group">
-                <label>Confirm PIN</label>
+              <div class={clsx("flex flex-col gap-1.5")}>
+                <label class={clsx("text-xs font-semibold text-slate-200")}>Confirm PIN</label>
                 <input
                   type="password"
-                  class="form-input"
+                  class={clsx(
+                    "w-full h-9 px-3 rounded-lg bg-slate-950/70 border border-white/15 hover:border-white/25 focus:border-blue-500 focus:outline-none",
+                    "text-xs text-zinc-100 placeholder:text-zinc-500 tracking-widest text-center transition-colors"
+                  )}
                   maxLength={8}
                   placeholder="••••"
                   value={confirmPin()}
@@ -120,10 +158,13 @@ export const RecoveryModal: Component<RecoveryModalProps> = (props) => {
               </div>
             </div>
 
-            <div class="modal-actions-row">
+            <div class={clsx("grid grid-cols-2 gap-2 w-full mt-1")}>
               <button
                 type="button"
-                class="secondary-btn"
+                class={clsx(
+                  "w-full h-10 px-3 rounded-lg bg-slate-800/65 hover:bg-slate-700/85 border border-white/15 hover:border-white/25",
+                  "text-slate-200 text-xs font-semibold cursor-pointer transition-all flex items-center justify-center disabled:opacity-45 disabled:pointer-events-none"
+                )}
                 onClick={props.onClose}
                 disabled={isSubmitting()}
               >
@@ -131,10 +172,15 @@ export const RecoveryModal: Component<RecoveryModalProps> = (props) => {
               </button>
               <button
                 type="submit"
-                class="primary-btn"
+                class={clsx(
+                  "w-full h-10 px-3 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 active:scale-[0.985]",
+                  "text-white text-xs font-semibold tracking-tight shadow-lg shadow-blue-500/25 border border-blue-400/35 transition-all",
+                  "flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-45 disabled:pointer-events-none disabled:shadow-none"
+                )}
                 disabled={isSubmitting() || wordCount() !== 12 || newPin().length < 4}
               >
-                {isSubmitting() ? "Verifying..." : "Reset PIN & Unlock"}
+                <KeyRound size={14} />
+                <span>{isSubmitting() ? "Verifying..." : "Reset & Unlock"}</span>
               </button>
             </div>
           </form>
