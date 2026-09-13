@@ -230,7 +230,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
     <div class="dashboard-shell">
       {/* Tab Navigation */}
       <nav class="dashboard-tabs">
-        <Tooltip content="Control Center & Shield Arming" placement="bottom" class="tab-tooltip-item">
+        <Tooltip content="Control center" placement="bottom" class="tab-tooltip-item">
           <button
             type="button"
             class={`tab-btn ${activeTab() === "control" ? "active" : ""}`}
@@ -242,7 +242,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
             <span class="tab-label-short">Control</span>
           </button>
         </Tooltip>
-        <Tooltip content="Display, Overlay Tint & Blur Settings" placement="bottom" class="tab-tooltip-item">
+        <Tooltip content="Display & overlay" placement="bottom" class="tab-tooltip-item">
           <button
             type="button"
             class={`tab-btn ${activeTab() === "display" ? "active" : ""}`}
@@ -254,7 +254,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
             <span class="tab-label-short">Display</span>
           </button>
         </Tooltip>
-        <Tooltip content="Security PIN, Password & Recovery Phrase" placement="bottom" class="tab-tooltip-item">
+        <Tooltip content="Security & vault" placement="bottom" class="tab-tooltip-item">
           <button
             type="button"
             class={`tab-btn ${activeTab() === "security" ? "active" : ""}`}
@@ -266,7 +266,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
             <span class="tab-label-short">Security</span>
           </button>
         </Tooltip>
-        <Tooltip content="SQLite Security Audit Logs & History" placement="bottom" class="tab-tooltip-item">
+        <Tooltip content="Audit logs" placement="bottom" class="tab-tooltip-item">
           <button
             type="button"
             class={`tab-btn ${activeTab() === "audit" ? "active" : ""}`}
@@ -274,10 +274,10 @@ export const Dashboard: Component<DashboardProps> = (props) => {
               setActiveTab("audit");
               loadAuditLogs();
             }}
-            aria-label="SQLite Audit Log"
+            aria-label="Audit Log"
           >
             <FileText size={18} class="tab-icon" />
-            <span class="tab-label-full">SQLite Audit Log</span>
+            <span class="tab-label-full">Audit Log</span>
             <span class="tab-label-short">Audit</span>
           </button>
         </Tooltip>
@@ -293,18 +293,17 @@ export const Dashboard: Component<DashboardProps> = (props) => {
         >
           <div class="hero-card">
             <div class="hero-left">
-              <span class="status-indicator-pill">Ready to Guard</span>
-              <h1 class="hero-title">Shield Your Screen</h1>
+              <span class="status-indicator-pill">Ready</span>
+              <h1 class="hero-title">Screen Protection</h1>
               <p class="hero-description">
-                Locks all clicks, touches, and keyboard shortcuts behind a transparent barrier.
-                Videos, cartoons, presentations, or dashboards underneath continue playing unobstructed.
+                Blocks clicks, touches, and keystrokes while media continues playing.
               </p>
 
               <Show
                 when={countdown() !== null}
                 fallback={
                   <div class="lock-actions-cluster">
-                    <Tooltip content="Lock screen behind transparent child-proof touch guard" placement="top">
+                    <Tooltip content="Lock screen immediately" placement="top">
                       <button
                         type="button"
                         class="big-lock-btn"
@@ -315,7 +314,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                         <span>Lock Screen Now</span>
                       </button>
                     </Tooltip>
-                    <Tooltip content="3-second delay allows switching to your video or presentation" placement="top">
+                    <Tooltip content="Lock after 3-second delay" placement="top">
                       <button
                         type="button"
                         class="countdown-lock-btn"
@@ -332,9 +331,9 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                 <div class="countdown-active-box">
                   <div class="countdown-digits">{countdown()}</div>
                   <p class="countdown-hint">
-                    Switch to your video or app! Locking screen...
+                    Locking screen...
                   </p>
-                  <Tooltip content="Cancel 3-second arming countdown" placement="bottom">
+                  <Tooltip content="Cancel countdown" placement="bottom">
                     <button
                       type="button"
                       class="cancel-countdown-btn"
@@ -352,7 +351,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
               <div class="spec-card">
                 <div class="spec-item">
                   <span class="spec-label">Protection</span>
-                  <span class="spec-val">Clicks & Keystrokes Blocked</span>
+                  <span class="spec-val">Input Blocked</span>
                 </div>
                 <div class="spec-item">
                   <span class="spec-label">Overlay Layer</span>
@@ -361,12 +360,12 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                   </span>
                 </div>
                 <div class="spec-item">
-                  <span class="spec-label">Unlock Requirement</span>
-                  <span class="spec-val">4-8 Digit PIN or Master Pass</span>
+                  <span class="spec-label">Unlock Mode</span>
+                  <span class="spec-val">PIN or Password</span>
                 </div>
                 <div class="spec-item">
-                  <span class="spec-label">Vault Storage</span>
-                  <span class="spec-val text-accent">OS Keyring + Stronghold</span>
+                  <span class="spec-label">Vault</span>
+                  <span class="spec-val text-accent">OS Keyring</span>
                 </div>
               </div>
             </div>
@@ -378,13 +377,13 @@ export const Dashboard: Component<DashboardProps> = (props) => {
               <div class="updater-title-row">
                 <RefreshCw
                   size={18}
-                  class={`text-blue-400 ${updaterService.state().isChecking ? "spin-animation" : ""}`}
+                  class={`text-zinc-300 ${updaterService.state().isChecking ? "spin-animation" : ""}`}
                 />
                 <h3 class="updater-title">Software Updates</h3>
                 <span class="version-tag">v0.1.0</span>
               </div>
               <p class="updater-desc">
-                Shieldr automatically checks official signed GitHub releases with ed25519 signatures.
+                Checks official signed releases from GitHub.
               </p>
 
               <Show when={updaterService.state().updateAvailable && updaterService.state().updateInfo}>
@@ -429,7 +428,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
               >
                 <div class="up-to-date-row">
                   <CheckCircle2 size={14} class="text-emerald-400" />
-                  <span>Shieldr is running the latest version</span>
+                  <span>Latest version installed</span>
                 </div>
               </Show>
 
@@ -442,7 +441,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
             </div>
 
             <div class="updater-right">
-              <Tooltip content="Check GitHub for official latest releases" placement="top">
+              <Tooltip content="Check for updates" placement="top">
                 <button
                   type="button"
                   class="check-update-btn"
@@ -454,12 +453,12 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                     size={15}
                     class={updaterService.state().isChecking ? "spin-animation" : ""}
                   />
-                  <span>{updaterService.state().isChecking ? "Checking..." : "Check for Updates"}</span>
+                  <span>{updaterService.state().isChecking ? "Checking..." : "Check Updates"}</span>
                 </button>
               </Tooltip>
 
               <div class="community-links">
-                <Tooltip content="Open official Shieldr GitHub repository" placement="top">
+                <Tooltip content="GitHub repository" placement="top">
                   <button
                     type="button"
                     class="community-btn github-btn"
@@ -471,7 +470,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                     <ExternalLink size={12} class="opacity-60" />
                   </button>
                 </Tooltip>
-                <Tooltip content="Watch YouTube video tutorials and demos" placement="top">
+                <Tooltip content="YouTube tutorials" placement="top">
                   <button
                     type="button"
                     class="community-btn youtube-btn"
@@ -490,26 +489,23 @@ export const Dashboard: Component<DashboardProps> = (props) => {
           <div class="features-grid">
             <div class="feature-tile">
               <div class="tile-icon">👶</div>
-              <h3>Toddler & Pet Safe</h3>
+              <h3>Input Blocking</h3>
               <p>
-                All mouse clicks, taps, and drag gestures are intercepted. Pressing Escape, Alt+Tab,
-                or Super/Win keys is blocked.
+                Blocks mouse clicks, taps, drag gestures, and system hotkeys.
               </p>
             </div>
             <div class="feature-tile">
               <div class="tile-icon">🔒</div>
-              <h3>Password to Close</h3>
+              <h3>PIN Protected</h3>
               <p>
-                Neither toddlers nor unauthorized users can close or hide the fullscreen overlay
-                without entering the security PIN.
+                Requires your security PIN to dismiss, close, or minimize.
               </p>
             </div>
             <div class="feature-tile">
               <div class="tile-icon">⚡</div>
-              <h3>Minimal Lock Widget</h3>
+              <h3>Auto-Fade Widget</h3>
               <p>
-                Only a discreet lock icon is visible. It can auto-fade after a few seconds of
-                inactivity so your media is completely unobstructed.
+                Discreet padlock icon fades away during inactivity.
               </p>
             </div>
           </div>
@@ -527,8 +523,8 @@ export const Dashboard: Component<DashboardProps> = (props) => {
         >
           <div class="settings-card">
             <div class="card-header">
-              <h2>Overlay Transparency & Appearance</h2>
-              <p>Configure how transparent the screen guard is and customize the lock icon.</p>
+              <h2>Display & Overlay</h2>
+              <p>Configure transparency, blur, and lock icon behavior.</p>
             </div>
 
             <Show when={saveDisplayMsg()}>
@@ -537,10 +533,9 @@ export const Dashboard: Component<DashboardProps> = (props) => {
 
             <div class="setting-row">
               <div class="setting-info">
-                <label>Screen Transparency Tint</label>
+                <label>Overlay Tint</label>
                 <span>
-                  Lower = completely transparent. Higher = darker tinted frost (Current:{" "}
-                  {Math.round(opacity() * 100)}% tint)
+                  Darkness level of the transparent screen guard ({Math.round(opacity() * 100)}%)
                 </span>
               </div>
               <div class="setting-control slider-control">
@@ -558,9 +553,9 @@ export const Dashboard: Component<DashboardProps> = (props) => {
 
             <div class="setting-row">
               <div class="setting-info">
-                <label>Background Frost Blur</label>
+                <label>Background Blur</label>
                 <span>
-                  Frosted glass blur effect underneath the guard layer (Current: {blur()}px blur)
+                  Frosted glass blur effect ({blur()}px)
                 </span>
               </div>
               <div class="setting-control slider-control">
@@ -578,8 +573,8 @@ export const Dashboard: Component<DashboardProps> = (props) => {
 
             <div class="setting-row">
               <div class="setting-info">
-                <label>Emergency Unlock Padlock Position</label>
-                <span>Where the click-to-unlock floating padlock icon appears.</span>
+                <label>Unlock Icon Position</label>
+                <span>Placement of the click-to-unlock trigger</span>
               </div>
               <div class="setting-control">
                 <select
@@ -589,18 +584,18 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                     setPosition(e.currentTarget.value as ShieldProperties["lock_icon_position"])
                   }
                 >
-                  <option value="floating">Floating (Random subtle position)</option>
-                  <option value="center">Screen Center</option>
-                  <option value="top-right">Top-Right Corner</option>
-                  <option value="bottom-right">Bottom-Right Corner</option>
+                  <option value="floating">Floating</option>
+                  <option value="center">Center</option>
+                  <option value="top-right">Top Right</option>
+                  <option value="bottom-right">Bottom Right</option>
                 </select>
               </div>
             </div>
 
             <div class="setting-row">
               <div class="setting-info">
-                <label>Lock Icon Auto-Hide Timeout</label>
-                <span>Hides lock icon after mouse inactivity to preserve full immersion.</span>
+                <label>Auto-Hide Timeout</label>
+                <span>Hide lock icon after mouse inactivity</span>
               </div>
               <div class="setting-control">
                 <select
@@ -608,28 +603,28 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                   value={autohide()}
                   onChange={(e) => setAutohide(parseInt(e.currentTarget.value))}
                 >
-                  <option value="0">Never auto-hide (Always visible)</option>
-                  <option value="2">2 seconds of inactivity</option>
-                  <option value="3">3 seconds of inactivity</option>
-                  <option value="5">5 seconds of inactivity</option>
-                  <option value="10">10 seconds of inactivity</option>
+                  <option value="0">Never</option>
+                  <option value="2">2 seconds</option>
+                  <option value="3">3 seconds</option>
+                  <option value="5">5 seconds</option>
+                  <option value="10">10 seconds</option>
                 </select>
               </div>
             </div>
 
             <div class="setting-row">
               <div class="setting-info">
-                <label>Audio & Acoustic Feedback</label>
-                <span>Synthesizes WebAudio tones for keypad presses, arming, and unlocks.</span>
+                <label>Sound Feedback</label>
+                <span>Audio tones for keypad and unlock actions</span>
               </div>
               <div class="setting-control">
-                <Tooltip content={soundEnabled() ? "Sound feedback is active" : "Sound feedback is muted"} placement="left">
+                <Tooltip content={soundEnabled() ? "Sound enabled" : "Sound disabled"} placement="left">
                   <label class="toggle-switch">
                     <input
                       type="checkbox"
                       checked={soundEnabled()}
                       onChange={(e) => setSoundEnabled(e.currentTarget.checked)}
-                      aria-label="Audio & Acoustic Feedback"
+                      aria-label="Sound Feedback"
                     />
                     <span class="toggle-slider" />
                   </label>
@@ -639,19 +634,19 @@ export const Dashboard: Component<DashboardProps> = (props) => {
 
             <div class="setting-row">
               <div class="setting-info">
-                <label>Keep Screen & System Awake</label>
+                <label>Keep Awake</label>
                 <span>
-                  Prevents screen blanking, sleep timers, and OS standby while Shieldr is locked.
+                  Prevent sleep and display turn-off while locked
                 </span>
               </div>
               <div class="setting-control">
-                <Tooltip content={keepAwake() ? "Keep awake active (sleep prevented)" : "Keep awake OFF"} placement="left">
+                <Tooltip content={keepAwake() ? "Keep awake enabled" : "Keep awake disabled"} placement="left">
                   <label class="toggle-switch">
                     <input
                       type="checkbox"
                       checked={keepAwake()}
                       onChange={(e) => setKeepAwake(e.currentTarget.checked)}
-                      aria-label="Keep Screen & System Awake"
+                      aria-label="Keep Awake"
                     />
                     <span class="toggle-slider" />
                   </label>
@@ -660,14 +655,14 @@ export const Dashboard: Component<DashboardProps> = (props) => {
             </div>
 
             <div class="settings-actions">
-              <Tooltip content="Persist display & behavior settings into SQLite" placement="top">
+              <Tooltip content="Save display settings" placement="top">
                 <button
                   type="button"
                   class="primary-btn"
                   onClick={handleSaveDisplayProperties}
-                  aria-label="Save Display Settings"
+                  aria-label="Save Settings"
                 >
-                  Save Display Settings
+                  Save Settings
                 </button>
               </Tooltip>
             </div>
@@ -687,7 +682,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
             {/* Change PIN Card */}
             <div class="settings-card">
               <div class="card-header">
-                <h3>Change Security PIN</h3>
+                <h3>Change PIN</h3>
                 <p>Update your 4-8 digit quick-unlock code.</p>
               </div>
 
@@ -705,7 +700,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
 
               <form onSubmit={handleChangePin} class="compact-form">
                 <div class="form-group">
-                  <label>Current PIN or Master Password</label>
+                  <label>Current PIN or Password</label>
                   <input
                     type="password"
                     class="form-input"
@@ -735,7 +730,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
             <div class="settings-card">
               <div class="card-header">
                 <h3>Change Master Password</h3>
-                <p>Emergency alphanumeric key for password resets.</p>
+                <p>Emergency recovery password.</p>
               </div>
 
               <Show when={masterChangeMsg()}>
@@ -762,7 +757,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                   />
                 </div>
                 <div class="form-group">
-                  <label>New Master Password (6+ characters)</label>
+                  <label>New Master Password (6+ chars)</label>
                   <input
                     type="password"
                     class="form-input"
@@ -772,7 +767,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                   />
                 </div>
                 <button type="submit" class="secondary-btn">
-                  Update Master Password
+                  Update Password
                 </button>
               </form>
             </div>
@@ -781,9 +776,9 @@ export const Dashboard: Component<DashboardProps> = (props) => {
           {/* Backup Recovery Phrase Card */}
           <div class="settings-card full-width-card">
             <div class="card-header">
-              <h3>Backup 12-Word BIP-39 Recovery Phrase</h3>
+              <h3>12-Word Recovery Phrase</h3>
               <p>
-                To view your seed phrase, confirm your Master Password. Secrets are never stored in SQLite.
+                Enter your master password to view your backup phrase.
               </p>
             </div>
 
@@ -793,7 +788,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                   <input
                     type="password"
                     class="form-input"
-                    placeholder="Enter Master Password to reveal phrase..."
+                    placeholder="Enter Master Password..."
                     value={revealMasterPass()}
                     onInput={(e) => setRevealMasterPass(e.currentTarget.value)}
                     required
@@ -801,7 +796,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                 </div>
                 <button type="submit" class="primary-btn">
                   <KeyRound size={15} />
-                  <span>Reveal Recovery Phrase</span>
+                  <span>Reveal Phrase</span>
                 </button>
               </form>
               <Show when={revealMsg()}>
@@ -821,7 +816,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                     )}
                   </For>
                 </div>
-                <Tooltip content={copiedPhrase() ? "Copied 12 words to clipboard!" : "Copy 12-word recovery phrase"} placement="top">
+                <Tooltip content={copiedPhrase() ? "Copied to clipboard" : "Copy 12-word phrase"} placement="top">
                   <button
                     type="button"
                     class="copy-phrase-btn"
@@ -839,7 +834,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                     aria-label="Copy Recovery Phrase"
                   >
                     {copiedPhrase() ? <Check size={16} class="text-emerald-400" /> : <Copy size={16} />}
-                    <span>{copiedPhrase() ? "Copied to Clipboard!" : "Copy 12 Words"}</span>
+                    <span>{copiedPhrase() ? "Copied!" : "Copy 12 Words"}</span>
                   </button>
                 </Tooltip>
               </div>
@@ -859,13 +854,12 @@ export const Dashboard: Component<DashboardProps> = (props) => {
           <div class="settings-card">
             <div class="card-header flex-between">
               <div>
-                <h2>SQLite Security & Audit Logs</h2>
+                <h2>Audit Log</h2>
                 <p>
-                  Demonstrating zero-knowledge property separation: SQLite stores only event logs
-                  and properties, never secret values!
+                  Security events and access history.
                 </p>
               </div>
-              <Tooltip content="Query SQLite database for latest events" placement="left">
+              <Tooltip content="Refresh audit log" placement="left">
                 <button
                   type="button"
                   class="refresh-btn"
@@ -874,7 +868,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                   aria-label="Refresh Audit Logs"
                 >
                   <RefreshCw size={15} class={isLoadingLogs() ? "spin-animation" : ""} />
-                  <span>Refresh Logs</span>
+                  <span>Refresh</span>
                 </button>
               </Tooltip>
             </div>

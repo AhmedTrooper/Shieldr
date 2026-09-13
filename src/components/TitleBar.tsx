@@ -54,7 +54,7 @@ export const TitleBar: Component<TitleBarProps> = (props) => {
     <header class="custom-titlebar" data-tauri-drag-region>
       <div class="titlebar-left" data-tauri-drag-region>
         <div class="window-controls">
-          <Tooltip content="Close or hide window to system tray" placement="bottom-start">
+          <Tooltip content="Close to tray" placement="bottom-start">
             <button
               type="button"
               class="win-btn win-close"
@@ -62,7 +62,7 @@ export const TitleBar: Component<TitleBarProps> = (props) => {
               onClick={handleClose}
             />
           </Tooltip>
-          <Tooltip content="Minimize window" placement="bottom">
+          <Tooltip content="Minimize" placement="bottom">
             <button
               type="button"
               class="win-btn win-minimize"
@@ -72,19 +72,19 @@ export const TitleBar: Component<TitleBarProps> = (props) => {
           </Tooltip>
         </div>
         <div class="app-brand" data-tauri-drag-region>
-          <Shield size={16} class="text-blue-400 brand-icon" />
+          <Shield size={16} class="text-zinc-200 brand-icon" />
           <span class="brand-title">Shieldr</span>
-          <span class="brand-pill">{props.isLocked ? "Armed" : "Standby"}</span>
+          <span class="brand-pill">{props.isLocked ? "Armed" : "Ready"}</span>
         </div>
       </div>
 
       <div class="titlebar-center" data-tauri-drag-region>
-        <span class="title-subtext">Toddler & Touch Protection</span>
+        <span class="title-subtext">Screen Protection</span>
       </div>
 
       <div class="titlebar-right" data-tauri-drag-region>
         <div class="titlebar-actions">
-          <Tooltip content="Check for Software Updates" placement="bottom">
+          <Tooltip content="Check for updates" placement="bottom">
             <button
               type="button"
               class="titlebar-icon-btn"
@@ -94,11 +94,11 @@ export const TitleBar: Component<TitleBarProps> = (props) => {
             >
               <RefreshCw
                 size={15}
-                class={updaterService.state().isChecking ? "spin-animation text-blue-400" : ""}
+                class={updaterService.state().isChecking ? "spin-animation text-zinc-300" : ""}
               />
             </button>
           </Tooltip>
-          <Tooltip content="GitHub Repository & Code" placement="bottom">
+          <Tooltip content="GitHub" placement="bottom">
             <button
               type="button"
               class="titlebar-icon-btn"
@@ -108,7 +108,7 @@ export const TitleBar: Component<TitleBarProps> = (props) => {
               <SiGithub size={15} />
             </button>
           </Tooltip>
-          <Tooltip content="YouTube Community & Tutorials" placement="bottom-end">
+          <Tooltip content="YouTube" placement="bottom-end">
             <button
               type="button"
               class="titlebar-icon-btn"
@@ -119,7 +119,7 @@ export const TitleBar: Component<TitleBarProps> = (props) => {
             </button>
           </Tooltip>
         </div>
-        <span class="security-chip">Encrypted Vault</span>
+        <span class="security-chip">Encrypted</span>
       </div>
     </header>
   );

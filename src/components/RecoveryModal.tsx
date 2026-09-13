@@ -60,10 +60,10 @@ export const RecoveryModal: Component<RecoveryModalProps> = (props) => {
     <Show when={props.isOpen}>
       <div class="modal-backdrop" onClick={props.onClose}>
         <div class="recovery-card" onClick={(e) => e.stopPropagation()}>
-          <div class="recovery-badge">🔑 Emergency Reset</div>
-          <h2 class="modal-heading">Reset Security PIN</h2>
+          <div class="recovery-badge">Recovery</div>
+          <h2 class="modal-heading">Reset PIN</h2>
           <p class="modal-description">
-            Enter your 12-word BIP-39 recovery phrase to reset your PIN.
+            Enter your 12-word recovery phrase to set a new PIN.
           </p>
 
           <Show when={errorMsg()}>
@@ -71,7 +71,7 @@ export const RecoveryModal: Component<RecoveryModalProps> = (props) => {
           </Show>
 
           <Show when={isSuccess()}>
-            <div class="success-banner">✓ PIN successfully reset! Restoring access...</div>
+            <div class="success-banner">✓ PIN reset! Restoring access...</div>
           </Show>
 
           <form onSubmit={handleReset} class="recovery-form">
@@ -85,7 +85,7 @@ export const RecoveryModal: Component<RecoveryModalProps> = (props) => {
               <textarea
                 class="recovery-textarea"
                 rows={3}
-                placeholder="e.g. apple banana cat dog elephant fox giraffe horse iguana jaguar kangaroo lion"
+                placeholder="Enter 12 words separated by spaces..."
                 value={phraseInput()}
                 onInput={(e) => setPhraseInput(e.currentTarget.value)}
                 required

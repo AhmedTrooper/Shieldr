@@ -96,9 +96,9 @@ export const InitialSetupModal: Component<InitialSetupModalProps> = (props) => {
           <Show when={step() === 1}>
             <div class="setup-header">
               <div class="shield-badge-icon">🛡️</div>
-              <h2 class="modal-heading">Welcome to Shieldr</h2>
+              <h2 class="modal-heading">Set Up Shieldr</h2>
               <p class="modal-description">
-                Configure your screen lock credentials. Stored in <strong>OS Keyring</strong> & <strong>Stronghold Vault</strong>.
+                Configure your screen lock PIN and master password.
               </p>
             </div>
 
@@ -135,7 +135,7 @@ export const InitialSetupModal: Component<InitialSetupModalProps> = (props) => {
                   />
                 </div>
               </div>
-              <span class="field-hint">Numeric PIN used for quick touch and numpad unlocking.</span>
+              <span class="field-hint">4-8 digit numeric PIN for quick unlock.</span>
 
               <div class="form-group">
                 <label>Master Password</label>
@@ -148,14 +148,13 @@ export const InitialSetupModal: Component<InitialSetupModalProps> = (props) => {
                   required
                 />
                 <span class="field-hint">
-                  Emergency fallback password to unlock or reset credentials.
+                  Fallback password to unlock or reset PIN.
                 </span>
               </div>
 
               <div class="storage-notice-box">
-                <div class="notice-title">🔐 Zero-Knowledge Vault</div>
                 <p>
-                  Keys stored in <strong>OS Keyring</strong> & <strong>Stronghold</strong>. SQLite holds settings & audit logs only.
+                  Credentials are encrypted in <strong>OS Keyring</strong>.
                 </p>
               </div>
 
@@ -164,7 +163,7 @@ export const InitialSetupModal: Component<InitialSetupModalProps> = (props) => {
                 class="primary-btn full-width"
                 disabled={isSubmitting() || pin().length < 4 || masterPassword().length < 6}
               >
-                {isSubmitting() ? "Creating Security Vault..." : "Next: Generate Recovery Phrase →"}
+                {isSubmitting() ? "Creating Vault..." : "Continue →"}
               </button>
             </form>
           </Show>
@@ -172,9 +171,9 @@ export const InitialSetupModal: Component<InitialSetupModalProps> = (props) => {
           <Show when={step() === 2}>
             <div class="setup-header">
               <div class="shield-badge-icon">📜</div>
-              <h2 class="modal-heading">Backup Recovery Phrase</h2>
+              <h2 class="modal-heading">Recovery Phrase</h2>
               <p class="modal-description">
-                You <strong>must copy</strong> this 12-word BIP-39 recovery phrase before you can enter the app.
+                Save this 12-word phrase to restore access if you forget your credentials.
               </p>
             </div>
 
@@ -194,7 +193,7 @@ export const InitialSetupModal: Component<InitialSetupModalProps> = (props) => {
             </div>
 
             <div class="copy-bar">
-              <Tooltip content="Copy 12-word recovery phrase to clipboard" placement="top">
+              <Tooltip content="Copy 12-word recovery phrase" placement="top">
                 <button
                   type="button"
                   class={`copy-phrase-btn ${hasCopiedPhrase() ? "copied-state" : "must-copy-pulse"}`}
@@ -204,8 +203,8 @@ export const InitialSetupModal: Component<InitialSetupModalProps> = (props) => {
                   {copied()
                     ? "✓ Copied to Clipboard!"
                     : hasCopiedPhrase()
-                    ? "✓ Phrase Copied (Click to Copy Again)"
-                    : "📋 Step 1: Copy All 12 Words (Required)"}
+                    ? "✓ Phrase Copied"
+                    : "📋 Copy 12 Words"}
                 </button>
               </Tooltip>
             </div>
@@ -222,10 +221,10 @@ export const InitialSetupModal: Component<InitialSetupModalProps> = (props) => {
             <Tooltip
               content={
                 !hasCopiedPhrase()
-                  ? "You must copy the recovery phrase first"
+                  ? "Copy the recovery phrase first"
                   : !confirmedBackup()
-                  ? "Please check the confirmation box above"
-                  : "Launch Shieldr and activate protection"
+                  ? "Check the confirmation box"
+                  : "Complete setup and launch Shieldr"
               }
               placement="top"
             >
@@ -236,11 +235,7 @@ export const InitialSetupModal: Component<InitialSetupModalProps> = (props) => {
                 onClick={handleFinish}
                 aria-label="Finish Setup"
               >
-                {!hasCopiedPhrase()
-                  ? "⚠️ Copy Phrase to Clipboard to Continue"
-                  : !confirmedBackup()
-                  ? "Check Confirmation Box to Continue"
-                  : "Finish Setup & Launch Shieldr →"}
+                Finish Setup
               </button>
             </Tooltip>
           </Show>

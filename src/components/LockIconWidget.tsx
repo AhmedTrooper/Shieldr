@@ -110,12 +110,12 @@ export const LockIconWidget: Component<LockIconWidgetProps> = (props) => {
 
         <defs>
           <linearGradient id="bodyGradient" x1="10" y1="20" x2="38" y2="42" gradientUnits="userSpaceOnUse">
-            <stop stop-color="#3B82F6" />
-            <stop offset="1" stop-color="#1D4ED8" />
+            <stop stop-color="#e4e4e7" />
+            <stop offset="1" stop-color="#71717a" />
           </linearGradient>
         </defs>
       </svg>
-      <span class="lock-hint-pill">Tap to Unlock</span>
+      <span class="lock-hint-pill">Unlock</span>
     </div>
   );
 };

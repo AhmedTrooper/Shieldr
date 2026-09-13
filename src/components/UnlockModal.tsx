@@ -141,20 +141,20 @@ export const UnlockModal: Component<UnlockModalProps> = (props) => {
               <path d="M22.8 29.5L22 36H26L25.2 29.5" fill="rgba(0, 0, 0, 0.8)" />
               <defs>
                 <linearGradient id="modalBodyGradient" x1="10" y1="20" x2="38" y2="42" gradientUnits="userSpaceOnUse">
-                  <stop stop-color={isSuccess() ? "#10B981" : "#3B82F6"} />
-                  <stop offset="1" stop-color={isSuccess() ? "#059669" : "#1D4ED8"} />
+                  <stop stop-color={isSuccess() ? "#22c55e" : "#e4e4e7"} />
+                  <stop offset="1" stop-color={isSuccess() ? "#16a34a" : "#71717a"} />
                 </linearGradient>
               </defs>
             </svg>
           </div>
 
           <h2 class="unlock-title">
-            {isSuccess() ? "Shield Unlocked" : "Enter PIN to Unlock"}
+            {isSuccess() ? "Unlocked" : "Enter PIN"}
           </h2>
           <p class="unlock-subtitle">
             {isSuccess()
-              ? "Restoring window control..."
-              : "Toddler and touch protection is active."}
+              ? "Restoring access..."
+              : "Screen protection is active."}
           </p>
 
           {/* Lockout banner */}
@@ -164,7 +164,7 @@ export const UnlockModal: Component<UnlockModalProps> = (props) => {
               <div>
                 <strong>Locked Out</strong>
                 <p>
-                  Excessive failed attempts. Try again in{" "}
+                  Too many attempts. Wait{" "}
                   <span class="countdown-highlight">
                     {props.lockoutRemainingSecs ?? 30}s
                   </span>
@@ -272,30 +272,30 @@ export const UnlockModal: Component<UnlockModalProps> = (props) => {
               }
               onClick={() => submitUnlock("unlock")}
             >
-              {isSubmitting() ? "Verifying..." : "Unlock Shield"}
+              {isSubmitting() ? "Verifying..." : "Unlock"}
             </button>
 
             <div class="secondary-actions-row">
-              <Tooltip content="Unlock screen and minimize Shieldr to system tray" placement="top">
+              <Tooltip content="Unlock and hide to tray" placement="top">
                 <button
                   type="button"
                   class="action-pill-btn"
                   disabled={props.isLockedOut || isSubmitting()}
                   onClick={() => submitUnlock("hide")}
-                  aria-label="Unlock & Hide"
+                  aria-label="Hide to Tray"
                 >
-                  Unlock & Hide
+                  Hide
                 </button>
               </Tooltip>
-              <Tooltip content="Unlock screen and completely quit Shieldr" placement="top">
+              <Tooltip content="Unlock and quit application" placement="top">
                 <button
                   type="button"
                   class="action-pill-btn danger-pill"
                   disabled={props.isLockedOut || isSubmitting()}
                   onClick={() => submitUnlock("close")}
-                  aria-label="Unlock & Close"
+                  aria-label="Quit Application"
                 >
-                  Unlock & Close
+                  Quit
                 </button>
               </Tooltip>
             </div>
@@ -311,7 +311,7 @@ export const UnlockModal: Component<UnlockModalProps> = (props) => {
                 setErrorMessage(null);
               }}
             >
-              {useMasterPassword() ? "Use PIN Instead" : "Use Master Password"}
+              {useMasterPassword() ? "Use PIN" : "Use Master Password"}
             </button>
             <span class="link-divider">•</span>
             <button
@@ -323,14 +323,14 @@ export const UnlockModal: Component<UnlockModalProps> = (props) => {
             </button>
           </div>
 
-          <Tooltip content="Dismiss modal and keep touchscreen guarded" placement="top">
+          <Tooltip content="Dismiss modal" placement="top">
             <button
               type="button"
               class="dismiss-shield-btn"
               onClick={props.onDismiss}
-              aria-label="Keep Shield Locked"
+              aria-label="Keep Locked"
             >
-              ✕ Keep Locked
+              ✕ Dismiss
             </button>
           </Tooltip>
         </div>
