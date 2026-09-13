@@ -19,7 +19,7 @@ export function Card(props: JSX.HTMLAttributes<HTMLDivElement>) {
 export function CardHeader(props: JSX.HTMLAttributes<HTMLDivElement>) {
   const [local, others] = splitProps(props, ["class", "children"]);
   return (
-    <div class={cn("flex flex-col space-y-1.5 p-6", local.class)} {...others}>
+    <div class={cn("flex flex-col space-y-1.5 p-4 sm:p-5", local.class)} {...others}>
       {local.children}
     </div>
   );
@@ -29,7 +29,7 @@ export function CardTitle(props: JSX.HTMLAttributes<HTMLHeadingElement>) {
   const [local, others] = splitProps(props, ["class", "children"]);
   return (
     <h3
-      class={cn("text-lg font-semibold leading-none tracking-tight text-white", local.class)}
+      class={cn("text-base font-bold leading-none tracking-tight text-white", local.class)}
       {...others}
     >
       {local.children}
@@ -40,7 +40,7 @@ export function CardTitle(props: JSX.HTMLAttributes<HTMLHeadingElement>) {
 export function CardDescription(props: JSX.HTMLAttributes<HTMLParagraphElement>) {
   const [local, others] = splitProps(props, ["class", "children"]);
   return (
-    <p class={cn("text-sm text-slate-400", local.class)} {...others}>
+    <p class={cn("text-xs text-slate-400 leading-relaxed", local.class)} {...others}>
       {local.children}
     </p>
   );
@@ -49,7 +49,7 @@ export function CardDescription(props: JSX.HTMLAttributes<HTMLParagraphElement>)
 export function CardContent(props: JSX.HTMLAttributes<HTMLDivElement>) {
   const [local, others] = splitProps(props, ["class", "children"]);
   return (
-    <div class={cn("p-6 pt-0", local.class)} {...others}>
+    <div class={cn("p-4 sm:p-5 pt-0", local.class)} {...others}>
       {local.children}
     </div>
   );
@@ -58,7 +58,7 @@ export function CardContent(props: JSX.HTMLAttributes<HTMLDivElement>) {
 export function CardFooter(props: JSX.HTMLAttributes<HTMLDivElement>) {
   const [local, others] = splitProps(props, ["class", "children"]);
   return (
-    <div class={cn("flex items-center p-6 pt-0", local.class)} {...others}>
+    <div class={cn("flex items-center p-4 sm:p-5 pt-0", local.class)} {...others}>
       {local.children}
     </div>
   );

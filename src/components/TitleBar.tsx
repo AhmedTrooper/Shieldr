@@ -105,7 +105,7 @@ export const TitleBar: Component<TitleBarProps> = (props) => {
       </div>
 
       <div class={clsx("hidden sm:flex items-center shrink-0 gap-2")} data-tauri-drag-region>
-        <div class={clsx("flex items-center gap-1 mr-1")}>
+        <div class={clsx("flex items-center gap-1")}>
           <Tooltip content="Check for updates" placement="bottom">
             <button
               type="button"

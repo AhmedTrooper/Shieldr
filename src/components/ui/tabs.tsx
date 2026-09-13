@@ -22,7 +22,7 @@ export function TabsTrigger(props: Parameters<typeof KobalteTabs.Trigger>[0] & {
   return (
     <KobalteTabs.Trigger
       class={cn(
-        "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-xs sm:text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:pointer-events-none disabled:opacity-50 data-[selected]:bg-blue-600 data-[selected]:text-white data-[selected]:shadow-sm cursor-pointer",
+        "inline-flex items-center justify-center whitespace-nowrap rounded-lg px-3 py-1.5 text-xs sm:text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:pointer-events-none disabled:opacity-50 data-[selected]:bg-blue-600 data-[selected]:text-white data-[selected]:shadow-sm cursor-pointer",
         local.class
       )}
       {...others}

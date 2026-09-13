@@ -350,12 +350,12 @@ export const Dashboard: Component<DashboardProps> = (props) => {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2 }}
-          class={clsx("flex flex-1 flex-col gap-4 min-h-0 pb-6")}
+          class={clsx("flex flex-1 flex-col gap-4 min-h-0 pb-2")}
         >
           {/* Screen Protection Card */}
           <div
             class={clsx(
-              "flex flex-col md:flex-row gap-4 md:gap-5 p-4 sm:p-5 rounded-xl",
+              "flex flex-col md:flex-row gap-4 md:gap-5 p-4 sm:p-6 rounded-xl",
               "bg-slate-900/80 border border-white/10 shadow-xl backdrop-blur-md transition-all"
             )}
           >
@@ -591,7 +591,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
           {/* Software Updates Card */}
           <div
             class={clsx(
-              "flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 p-4 md:px-5 md:py-4 rounded-xl",
+              "flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 p-4 sm:p-6 rounded-xl",
               "bg-slate-900/70 border border-white/10 shadow-xl backdrop-blur-md transition-colors hover:border-white/20"
             )}
           >
@@ -801,9 +801,9 @@ export const Dashboard: Component<DashboardProps> = (props) => {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2 }}
-          class={clsx("flex flex-1 flex-col gap-3 sm:gap-4 min-h-0 pb-4")}
+          class={clsx("flex flex-1 flex-col gap-3 sm:gap-4 min-h-0 pb-2")}
         >
-          <div class={clsx("flex flex-col gap-3.5 p-4 sm:p-5 rounded-xl bg-slate-900/80 border border-white/10 shadow-xl backdrop-blur-md")}>
+          <div class={clsx("flex flex-col gap-3.5 p-4 sm:p-6 rounded-xl bg-slate-900/80 border border-white/10 shadow-xl backdrop-blur-md")}>
             <div class={clsx("flex flex-col gap-1 pb-2 border-b border-white/10")}>
               <h2 class={clsx("text-base sm:text-lg font-bold tracking-tight text-white m-0")}>Display & Overlay</h2>
               <p class={clsx("text-xs text-slate-400 m-0")}>Configure transparency, blur, and lock icon behavior.</p>
@@ -816,7 +816,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
               </div>
             </Show>
 
-            <div class={clsx("flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-2.5 border-b border-white/[0.07]")}>
+            <div class={clsx("flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3 border-b border-white/[0.07]")}>
               <div class={clsx("flex flex-col gap-0.5 sm:max-w-[65%]")}>
                 <label class={clsx("text-[13px] font-semibold text-slate-200")}>Overlay Tint</label>
                 <span class={clsx("text-xs text-slate-400 leading-relaxed")}>
@@ -839,7 +839,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
               </div>
             </div>
 
-            <div class={clsx("flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-2.5 border-b border-white/[0.07]")}>
+            <div class={clsx("flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3 border-b border-white/[0.07]")}>
               <div class={clsx("flex flex-col gap-0.5 sm:max-w-[65%]")}>
                 <label class={clsx("text-[13px] font-semibold text-slate-200")}>Background Blur</label>
                 <span class={clsx("text-xs text-slate-400 leading-relaxed")}>
@@ -862,7 +862,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
               </div>
             </div>
 
-            <div class={clsx("flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-2.5 border-b border-white/[0.07]")}>
+            <div class={clsx("flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3 border-b border-white/[0.07]")}>
               <div class={clsx("flex flex-col gap-0.5 sm:max-w-[65%]")}>
                 <label class={clsx("text-[13px] font-semibold text-slate-200")}>Unlock Icon Position</label>
                 <span class={clsx("text-xs text-slate-400 leading-relaxed")}>Placement of the click-to-unlock trigger</span>
@@ -883,7 +883,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
               </div>
             </div>
 
-            <div class={clsx("flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-2.5 border-b border-white/[0.07]")}>
+            <div class={clsx("flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3 border-b border-white/[0.07]")}>
               <div class={clsx("flex flex-col gap-0.5 sm:max-w-[65%]")}>
                 <label class={clsx("text-[13px] font-semibold text-slate-200")}>Auto-Hide Timeout</label>
                 <span class={clsx("text-xs text-slate-400 leading-relaxed")}>Hide lock icon after mouse inactivity</span>
@@ -903,7 +903,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
               </div>
             </div>
 
-            <div class={clsx("flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-2.5 border-b border-white/[0.07]")}>
+            <div class={clsx("flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3 border-b border-white/[0.07]")}>
               <div class={clsx("flex flex-col gap-0.5 sm:max-w-[65%]")}>
                 <label class={clsx("text-[13px] font-semibold text-slate-200")}>Sound Feedback</label>
                 <span class={clsx("text-xs text-slate-400 leading-relaxed")}>Audio tones for keypad and unlock actions</span>
@@ -929,7 +929,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
               </div>
             </div>
 
-            <div class={clsx("flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-2.5 border-b border-white/[0.07]")}>
+            <div class={clsx("flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3 border-b border-white/[0.07]")}>
               <div class={clsx("flex flex-col gap-0.5 sm:max-w-[65%]")}>
                 <label class={clsx("text-[13px] font-semibold text-slate-200")}>Keep Awake</label>
                 <span class={clsx("text-xs text-slate-400 leading-relaxed")}>
@@ -957,7 +957,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
               </div>
             </div>
 
-            <div class={clsx("flex justify-end pt-2")}>
+            <div class={clsx("flex justify-end pt-4")}>
               <Tooltip content="Save display settings" placement="top">
                 <button
                   type="button"
@@ -983,11 +983,11 @@ export const Dashboard: Component<DashboardProps> = (props) => {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2 }}
-          class={clsx("flex flex-1 flex-col gap-4 min-h-0 pb-4")}
+          class={clsx("flex flex-1 flex-col gap-4 min-h-0 pb-2")}
         >
           <div class={clsx("grid grid-cols-1 md:grid-cols-2 gap-4")}>
             {/* Change PIN Card */}
-            <div class={clsx("flex flex-col gap-3 p-4 sm:p-5 rounded-xl bg-slate-900/80 border border-white/10 shadow-xl backdrop-blur-md")}>
+            <div class={clsx("flex flex-col gap-3 p-4 sm:p-6 rounded-xl bg-slate-900/80 border border-white/10 shadow-xl backdrop-blur-md")}>
               <div class={clsx("flex flex-col gap-1 pb-2 border-b border-white/10")}>
                 <h3 class={clsx("text-base font-bold tracking-tight text-white m-0")}>Change PIN</h3>
                 <p class={clsx("text-xs text-slate-400 m-0")}>Update your 4-8 digit quick-unlock code.</p>
@@ -1038,7 +1038,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
             </div>
 
             {/* Change Master Password Card */}
-            <div class={clsx("flex flex-col gap-3 p-4 sm:p-5 rounded-xl bg-slate-900/80 border border-white/10 shadow-xl backdrop-blur-md")}>
+            <div class={clsx("flex flex-col gap-3 p-4 sm:p-6 rounded-xl bg-slate-900/80 border border-white/10 shadow-xl backdrop-blur-md")}>
               <div class={clsx("flex flex-col gap-1 pb-2 border-b border-white/10")}>
                 <h3 class={clsx("text-base font-bold tracking-tight text-white m-0")}>Change Master Password</h3>
                 <p class={clsx("text-xs text-slate-400 m-0")}>Emergency recovery password.</p>
@@ -1089,7 +1089,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
           </div>
 
           {/* Backup Recovery Phrase Card */}
-          <div class={clsx("flex flex-col gap-3 p-4 sm:p-5 rounded-xl bg-slate-900/80 border border-white/10 shadow-xl backdrop-blur-md")}>
+          <div class={clsx("flex flex-col gap-3 p-4 sm:p-6 rounded-xl bg-slate-900/80 border border-white/10 shadow-xl backdrop-blur-md")}>
             <div class={clsx("flex flex-col gap-1 pb-2 border-b border-white/10")}>
               <h3 class={clsx("text-base font-bold tracking-tight text-white m-0")}>12-Word Recovery Phrase</h3>
               <p class={clsx("text-xs text-slate-400 m-0")}>
@@ -1177,9 +1177,9 @@ export const Dashboard: Component<DashboardProps> = (props) => {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2 }}
-          class={clsx("flex flex-1 flex-col gap-4 min-h-0 pb-4")}
+          class={clsx("flex flex-1 flex-col gap-4 min-h-0 pb-2")}
         >
-          <div class={clsx("flex flex-col gap-4 p-4 sm:p-5 rounded-xl bg-slate-900/80 border border-white/10 shadow-xl backdrop-blur-md")}>
+          <div class={clsx("flex flex-col gap-4 p-4 sm:p-6 rounded-xl bg-slate-900/80 border border-white/10 shadow-xl backdrop-blur-md")}>
             <div class={clsx("flex items-center justify-between gap-4 pb-2 border-b border-white/10")}>
               <div>
                 <h2 class={clsx("text-base sm:text-lg font-bold tracking-tight text-white m-0")}>Audit Log</h2>
@@ -1209,18 +1209,18 @@ export const Dashboard: Component<DashboardProps> = (props) => {
               <table class={clsx("w-full text-left text-xs border-collapse")}>
                 <thead>
                   <tr class={clsx("border-b border-white/10 bg-slate-900/90 text-slate-400 font-semibold")}>
-                    <th class={clsx("py-2.5 px-3 whitespace-nowrap")}>ID</th>
-                    <th class={clsx("py-2.5 px-3 whitespace-nowrap")}>Event Type</th>
-                    <th class={clsx("py-2.5 px-3 whitespace-nowrap")}>Details</th>
-                    <th class={clsx("py-2.5 px-3 whitespace-nowrap")}>Timestamp</th>
+                    <th class={clsx("py-2.5 px-3.5 whitespace-nowrap")}>ID</th>
+                    <th class={clsx("py-2.5 px-3.5 whitespace-nowrap")}>Event Type</th>
+                    <th class={clsx("py-2.5 px-3.5 whitespace-nowrap")}>Details</th>
+                    <th class={clsx("py-2.5 px-3.5 whitespace-nowrap")}>Timestamp</th>
                   </tr>
                 </thead>
                 <tbody>
                   <For each={logs()}>
                     {(entry) => (
                       <tr class={clsx("border-b border-white/[0.05] hover:bg-white/[0.02] transition-colors")}>
-                        <td class={clsx("py-2 px-3 text-slate-400 font-mono")}>#{entry.id}</td>
-                        <td class={clsx("py-2 px-3 whitespace-nowrap")}>
+                        <td class={clsx("py-2.5 px-3.5 text-slate-400 font-mono")}>#{entry.id}</td>
+                        <td class={clsx("py-2.5 px-3.5 whitespace-nowrap")}>
                           <span
                             class={clsx(
                               "inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider",
@@ -1240,8 +1240,8 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                             {entry.event_type}
                           </span>
                         </td>
-                        <td class={clsx("py-2 px-3 text-slate-300 font-mono")}>{entry.details}</td>
-                        <td class={clsx("py-2 px-3 text-slate-400 whitespace-nowrap font-mono text-[11px]")}>
+                        <td class={clsx("py-2.5 px-3.5 text-slate-300 font-mono")}>{entry.details}</td>
+                        <td class={clsx("py-2.5 px-3.5 text-slate-400 whitespace-nowrap font-mono text-[11px]")}>
                           {new Date(entry.timestamp).toLocaleString()}
                         </td>
                       </tr>
