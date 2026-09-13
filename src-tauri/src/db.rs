@@ -21,6 +21,7 @@ pub struct ShieldProperties {
     pub has_pin_configured: bool,
     pub has_master_password: bool,
     pub has_reset_phrase: bool,
+    pub keep_awake: bool,
 }
 
 impl Default for ShieldProperties {
@@ -36,6 +37,7 @@ impl Default for ShieldProperties {
             has_pin_configured: false,
             has_master_password: false,
             has_reset_phrase: false,
+            keep_awake: true,
         }
     }
 }
@@ -181,6 +183,9 @@ impl SqliteStore {
         if let Some(v) = self.get_property("has_reset_phrase")? {
             props.has_reset_phrase = v == "true" || v == "1";
         }
+        if let Some(v) = self.get_property("keep_awake")? {
+            props.keep_awake = v == "true" || v == "1";
+        }
 
         Ok(props)
     }
@@ -214,6 +219,7 @@ impl SqliteStore {
             "has_reset_phrase",
             if props.has_reset_phrase { "1" } else { "0" },
         )?;
+        self.set_property("keep_awake", if props.keep_awake { "1" } else { "0" })?;
         Ok(())
     }
 
@@ -339,10 +345,12 @@ mod tests {
             .expect("Should read default properties");
         assert_eq!(props.overlay_opacity, 0.02);
         assert_eq!(props.sound_enabled, true);
+        assert_eq!(props.keep_awake, true);
 
         props.overlay_opacity = 0.15;
         props.sound_enabled = false;
         props.has_pin_configured = true;
+        props.keep_awake = false;
         store
             .save_all_properties(&props)
             .expect("Should save properties");
@@ -353,6 +361,7 @@ mod tests {
         assert_eq!(updated.overlay_opacity, 0.15);
         assert_eq!(updated.sound_enabled, false);
         assert_eq!(updated.has_pin_configured, true);
+        assert_eq!(updated.keep_awake, false);
 
         // Audit log test
         store

@@ -36,6 +36,7 @@ zeroize = "1"
 rand_core = "0.9"
 sha2 = "0.11.0"
 tauri-plugin-clipboard-manager = "2"
+keepawake = "0.6.1"
 
 
 # Read the optimization guideline for more details: https://tauri.app/concept/size/#cargo-configuration

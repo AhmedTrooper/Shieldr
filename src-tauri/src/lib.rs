@@ -8,7 +8,10 @@ pub mod stronghold_store;
 pub mod tray;
 pub mod vault;
 
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::{
+    atomic::{AtomicBool, Ordering},
+    Mutex,
+};
 
 use rand::RngExt;
 use sha2::{Digest, Sha256};
@@ -22,6 +25,7 @@ use crate::{
 pub struct AppState {
     pub vault: Vault,
     pub is_locked: AtomicBool,
+    pub keep_awake_guard: Mutex<Option<keepawake::KeepAwake>>,
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -81,6 +85,7 @@ pub fn run() {
             let app_state = AppState {
                 vault,
                 is_locked: AtomicBool::new(false),
+                keep_awake_guard: Mutex::new(None),
             };
 
             app.manage(app_state);

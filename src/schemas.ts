@@ -14,6 +14,7 @@ export const ShieldPropertiesSchema = z.object({
   has_pin_configured: z.boolean(),
   has_master_password: z.boolean(),
   has_reset_phrase: z.boolean(),
+  keep_awake: z.boolean().default(true),
 });
 
 export type ShieldProperties = z.infer<typeof ShieldPropertiesSchema>;

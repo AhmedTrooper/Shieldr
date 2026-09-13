@@ -65,9 +65,34 @@ pub async fn lock_shield(
         .map_err(|e| AppError::Window(e.to_string()))?;
 
     state.is_locked.store(true, Ordering::SeqCst);
+
+    // Keep OS and display awake while locked if enabled
+    let props = state.vault.db().get_all_properties().unwrap_or_default();
+    if props.keep_awake {
+        match keepawake::Builder::default()
+            .display(true)
+            .idle(true)
+            .sleep(true)
+            .reason("Shieldr screen lock active")
+            .app_name("Shieldr")
+            .app_reverse_domain("com.shieldr.app")
+            .create()
+        {
+            Ok(handle) => {
+                if let Ok(mut guard) = state.keep_awake_guard.lock() {
+                    *guard = Some(handle);
+                }
+                eprintln!("KeepAwake lock acquired: display and system sleep inhibited.");
+            }
+            Err(e) => {
+                eprintln!("Warning: Failed to acquire KeepAwake lock: {e}");
+            }
+        }
+    }
+
     state.vault.db().record_audit_event(
         "SHIELD_LOCKED",
-        "Shield locked in transparent fullscreen mode.",
+        "Shield locked in transparent fullscreen mode (KeepAwake active).",
     )?;
 
     get_shield_status(state).await
@@ -83,6 +108,14 @@ pub async fn unlock_shield(
 
     if !valid {
         return Err(AppError::InvalidCredentials);
+    }
+
+    // Release OS keepawake inhibitor lock
+    if let Ok(mut guard) = state.keep_awake_guard.lock() {
+        if guard.is_some() {
+            *guard = None; // Drops keepawake::KeepAwake, releasing OS sleep inhibitor
+            eprintln!("KeepAwake lock released.");
+        }
     }
 
     let window = app
@@ -182,6 +215,9 @@ pub async fn request_close_window(
     }
 
     if let Some(window) = app.get_webview_window("main") {
+        if let Ok(mut guard) = state.keep_awake_guard.lock() {
+            *guard = None;
+        }
         window
             .close()
             .map_err(|e| AppError::Window(e.to_string()))?;
