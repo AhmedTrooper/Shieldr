@@ -22,7 +22,22 @@
         "transparent": true,
         "decorations": false,
         "shadow": false,
-        "center": true
+        "center": true,
+        "visible": false
+      },
+      {
+        "title": "Shieldr",
+        "label": "splashscreen",
+        "url": "splashscreen.html",
+        "width": 360,
+        "height": 380,
+        "resizable": false,
+        "transparent": true,
+        "decorations": false,
+        "shadow": false,
+        "center": true,
+        "alwaysOnTop": true,
+        "visible": true
       }
     ],
     "security": {

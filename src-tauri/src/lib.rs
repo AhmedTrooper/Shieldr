@@ -58,6 +58,13 @@ pub fn run() {
 
     #[allow(unused_mut)]
     let mut builder = tauri::Builder::default()
+        .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
+            if let Some(window) = app.get_webview_window("main") {
+                let _ = window.show();
+                let _ = window.unminimize();
+                let _ = window.set_focus();
+            }
+        }))
         // B-084: Persist window size + position across launches, but
         // explicitly skip FULLSCREEN and MAXIMIZED so the lock screen
         // (which goes fullscreen) doesn't poison the saved state with
@@ -65,12 +72,14 @@ pub fn run() {
         // and the explicit `save_window_state(...)` call in
         // `unlock_shield` overwrites whatever the auto-save wrote during
         // the locked fullscreen phase.
+        // We denylist the splashscreen and omit VISIBLE so the splashscreen
+        // isn't tracked and main remains hidden until frontend signals readiness.
         .plugin(
             tauri_plugin_window_state::Builder::new()
+                .with_denylist(&["splashscreen"])
                 .with_state_flags(
                     tauri_plugin_window_state::StateFlags::SIZE
                         | tauri_plugin_window_state::StateFlags::POSITION
-                        | tauri_plugin_window_state::StateFlags::VISIBLE
                         | tauri_plugin_window_state::StateFlags::DECORATIONS,
                 )
                 .build(),
@@ -225,6 +234,7 @@ pub fn run() {
             request_hide_window,
             request_hide_window_unlocked,
             minimize_window,
+            close_splashscreen,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

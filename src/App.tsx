@@ -138,7 +138,13 @@ const App: Component = () => {
   let mounted = true;
 
   onMount(async () => {
-    await refreshStatus();
+    try {
+      await refreshStatus();
+    } finally {
+      tauriBridge.closeSplashscreen().catch((err) => {
+        console.error("Failed to close splashscreen:", err);
+      });
+    }
     window.addEventListener("focus", handleWindowFocus);
 
     try {

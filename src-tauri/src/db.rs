@@ -435,8 +435,8 @@ mod tests {
             .get_all_properties()
             .expect("Should read default properties");
         assert_eq!(props.overlay_opacity, 0.02);
-        assert_eq!(props.sound_enabled, true);
-        assert_eq!(props.keep_awake, true);
+        assert!(props.sound_enabled);
+        assert!(props.keep_awake);
 
         props.overlay_opacity = 0.15;
         props.sound_enabled = false;
@@ -450,9 +450,9 @@ mod tests {
             .get_all_properties()
             .expect("Should read updated properties");
         assert_eq!(updated.overlay_opacity, 0.15);
-        assert_eq!(updated.sound_enabled, false);
-        assert_eq!(updated.has_pin_configured, true);
-        assert_eq!(updated.keep_awake, false);
+        assert!(!updated.sound_enabled);
+        assert!(updated.has_pin_configured);
+        assert!(!updated.keep_awake);
 
         // Audit log test
         store

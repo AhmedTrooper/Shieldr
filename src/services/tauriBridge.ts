@@ -175,4 +175,12 @@ export const tauriBridge = {
       return handleInvokeError(e);
     }
   },
+
+  async closeSplashscreen(): Promise<void> {
+    try {
+      return await invoke<void>("close_splashscreen");
+    } catch (e) {
+      return handleInvokeError(e);
+    }
+  },
 };

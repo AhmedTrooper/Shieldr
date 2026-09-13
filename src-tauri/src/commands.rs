@@ -355,3 +355,16 @@ pub async fn minimize_window(app: AppHandle) -> Result<(), AppError> {
     }
     Ok(())
 }
+
+#[tauri::command]
+pub async fn close_splashscreen(app: AppHandle) -> Result<(), AppError> {
+    if let Some(splashscreen) = app.get_webview_window("splashscreen") {
+        let _ = splashscreen.close();
+    }
+    if let Some(main) = app.get_webview_window("main") {
+        main.show().map_err(|e| AppError::Window(e.to_string()))?;
+        main.set_focus()
+            .map_err(|e| AppError::Window(e.to_string()))?;
+    }
+    Ok(())
+}
