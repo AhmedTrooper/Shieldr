@@ -1,6 +1,6 @@
 import { Component, createEffect, createSignal, For, Show } from "solid-js";
 import { clsx } from "clsx";
-import { ArrowRight, Check, Copy, KeyRound, ScrollText, ShieldCheck } from "lucide-solid";
+import { ArrowRight, Check, Copy, KeyRound, Loader2, ScrollText, ShieldCheck } from "lucide-solid";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { sound } from "../services/sound";
 import { SetupSecuritySchema } from "../schemas";
@@ -218,8 +218,10 @@ export const InitialSetupModal: Component<InitialSetupModalProps> = (props) => {
                 )}
                 disabled={isSubmitting() || pin().length < 4 || masterPassword().length < 6}
               >
+                <Show when={isSubmitting()} fallback={<ArrowRight size={14} />}>
+                  <Loader2 size={14} class="animate-spin" />
+                </Show>
                 <span>{isSubmitting() ? "Creating Vault..." : "Continue"}</span>
-                <ArrowRight size={14} />
               </button>
             </form>
           </Show>

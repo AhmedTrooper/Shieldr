@@ -18,6 +18,7 @@ import {
   ExternalLink,
   ChevronLeft,
   ChevronRight,
+  Loader2,
 } from "lucide-solid";
 import { SiGithub, SiYoutube } from "solid-icons/si";
 import { AuditLogEntry, ShieldProperties, ShieldStatus } from "../types";
@@ -103,6 +104,12 @@ export const Dashboard: Component<DashboardProps> = (props) => {
   const [keepAwake, setKeepAwake] = createSignal(props.properties.keep_awake ?? true);
   const [saveDisplayMsg, setSaveDisplayMsg] = createSignal<string | null>(null);
 
+  // Form Submitting & Action Loading States
+  const [isChangingPin, setIsChangingPin] = createSignal(false);
+  const [isChangingMaster, setIsChangingMaster] = createSignal(false);
+  const [isRevealingPhrase, setIsRevealingPhrase] = createSignal(false);
+  const [isSavingDisplay, setIsSavingDisplay] = createSignal(false);
+
   // Audit Logs State
   const [logs, setLogs] = createSignal<AuditLogEntry[]>([]);
   const [isLoadingLogs, setIsLoadingLogs] = createSignal(false);
@@ -166,6 +173,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
 
   const handleChangePin = async (e: Event) => {
     e.preventDefault();
+    if (isChangingPin()) return;
     setPinChangeMsg(null);
 
     const validation = ChangePinSchema.safeParse({
@@ -182,6 +190,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
       return;
     }
 
+    setIsChangingPin(true);
     try {
       // B-033: PIN rotation now requires the master password — not the
       // current PIN. This makes PIN rotation a privileged action and stops
@@ -197,11 +206,14 @@ export const Dashboard: Component<DashboardProps> = (props) => {
         type: "error",
         text: err instanceof Error ? err.message : "Failed to change PIN",
       });
+    } finally {
+      setIsChangingPin(false);
     }
   };
 
   const handleChangeMasterPassword = async (e: Event) => {
     e.preventDefault();
+    if (isChangingMaster()) return;
     setMasterChangeMsg(null);
 
     const validation = ChangeMasterPasswordSchema.safeParse({
@@ -218,6 +230,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
       return;
     }
 
+    setIsChangingMaster(true);
     try {
       await tauriBridge.changeMasterPassword(validation.data.currentMaster, validation.data.newMaster);
       sound.playUnlockSound();
@@ -230,12 +243,15 @@ export const Dashboard: Component<DashboardProps> = (props) => {
         type: "error",
         text: err instanceof Error ? err.message : "Failed to change Master Password",
       });
+    } finally {
+      setIsChangingMaster(false);
     }
   };
 
 
   const handleRevealPhrase = async (e: Event) => {
     e.preventDefault();
+    if (isRevealingPhrase()) return;
     setRevealMsg(null);
 
     const masterPass = revealMasterPass().trim();
@@ -245,6 +261,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
       return;
     }
 
+    setIsRevealingPhrase(true);
     try {
       const phrase = await tauriBridge.revealRecoveryPhrase(masterPass);
       setRevealedPhrase(phrase);
@@ -252,10 +269,13 @@ export const Dashboard: Component<DashboardProps> = (props) => {
     } catch (err: unknown) {
       sound.playErrorBuzz();
       setRevealMsg(err instanceof Error ? err.message : "Incorrect Master Password");
+    } finally {
+      setIsRevealingPhrase(false);
     }
   };
 
   const handleSaveDisplayProperties = async () => {
+    if (isSavingDisplay()) return;
     const rawUpdated = {
       ...props.properties,
       overlay_opacity: opacity(),
@@ -275,6 +295,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
 
     const updated = parsed.data;
     sound.setEnabled(soundEnabled());
+    setIsSavingDisplay(true);
     try {
       await tauriBridge.saveProperties(updated);
       props.onPropertiesUpdated(updated);
@@ -284,6 +305,8 @@ export const Dashboard: Component<DashboardProps> = (props) => {
     } catch (err: unknown) {
       sound.playErrorBuzz();
       setSaveDisplayMsg(err instanceof Error ? err.message : "Failed to save settings");
+    } finally {
+      setIsSavingDisplay(false);
     }
   };
 
@@ -748,12 +771,17 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                   class={clsx(
                     "h-10 min-h-[40px] px-5 rounded-lg text-xs sm:text-[13px] font-bold text-white",
                     "bg-blue-600 hover:bg-blue-500 active:scale-[0.985] shadow-lg shadow-blue-600/30",
-                    "border border-blue-400/40 transition-all cursor-pointer inline-flex items-center justify-center gap-2"
+                    "border border-blue-400/40 transition-all cursor-pointer inline-flex items-center justify-center gap-2",
+                    "disabled:opacity-50 disabled:pointer-events-none"
                   )}
                   onClick={handleSaveDisplayProperties}
+                  disabled={isSavingDisplay()}
                   aria-label="Save Settings"
                 >
-                  Save Settings
+                  <Show when={isSavingDisplay()} fallback={<Sliders size={14} />}>
+                    <Loader2 size={14} class="animate-spin" />
+                  </Show>
+                  <span>{isSavingDisplay() ? "Saving..." : "Save Settings"}</span>
                 </button>
               </Tooltip>
             </div>
@@ -795,18 +823,19 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                   <label class={clsx("text-[11px] sm:text-xs font-semibold text-slate-300")}>Current Master Password (required)</label>
                   <input
                     type="password"
-                    class={clsx("w-full h-9 sm:h-10 px-3 rounded-lg bg-slate-950/80 border border-white/15 text-white text-xs sm:text-[13px] font-mono outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-slate-600")}
+                    class={clsx("w-full h-9 sm:h-10 px-3 rounded-lg bg-slate-950/80 border border-white/15 text-white text-xs sm:text-[13px] font-mono outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-slate-600 disabled:opacity-50")}
                     value={currentMasterForPin()}
                     onInput={(e) => setCurrentMasterForPin(e.currentTarget.value)}
                     required
                     autocomplete="current-password"
+                    disabled={isChangingPin()}
                   />
                 </div>
                 <div class={clsx("flex flex-col gap-1")}>
                   <label class={clsx("text-[11px] sm:text-xs font-semibold text-slate-300")}>New PIN (4-8 digits)</label>
                   <input
                     type="password"
-                    class={clsx("w-full h-9 sm:h-10 px-3 rounded-lg bg-slate-950/80 border border-white/15 text-white text-xs sm:text-[13px] font-mono outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-slate-600")}
+                    class={clsx("w-full h-9 sm:h-10 px-3 rounded-lg bg-slate-950/80 border border-white/15 text-white text-xs sm:text-[13px] font-mono outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-slate-600 disabled:opacity-50")}
                     maxLength={8}
                     minLength={4}
                     pattern="[0-9]{4,8}"
@@ -815,13 +844,18 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                     value={newPin()}
                     onInput={(e) => setNewPin(e.currentTarget.value)}
                     required
+                    disabled={isChangingPin()}
                   />
                 </div>
                 <button
                   type="submit"
-                  class={clsx("w-full h-9 sm:h-10 min-h-[36px] sm:min-h-[40px] px-4 rounded-lg text-xs font-semibold text-slate-200 hover:text-white bg-slate-800 hover:bg-slate-700/90 border border-white/15 hover:border-blue-400/40 transition-all cursor-pointer inline-flex items-center justify-center gap-2 active:scale-[0.985]")}
+                  disabled={isChangingPin()}
+                  class={clsx("w-full h-9 sm:h-10 min-h-[36px] sm:min-h-[40px] px-4 rounded-lg text-xs font-semibold text-slate-200 hover:text-white bg-slate-800 hover:bg-slate-700/90 border border-white/15 hover:border-blue-400/40 transition-all cursor-pointer inline-flex items-center justify-center gap-2 active:scale-[0.985] disabled:opacity-50 disabled:pointer-events-none")}
                 >
-                  Update PIN
+                  <Show when={isChangingPin()} fallback={<KeyRound size={13} class="text-slate-400" />}>
+                    <Loader2 size={13} class="animate-spin text-blue-400" />
+                  </Show>
+                  <span>{isChangingPin() ? "Updating PIN..." : "Update PIN"}</span>
                 </button>
               </form>
             </div>
@@ -851,29 +885,35 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                   <label class={clsx("text-[11px] sm:text-xs font-semibold text-slate-300")}>Current Master Password</label>
                   <input
                     type="password"
-                    class={clsx("w-full h-9 sm:h-10 px-3 rounded-lg bg-slate-950/80 border border-white/15 text-white text-xs sm:text-[13px] font-mono outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-slate-600")}
+                    class={clsx("w-full h-9 sm:h-10 px-3 rounded-lg bg-slate-950/80 border border-white/15 text-white text-xs sm:text-[13px] font-mono outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-slate-600 disabled:opacity-50")}
                     value={currentMaster()}
                     onInput={(e) => setCurrentMaster(e.currentTarget.value)}
                     required
+                    disabled={isChangingMaster()}
                   />
                 </div>
                 <div class={clsx("flex flex-col gap-1")}>
                   <label class={clsx("text-[11px] sm:text-xs font-semibold text-slate-300")}>New Master Password (6+ chars)</label>
                   <input
                     type="password"
-                    class={clsx("w-full h-9 sm:h-10 px-3 rounded-lg bg-slate-950/80 border border-white/15 text-white text-xs sm:text-[13px] font-mono outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-slate-600")}
+                    class={clsx("w-full h-9 sm:h-10 px-3 rounded-lg bg-slate-950/80 border border-white/15 text-white text-xs sm:text-[13px] font-mono outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-slate-600 disabled:opacity-50")}
                     minLength={6}
                     placeholder="At least 6 characters..."
                     value={newMaster()}
                     onInput={(e) => setNewMaster(e.currentTarget.value)}
                     required
+                    disabled={isChangingMaster()}
                   />
                 </div>
                 <button
                   type="submit"
-                  class={clsx("w-full h-9 sm:h-10 min-h-[36px] sm:min-h-[40px] px-4 rounded-lg text-xs font-semibold text-slate-200 hover:text-white bg-slate-800 hover:bg-slate-700/90 border border-white/15 hover:border-blue-400/40 transition-all cursor-pointer inline-flex items-center justify-center gap-2 active:scale-[0.985]")}
+                  disabled={isChangingMaster()}
+                  class={clsx("w-full h-9 sm:h-10 min-h-[36px] sm:min-h-[40px] px-4 rounded-lg text-xs font-semibold text-slate-200 hover:text-white bg-slate-800 hover:bg-slate-700/90 border border-white/15 hover:border-blue-400/40 transition-all cursor-pointer inline-flex items-center justify-center gap-2 active:scale-[0.985] disabled:opacity-50 disabled:pointer-events-none")}
                 >
-                  Update Password
+                  <Show when={isChangingMaster()} fallback={<Lock size={13} class="text-slate-400" />}>
+                    <Loader2 size={13} class="animate-spin text-blue-400" />
+                  </Show>
+                  <span>{isChangingMaster() ? "Updating Password..." : "Update Password"}</span>
                 </button>
               </form>
             </div>
@@ -893,23 +933,28 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                 <div class={clsx("flex-1 min-w-0")}>
                   <input
                     type="password"
-                    class={clsx("w-full h-9 sm:h-10 px-3 rounded-lg bg-slate-950/80 border border-white/15 text-white text-xs sm:text-[13px] font-mono outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-slate-500")}
+                    class={clsx("w-full h-9 sm:h-10 px-3 rounded-lg bg-slate-950/80 border border-white/15 text-white text-xs sm:text-[13px] font-mono outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-slate-500 disabled:opacity-50")}
                     placeholder="Enter Master Password..."
                     value={revealMasterPass()}
                     onInput={(e) => setRevealMasterPass(e.currentTarget.value)}
                     required
+                    disabled={isRevealingPhrase()}
                   />
                 </div>
                 <button
                   type="submit"
+                  disabled={isRevealingPhrase()}
                   class={clsx(
                     "h-9 sm:h-10 min-h-[36px] sm:min-h-[40px] px-4 rounded-lg text-xs font-bold text-white",
                     "bg-blue-600 hover:bg-blue-500 border border-blue-400/40 shadow-md shadow-blue-600/30",
-                    "transition-all cursor-pointer inline-flex items-center justify-center gap-1.5 whitespace-nowrap active:scale-[0.985] shrink-0"
+                    "transition-all cursor-pointer inline-flex items-center justify-center gap-1.5 whitespace-nowrap active:scale-[0.985] shrink-0",
+                    "disabled:opacity-50 disabled:pointer-events-none"
                   )}
                 >
-                  <KeyRound size={14} />
-                  <span>Reveal Phrase</span>
+                  <Show when={isRevealingPhrase()} fallback={<KeyRound size={14} />}>
+                    <Loader2 size={14} class="animate-spin" />
+                  </Show>
+                  <span>{isRevealingPhrase() ? "Revealing..." : "Reveal Phrase"}</span>
                 </button>
               </form>
               <Show when={revealMsg()}>

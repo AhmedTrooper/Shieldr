@@ -1,6 +1,6 @@
 import { Component, createSignal, Show } from "solid-js";
 import { clsx } from "clsx";
-import { KeyRound } from "lucide-solid";
+import { KeyRound, Loader2 } from "lucide-solid";
 import { sound } from "../services/sound";
 import { RecoveryPhraseResetSchema } from "../schemas";
 
@@ -181,7 +181,9 @@ export const RecoveryModal: Component<RecoveryModalProps> = (props) => {
                 )}
                 disabled={isSubmitting() || wordCount() !== 12 || newPin().length < 4}
               >
-                <KeyRound size={14} />
+                <Show when={isSubmitting()} fallback={<KeyRound size={14} />}>
+                  <Loader2 size={14} class="animate-spin" />
+                </Show>
                 <span>{isSubmitting() ? "Verifying..." : "Reset & Unlock"}</span>
               </button>
             </div>

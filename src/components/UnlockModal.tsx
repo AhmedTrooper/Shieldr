@@ -1,6 +1,6 @@
 import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } from "solid-js";
 import { clsx } from "clsx";
-import { AlertTriangle, Delete, Eraser, Lock, X } from "lucide-solid";
+import { AlertTriangle, Delete, Eraser, Loader2, Lock, X } from "lucide-solid";
 import { sound } from "../services/sound";
 import { Tooltip } from "./ui/tooltip";
 
@@ -346,7 +346,9 @@ export const UnlockModal: Component<UnlockModalProps> = (props) => {
               }
               onClick={() => submitUnlock("unlock")}
             >
-              <Lock size={14} class={clsx("sm:size-[15px]", isSubmitting() && "animate-pulse")} />
+              <Show when={isSubmitting()} fallback={<Lock size={14} class="sm:size-[15px]" />}>
+                <Loader2 size={14} class="animate-spin sm:size-[15px]" />
+              </Show>
               <span>{isSubmitting() ? "Verifying..." : "Unlock"}</span>
             </button>
 
