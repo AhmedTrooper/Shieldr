@@ -149,7 +149,7 @@ export const Tooltip: Component<TooltipProps> = (props) => {
       <KobalteTooltip.Portal>
         <KobalteTooltip.Content
           class={clsx(
-            "shieldr-tooltip-content z-[9999] select-none rounded-lg border px-3 py-2 text-center text-[13px] font-medium leading-snug shadow-2xl backdrop-blur-xl transition-all duration-150",
+            "shieldr-tooltip-content z-[9999] select-none rounded-md border px-3 py-1.5 text-center text-[13px] font-medium leading-snug shadow-2xl backdrop-blur-xl transition-all duration-150",
             "border-cyan-500/30 bg-slate-950/98 text-slate-100",
             // Dynamic position-aware styling via clsx
             {
