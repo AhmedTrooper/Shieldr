@@ -116,7 +116,7 @@ export const UnlockModal: Component<UnlockModalProps> = (props) => {
       >
         <div
           class={clsx(
-            "my-auto w-full max-w-[340px] max-h-[calc(100vh-16px)] min-h-0",
+            "my-auto w-full max-w-[340px] sm:max-w-[360px] max-h-[calc(100vh-16px)] min-h-0",
             "flex flex-col items-center overflow-y-auto overflow-x-hidden box-border",
             "bg-slate-900/95 border border-white/15 rounded-2xl shadow-2xl shadow-black/80 p-4 sm:p-5 relative",
             "animate-[cardPop_0.22s_cubic-bezier(0.16,1,0.3,1)] transition-all",
@@ -213,13 +213,13 @@ export const UnlockModal: Component<UnlockModalProps> = (props) => {
             </div>
 
             {/* Virtual Numpad */}
-            <div class={clsx("grid grid-cols-3 gap-1.5 w-full max-w-[240px] mb-3")}>
+            <div class={clsx("grid grid-cols-3 gap-2 w-full max-w-[260px] mb-3")}>
               <For each={["1", "2", "3", "4", "5", "6", "7", "8", "9"]}>
                 {(num) => (
                   <button
                     type="button"
                     class={clsx(
-                      "h-9.5 min-h-[38px] rounded-lg bg-white/[0.06] hover:bg-white/[0.14] active:bg-blue-600 active:scale-95",
+                      "h-10 min-h-[40px] rounded-lg bg-white/[0.06] hover:bg-white/[0.14] active:bg-blue-600 active:scale-95",
                       "border border-white/10 hover:border-white/20 text-zinc-100 text-base font-semibold cursor-pointer",
                       "flex items-center justify-center shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] transition-all",
                       "disabled:opacity-40 disabled:pointer-events-none"
@@ -235,7 +235,7 @@ export const UnlockModal: Component<UnlockModalProps> = (props) => {
                 <button
                   type="button"
                   class={clsx(
-                    "h-9.5 min-h-[38px] rounded-lg bg-white/[0.06] hover:bg-white/[0.14] active:bg-blue-600 active:scale-95",
+                    "h-10 min-h-[40px] rounded-lg bg-white/[0.06] hover:bg-white/[0.14] active:bg-blue-600 active:scale-95",
                     "border border-white/10 hover:border-white/20 text-xs font-semibold text-zinc-400 cursor-pointer",
                     "flex items-center justify-center shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] transition-all",
                     "disabled:opacity-40 disabled:pointer-events-none"
@@ -250,7 +250,7 @@ export const UnlockModal: Component<UnlockModalProps> = (props) => {
               <button
                 type="button"
                 class={clsx(
-                  "h-9.5 min-h-[38px] rounded-lg bg-white/[0.06] hover:bg-white/[0.14] active:bg-blue-600 active:scale-95",
+                  "h-10 min-h-[40px] rounded-lg bg-white/[0.06] hover:bg-white/[0.14] active:bg-blue-600 active:scale-95",
                   "border border-white/10 hover:border-white/20 text-zinc-100 text-base font-semibold cursor-pointer",
                   "flex items-center justify-center shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] transition-all",
                   "disabled:opacity-40 disabled:pointer-events-none"
@@ -265,7 +265,7 @@ export const UnlockModal: Component<UnlockModalProps> = (props) => {
                 <button
                   type="button"
                   class={clsx(
-                    "h-9.5 min-h-[38px] rounded-lg bg-white/[0.06] hover:bg-white/[0.14] active:bg-blue-600 active:scale-95",
+                    "h-10 min-h-[40px] rounded-lg bg-white/[0.06] hover:bg-white/[0.14] active:bg-blue-600 active:scale-95",
                     "border border-white/10 hover:border-white/20 text-zinc-400 cursor-pointer",
                     "flex items-center justify-center shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] transition-all",
                     "disabled:opacity-40 disabled:pointer-events-none"
@@ -302,7 +302,7 @@ export const UnlockModal: Component<UnlockModalProps> = (props) => {
           </Show>
 
           {/* Primary Unlock Buttons */}
-          <div class={clsx("w-full flex flex-col gap-1.5")}>
+          <div class={clsx("w-full flex flex-col gap-2")}>
             <button
               type="button"
               class={clsx(
@@ -321,7 +321,7 @@ export const UnlockModal: Component<UnlockModalProps> = (props) => {
               {isSubmitting() ? "Verifying..." : "Unlock"}
             </button>
 
-            <div class={clsx("grid grid-cols-2 gap-1.5 w-full")}>
+            <div class={clsx("grid grid-cols-2 gap-2 w-full")}>
               <Tooltip content="Unlock and hide to tray" placement="top">
                 <button
                   type="button"

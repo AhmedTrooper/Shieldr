@@ -54,13 +54,13 @@ export const TitleBar: Component<TitleBarProps> = (props) => {
   return (
     <header
       class={clsx(
-        "h-10 min-h-[40px] flex items-center justify-between px-3.5 sm:px-5 md:px-6 lg:px-8",
+        "h-10 min-h-[40px] flex items-center justify-between px-2.5 sm:px-4 md:px-5 lg:px-6 gap-2",
         "bg-slate-950/80 backdrop-blur-xl border-b border-white/10 select-none relative z-50 transition-all"
       )}
       data-tauri-drag-region
     >
-      <div class={clsx("flex items-center gap-3 min-w-0")} data-tauri-drag-region>
-        <div class={clsx("flex items-center gap-1.5 pr-1.5")}>
+      <div class={clsx("flex items-center gap-2 sm:gap-3 min-w-0")} data-tauri-drag-region>
+        <div class={clsx("flex items-center gap-1.5 pr-1 shrink-0")}>
           <Tooltip content="Close to tray" placement="bottom-start">
             <button
               type="button"
@@ -84,12 +84,12 @@ export const TitleBar: Component<TitleBarProps> = (props) => {
             />
           </Tooltip>
         </div>
-        <div class={clsx("flex items-center gap-1.5")} data-tauri-drag-region>
+        <div class={clsx("flex items-center gap-1.5 min-w-0")} data-tauri-drag-region>
           <Shield size={15} class={clsx("text-blue-400 shrink-0")} />
-          <span class={clsx("text-[13px] font-bold text-slate-200 tracking-tight")}>Shieldr</span>
+          <span class={clsx("text-[13px] font-bold text-slate-200 tracking-tight truncate")}>Shieldr</span>
           <span
             class={clsx(
-              "text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border",
+              "hidden sm:inline-flex text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border shrink-0",
               props.isLocked
                 ? "bg-amber-500/15 text-amber-400 border-amber-500/30"
                 : "bg-blue-500/15 text-blue-400 border-blue-500/25"
@@ -100,11 +100,11 @@ export const TitleBar: Component<TitleBarProps> = (props) => {
         </div>
       </div>
 
-      <div class={clsx("hidden sm:block text-xs text-slate-400 font-medium tracking-tight whitespace-nowrap overflow-hidden text-ellipsis")} data-tauri-drag-region>
+      <div class={clsx("hidden md:block text-xs text-slate-400 font-medium tracking-tight whitespace-nowrap overflow-hidden text-ellipsis")} data-tauri-drag-region>
         <span>Screen Protection</span>
       </div>
 
-      <div class={clsx("hidden sm:flex items-center shrink-0 gap-2")} data-tauri-drag-region>
+      <div class={clsx("flex items-center shrink-0 gap-1.5")} data-tauri-drag-region>
         <div class={clsx("flex items-center gap-1")}>
           <Tooltip content="Check for updates" placement="bottom">
             <button

@@ -35,12 +35,19 @@
   --shadow-input-focus: inset 0 1.5px 3px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--accent-blue), 0 0 0 3.5px var(--accent-blue-glow);
 }
 
+/* Global base reset — non-conflicting (no padding/margin override so Tailwind utilities win) */
 * {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
   user-select: none;
   -webkit-user-select: none;
+}
+
+input,
+textarea,
+[contenteditable="true"],
+.select-text {
+  user-select: text;
+  -webkit-user-select: text;
 }
 
 /* Custom Minimalist Scrollbars */

@@ -69,9 +69,9 @@ export const RecoveryModal: Component<RecoveryModalProps> = (props) => {
       >
         <div
           class={clsx(
-            "my-auto w-full max-w-[400px] max-h-[calc(100vh-16px)] min-h-0",
+            "my-auto w-full max-w-[400px] sm:max-w-[420px] max-h-[calc(100vh-16px)] min-h-0",
             "flex flex-col items-center overflow-y-auto overflow-x-hidden box-border",
-            "bg-slate-900/95 border border-white/15 rounded-2xl shadow-2xl shadow-black/80 p-5 sm:p-6 relative",
+            "bg-slate-900/95 border border-white/15 rounded-2xl shadow-2xl shadow-black/80 p-4 sm:p-5 md:p-6 relative",
             "animate-[cardPop_0.22s_cubic-bezier(0.16,1,0.3,1)] transition-all",
             isSuccess() && "border-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.35)]"
           )}
@@ -98,7 +98,7 @@ export const RecoveryModal: Component<RecoveryModalProps> = (props) => {
             </div>
           </Show>
 
-          <form onSubmit={handleReset} class={clsx("w-full flex flex-col gap-3")}>
+          <form onSubmit={handleReset} class={clsx("w-full flex flex-col gap-2.5")}>
             <div class={clsx("flex flex-col gap-1.5")}>
               <div class={clsx("flex items-center justify-between")}>
                 <label class={clsx("text-xs font-semibold text-slate-200")}>12-Word Recovery Phrase</label>
@@ -124,7 +124,7 @@ export const RecoveryModal: Component<RecoveryModalProps> = (props) => {
               />
             </div>
 
-            <div class={clsx("grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full")}>
+            <div class={clsx("grid grid-cols-1 sm:grid-cols-2 gap-2 w-full")}>
               <div class={clsx("flex flex-col gap-1.5")}>
                 <label class={clsx("text-xs font-semibold text-slate-200")}>New PIN (4-8 digits)</label>
                 <input
@@ -158,7 +158,7 @@ export const RecoveryModal: Component<RecoveryModalProps> = (props) => {
               </div>
             </div>
 
-            <div class={clsx("grid grid-cols-2 gap-2 w-full mt-1")}>
+            <div class={clsx("grid grid-cols-2 gap-2 w-full mt-0.5")}>
               <button
                 type="button"
                 class={clsx(

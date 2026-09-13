@@ -101,9 +101,9 @@ export const InitialSetupModal: Component<InitialSetupModalProps> = (props) => {
       >
         <div
           class={clsx(
-            "my-auto w-full max-w-[400px] max-h-[calc(100vh-16px)] min-h-0",
+            "my-auto w-full max-w-[400px] sm:max-w-[420px] max-h-[calc(100vh-16px)] min-h-0",
             "flex flex-col items-center overflow-y-auto overflow-x-hidden box-border",
-            "bg-slate-900/95 border border-white/15 rounded-2xl shadow-2xl shadow-black/80 p-5 sm:p-6 relative",
+            "bg-slate-900/95 border border-white/15 rounded-2xl shadow-2xl shadow-black/80 p-4 sm:p-5 md:p-6 relative",
             "animate-[cardPop_0.22s_cubic-bezier(0.16,1,0.3,1)]"
           )}
           onClick={(e) => e.stopPropagation()}
@@ -125,8 +125,8 @@ export const InitialSetupModal: Component<InitialSetupModalProps> = (props) => {
               </div>
             </Show>
 
-            <form onSubmit={handleStep1Submit} class={clsx("w-full flex flex-col gap-3")}>
-              <div class={clsx("grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full")}>
+            <form onSubmit={handleStep1Submit} class={clsx("w-full flex flex-col gap-2.5")}>
+              <div class={clsx("grid grid-cols-1 sm:grid-cols-2 gap-2 w-full")}>
                 <div class={clsx("flex flex-col gap-1.5")}>
                   <label class={clsx("text-xs font-semibold text-slate-200")}>Security PIN</label>
                   <input
@@ -219,7 +219,7 @@ export const InitialSetupModal: Component<InitialSetupModalProps> = (props) => {
               </div>
             </Show>
 
-            <div class={clsx("grid grid-cols-2 sm:grid-cols-3 gap-2 w-full mb-3")}>
+            <div class={clsx("grid grid-cols-2 sm:grid-cols-3 gap-1.5 sm:gap-2 w-full mb-3")}>
               <For each={words()}>
                 {(word, idx) => (
                   <div class={clsx("flex items-center gap-2 py-1.5 px-2.5 rounded-lg bg-slate-950/70 border border-white/10 shadow-sm")}>
