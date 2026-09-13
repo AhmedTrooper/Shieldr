@@ -410,15 +410,15 @@ Both files have their own `isShaking` signal that fires on failed unlock. The Ap
 | B-010 | P1 | Keyring failures silently ignored | `src-tauri/src/vault.rs` | 🟢 Fixed |
 | B-011 | P2 | SQLite not in WAL mode | `src-tauri/src/db.rs` | 🟢 Fixed |
 | B-012 | P0 | Empty master password hits Argon2 | `src/components/Dashboard.tsx` | 🟢 Fixed |
-| B-013 | P0 | Backend payload not Zod-validated | all `tauriBridge` callers | 🔴 Open |
+| B-013 | P0 | Backend payload not Zod-validated | all `tauriBridge` callers | 🟢 Fixed |
 | B-014 | P1 | `status().properties` may be undefined | `src/App.tsx` | 🟢 Fixed |
 | B-015 | P1 | Modifier keys (devtools) while locked | `src/components/ShieldOverlay.tsx` | 🟢 Fixed |
 | B-016 | P0 | CSP is `null` | `src-tauri/tauri.conf.json` | ⚪ Intentionally Open (User Specified) |
 | B-017 | P1 | `change_pin` audit too coarse | `src-tauri/src/vault.rs` | 🟢 Fixed |
 | B-018 | P1 | `verify_credential` returns `Ok(false)` | `src-tauri/src/commands.rs`, `vault.rs` | 🟢 Fixed |
-| B-019 | P1 | Stronghold snapshot unprotected by master password | `src-tauri/src/lib.rs` | 🔴 Open |
-| B-020 | P2 | `panic = "abort"` no supervisor | `src-tauri/Cargo.toml` | 🔴 Open |
-| B-021 | P2 | Salt file unprotected | `src-tauri/src/lib.rs` | 🔴 Open |
+| B-019 | P1 | Stronghold snapshot unprotected by master password | `src-tauri/src/lib.rs` | ⚪ Deferred (needs master-prompt UX, see B-056) |
+| B-020 | P2 | `panic = "abort"` no supervisor | `src-tauri/Cargo.toml` | 🟢 Fixed |
+| B-021 | P2 | Salt file unprotected | `src-tauri/src/lib.rs` | 🟢 Fixed |
 | B-022 | P1 | Countdown uses stale read | `src/components/Dashboard.tsx` | 🟢 Fixed |
 | B-023 | P2 | Sound toggle doesn't apply until save | `src/components/Dashboard.tsx` | 🟢 Fixed |
 | B-024 | P2 | Recovery phrase persists across onboarding | `src/components/InitialSetupModal.tsx` | 🟢 Fixed |
@@ -427,7 +427,7 @@ Both files have their own `isShaking` signal that fires on failed unlock. The Ap
 | B-027 | P3 | Slider NaN risk | `src/components/Dashboard.tsx` | 🟢 Fixed |
 | B-028 | P3 | `playKeypadBeep` ignores digit param | `src/services/sound.ts` | 🟢 Fixed |
 | B-029 | P3 | Recovery phrase whitespace not normalized | `src/schemas.ts` | 🟢 Fixed |
-| B-030 | P2 | Window size hardcoded 900×640 | `src-tauri/src/commands.rs` | 🔴 Open |
+| B-030 | P2 | Window size hardcoded 900×640 | `src-tauri/src/commands.rs` | 🟢 Fixed |
 
 ---
 

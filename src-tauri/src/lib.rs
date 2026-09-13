@@ -117,6 +117,17 @@ pub fn run() {
                 std::fs::write(&salt_path, salt_bytes)?;
             }
 
+            // B-021: Harden salt file and app data directory permissions against
+            // other local OS accounts on multi-user Unix workstations.
+            #[cfg(unix)]
+            {
+                use std::os::unix::fs::PermissionsExt;
+                let _ =
+                    std::fs::set_permissions(&app_data_dir, std::fs::Permissions::from_mode(0o700));
+                let _ =
+                    std::fs::set_permissions(&salt_path, std::fs::Permissions::from_mode(0o600));
+            }
+
             // Register stronghold plugin
             app.handle()
                 .plugin(tauri_plugin_stronghold::Builder::with_argon2(&salt_path).build())?;

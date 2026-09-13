@@ -14,6 +14,9 @@ use crate::{
     AppState,
 };
 
+pub const DEFAULT_WINDOW_WIDTH: f64 = 900.0;
+pub const DEFAULT_WINDOW_HEIGHT: f64 = 640.0;
+
 #[derive(Serialize)]
 pub struct ShieldStatus {
     pub is_locked: bool,
@@ -172,13 +175,12 @@ pub async fn unlock_shield(
     if let Err(e) = window.set_always_on_top(false) {
         window_warnings.push(format!("set_always_on_top: {e}"));
     }
-    // B-084: Apply size + center AFTER exiting fullscreen so the OS
+    // B-084 & B-030: Apply size + center AFTER exiting fullscreen so the OS
     // doesn't snap us back to the pre-fullscreen position that the
-    // window-state plugin last saw. Best-effort; warnings recorded if
-    // any single step fails.
+    // window-state plugin last saw. Uses DEFAULT_WINDOW_WIDTH and DEFAULT_WINDOW_HEIGHT.
     if let Err(e) = window.set_size(Size::Logical(LogicalSize {
-        width: 900.0,
-        height: 640.0,
+        width: DEFAULT_WINDOW_WIDTH,
+        height: DEFAULT_WINDOW_HEIGHT,
     })) {
         window_warnings.push(format!("set_size: {e}"));
     }

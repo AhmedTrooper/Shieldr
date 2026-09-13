@@ -4,16 +4,16 @@ import { z } from "zod";
  * Zod schema for Shield UI properties and configuration
  */
 export const ShieldPropertiesSchema = z.object({
-  overlay_opacity: z.number().min(0).max(1),
-  overlay_blur: z.number().min(0).max(50),
-  lock_icon_position: z.enum(["floating", "center", "top-right", "bottom-right"]),
-  lock_icon_autohide_secs: z.number().min(1).max(60),
-  sound_enabled: z.boolean(),
-  max_failed_attempts: z.number().int().min(1).max(20),
-  lockout_duration_secs: z.number().int().min(5).max(3600),
-  has_pin_configured: z.boolean(),
-  has_master_password: z.boolean(),
-  has_reset_phrase: z.boolean(),
+  overlay_opacity: z.number().min(0).max(1).default(0.02),
+  overlay_blur: z.number().min(0).max(50).default(0),
+  lock_icon_position: z.enum(["floating", "center", "top-right", "bottom-right"]).default("floating"),
+  lock_icon_autohide_secs: z.number().min(1).max(60).default(3),
+  sound_enabled: z.boolean().default(true),
+  max_failed_attempts: z.number().int().min(1).max(20).default(5),
+  lockout_duration_secs: z.number().int().min(5).max(3600).default(30),
+  has_pin_configured: z.boolean().default(false),
+  has_master_password: z.boolean().default(false),
+  has_reset_phrase: z.boolean().default(false),
   keep_awake: z.boolean().default(true),
 });
 
@@ -23,10 +23,10 @@ export type ShieldProperties = z.infer<typeof ShieldPropertiesSchema>;
  * Zod schema for Shield runtime status
  */
 export const ShieldStatusSchema = z.object({
-  is_locked: z.boolean(),
-  is_configured: z.boolean(),
-  is_locked_out: z.boolean(),
-  lockout_remaining_secs: z.number().nullable(),
+  is_locked: z.boolean().default(false),
+  is_configured: z.boolean().default(false),
+  is_locked_out: z.boolean().default(false),
+  lockout_remaining_secs: z.number().nullish().transform((val) => val ?? null),
   properties: ShieldPropertiesSchema,
 });
 

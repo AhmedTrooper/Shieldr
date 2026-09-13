@@ -1,5 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
+import { z } from "zod";
 import { AppErrorPayload, AuditLogEntry, ShieldProperties, ShieldStatus } from "../types";
+import { AuditLogEntrySchema, ShieldStatusSchema } from "../schemas";
 
 export class TauriError extends Error {
   public code: string;
@@ -14,6 +16,19 @@ export class TauriError extends Error {
 }
 
 function handleInvokeError(err: unknown): never {
+  if (err instanceof TauriError) {
+    throw err;
+  }
+  if (err instanceof z.ZodError) {
+    const issues = (err as z.ZodError).issues;
+    const detail = issues && Array.isArray(issues)
+      ? issues.map((i) => `${i.path ? i.path.join(".") : "field"}: ${i.message}`).join("; ")
+      : err.message;
+    throw new TauriError({
+      code: "VALIDATION_ERROR",
+      message: `Invalid backend payload schema: ${detail}`,
+    });
+  }
   if (typeof err === "object" && err !== null && "code" in err && "message" in err) {
     throw new TauriError(err as AppErrorPayload);
   }
@@ -40,9 +55,11 @@ function handleInvokeError(err: unknown): never {
 }
 
 export const tauriBridge = {
+  // B-013: Validate all backend payloads at runtime via Zod
   async getShieldStatus(): Promise<ShieldStatus> {
     try {
-      return await invoke<ShieldStatus>("get_shield_status");
+      const raw = await invoke<unknown>("get_shield_status");
+      return ShieldStatusSchema.parse(raw);
     } catch (e) {
       return handleInvokeError(e);
     }
@@ -50,7 +67,8 @@ export const tauriBridge = {
 
   async setupSecurity(pin: string, masterPassword: string): Promise<string> {
     try {
-      return await invoke<string>("setup_security", { pin, masterPassword });
+      const raw = await invoke<unknown>("setup_security", { pin, masterPassword });
+      return z.string().parse(raw);
     } catch (e) {
       return handleInvokeError(e);
     }
@@ -58,7 +76,8 @@ export const tauriBridge = {
 
   async lockShield(): Promise<ShieldStatus> {
     try {
-      return await invoke<ShieldStatus>("lock_shield");
+      const raw = await invoke<unknown>("lock_shield");
+      return ShieldStatusSchema.parse(raw);
     } catch (e) {
       return handleInvokeError(e);
     }
@@ -66,7 +85,8 @@ export const tauriBridge = {
 
   async unlockShield(credential: string): Promise<ShieldStatus> {
     try {
-      return await invoke<ShieldStatus>("unlock_shield", { credential });
+      const raw = await invoke<unknown>("unlock_shield", { credential });
+      return ShieldStatusSchema.parse(raw);
     } catch (e) {
       return handleInvokeError(e);
     }
@@ -100,7 +120,8 @@ export const tauriBridge = {
 
   async revealRecoveryPhrase(masterPassword: string): Promise<string> {
     try {
-      return await invoke<string>("reveal_recovery_phrase", { masterPassword });
+      const raw = await invoke<unknown>("reveal_recovery_phrase", { masterPassword });
+      return z.string().parse(raw);
     } catch (e) {
       return handleInvokeError(e);
     }
@@ -116,7 +137,8 @@ export const tauriBridge = {
 
   async getAuditLogs(limit?: number): Promise<AuditLogEntry[]> {
     try {
-      return await invoke<AuditLogEntry[]>("get_audit_logs", { limit });
+      const raw = await invoke<unknown>("get_audit_logs", { limit });
+      return z.array(AuditLogEntrySchema).parse(raw);
     } catch (e) {
       return handleInvokeError(e);
     }
