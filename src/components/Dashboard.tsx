@@ -16,11 +16,6 @@ import {
   AlertCircle,
   Download,
   ExternalLink,
-  MousePointerClick,
-  ShieldCheck,
-  Sparkles,
-  Layers,
-  Database,
 } from "lucide-solid";
 import { SiGithub, SiYoutube } from "solid-icons/si";
 import { AuditLogEntry, ShieldProperties, ShieldStatus } from "../types";
@@ -33,6 +28,7 @@ import {
   ShieldPropertiesSchema,
 } from "../schemas";
 import { Tooltip } from "./ui/tooltip";
+import { Select, type SelectOption } from "./ui/select";
 import { clsx } from "clsx";
 
 interface DashboardProps {
@@ -44,48 +40,9 @@ interface DashboardProps {
 }
 
 export const Dashboard: Component<DashboardProps> = (props) => {
-  const [activeTab, setActiveTab] = createSignal<"control" | "security" | "display" | "audit">("control");
+  const [activeTab, setActiveTab] = createSignal<"control" | "security" | "display" | "audit" | "updates">("control");
 
-  // Dynamic system status
-  const statusLabel = () => {
-    if (props.status?.is_locked_out) return "Locked Out";
-    if (props.isLocked || props.status?.is_locked) return "Armed";
-    if (props.status && !props.status.is_configured) return "Setup Needed";
-    return "Ready";
-  };
-
-  const statusBadgeClasses = () =>
-    clsx(
-      "self-start inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10.5px] font-bold uppercase tracking-wider transition-all mb-2.5",
-      {
-        "bg-emerald-500/15 border border-emerald-500/30 text-emerald-400":
-          !props.status?.is_locked_out &&
-          !(props.isLocked || props.status?.is_locked) &&
-          (props.status?.is_configured ?? true),
-        "bg-blue-500/15 border border-blue-500/35 text-blue-400":
-          (props.isLocked || props.status?.is_locked) && !props.status?.is_locked_out,
-        "bg-red-500/15 border border-red-500/35 text-red-400":
-          props.status?.is_locked_out,
-        "bg-amber-500/15 border border-amber-500/35 text-amber-400":
-          props.status && !props.status.is_configured,
-      }
-    );
-
-  const statusDotClasses = () =>
-    clsx("w-1.5 h-1.5 rounded-full animate-pulse", {
-      "bg-emerald-500 shadow-[0_0_8px_#10b981]":
-        !props.status?.is_locked_out &&
-        !(props.isLocked || props.status?.is_locked) &&
-        (props.status?.is_configured ?? true),
-      "bg-blue-500 shadow-[0_0_8px_#3b82f6]":
-        (props.isLocked || props.status?.is_locked) && !props.status?.is_locked_out,
-      "bg-red-500 shadow-[0_0_8px_#ef4444]":
-        props.status?.is_locked_out,
-      "bg-amber-500 shadow-[0_0_8px_#f59e0b]":
-        props.status && !props.status.is_configured,
-    });
-
-  const tabBtnClasses = (tab: "control" | "display" | "security" | "audit") =>
+  const tabBtnClasses = (tab: "control" | "display" | "security" | "audit" | "updates") =>
     clsx(
       "w-full min-w-0 h-9 sm:h-10 px-1.5 sm:px-2.5 md:px-3.5 rounded-lg text-[11px] sm:text-xs md:text-[13px] font-semibold tracking-tight",
       "inline-flex flex-row items-center justify-center gap-1 sm:gap-1.5 md:gap-2 whitespace-nowrap cursor-pointer transition-all duration-150 select-none",
@@ -123,6 +80,21 @@ export const Dashboard: Component<DashboardProps> = (props) => {
   const [blur, setBlur] = createSignal(props.properties.overlay_blur);
   const [position, setPosition] = createSignal(props.properties.lock_icon_position);
   const [autohide, setAutohide] = createSignal(props.properties.lock_icon_autohide_secs);
+
+  const positionOptions: SelectOption[] = [
+    { value: "floating", label: "Floating" },
+    { value: "center", label: "Center" },
+    { value: "top-right", label: "Top Right" },
+    { value: "bottom-right", label: "Bottom Right" },
+  ];
+
+  const autohideOptions: SelectOption[] = [
+    { value: "0", label: "Never" },
+    { value: "2", label: "2 seconds" },
+    { value: "3", label: "3 seconds" },
+    { value: "5", label: "5 seconds" },
+    { value: "10", label: "10 seconds" },
+  ];
   const [soundEnabled, setSoundEnabled] = createSignal(props.properties.sound_enabled);
   const [keepAwake, setKeepAwake] = createSignal(props.properties.keep_awake ?? true);
   const [saveDisplayMsg, setSaveDisplayMsg] = createSignal<string | null>(null);
@@ -288,7 +260,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
   });
 
   return (
-    <div class={clsx("flex flex-col flex-1 w-full min-h-0 p-3 sm:p-4 md:p-5 lg:p-6 gap-3 sm:gap-4 overflow-y-auto")}>
+    <div class={clsx("flex flex-col flex-1 w-full min-h-0 px-3 sm:px-4 md:px-5 lg:px-6 pt-3 sm:pt-4 md:pt-5 lg:pt-6 pb-4 sm:pb-6 md:pb-8 lg:pb-10 gap-3 sm:gap-4 overflow-y-auto")}>
       {/* Tab Navigation */}
       <nav class={clsx("flex items-center gap-1 p-1 rounded-xl bg-slate-900/80 border border-white/10 shadow-lg backdrop-blur-md w-full shrink-0")}>
         <Tooltip content="Control center" placement="bottom" class={clsx("flex-1 min-w-0 flex")}>
@@ -342,6 +314,18 @@ export const Dashboard: Component<DashboardProps> = (props) => {
             <span class={clsx("hidden sm:inline md:hidden")}>Audit</span>
           </button>
         </Tooltip>
+        <Tooltip content="Software updates" placement="bottom" class={clsx("flex-1 min-w-0 flex")}>
+          <button
+            type="button"
+            class={tabBtnClasses("updates")}
+            onClick={() => setActiveTab("updates")}
+            aria-label="Software Updates"
+          >
+            <Download size={16} class={clsx("flex-shrink-0 sm:w-[18px] sm:h-[18px]")} />
+            <span class={clsx("hidden md:inline")}>Updates</span>
+            <span class={clsx("hidden sm:inline md:hidden")}>Updates</span>
+          </button>
+        </Tooltip>
       </nav>
 
       {/* Tab 1: Control Center */}
@@ -350,7 +334,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2 }}
-          class={clsx("flex flex-1 flex-col gap-4 min-h-0 pb-2")}
+          class={clsx("flex flex-1 flex-col gap-4 min-h-0 mb-3 sm:mb-4")}
         >
           {/* Screen Protection Card */}
           <div
@@ -361,10 +345,6 @@ export const Dashboard: Component<DashboardProps> = (props) => {
           >
             <div class={clsx("flex flex-1 md:flex-[1.35] flex-col justify-between w-full min-w-0 gap-3")}>
               <div>
-                <span class={statusBadgeClasses()}>
-                  <span class={statusDotClasses()} />
-                  {statusLabel()}
-                </span>
                 <h1 class={clsx("text-base sm:text-lg md:text-xl font-bold tracking-tight text-white mb-1 leading-snug")}>
                   Screen Protection
                 </h1>
@@ -519,277 +499,6 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                 </div>
               </Show>
             </div>
-
-            <div class={clsx("flex flex-1 items-stretch w-full min-w-0 mt-2 md:mt-0")}>
-              <div
-                class={clsx(
-                  "w-full flex flex-col justify-around gap-1.5 p-2.5 sm:p-3 rounded-lg",
-                  "bg-slate-950/60 border border-white/10"
-                )}
-              >
-                <Tooltip
-                  content="Keyboard, mouse, and touch inputs blocked"
-                  placement="left"
-                  class={clsx("w-full flex")}
-                >
-                  <div class={clsx("w-full flex justify-between items-center text-[11px] sm:text-xs py-1.5 px-2 rounded hover:bg-white/[0.04] transition-colors gap-2")}>
-                    <div class={clsx("flex items-center gap-2 min-w-0")}>
-                      <ShieldCheck size={13} class={clsx("text-blue-400 shrink-0")} />
-                      <span class={clsx("text-slate-400 font-medium truncate")}>Protection</span>
-                    </div>
-                    <span class={clsx("font-semibold text-slate-200 text-right truncate")}>Input Blocked</span>
-                  </div>
-                </Tooltip>
-
-                <Tooltip
-                  content="Overlay transparency level"
-                  placement="left"
-                  class={clsx("w-full flex")}
-                >
-                  <div class={clsx("w-full flex justify-between items-center text-[11px] sm:text-xs py-1.5 px-2 rounded hover:bg-white/[0.04] transition-colors gap-2")}>
-                    <div class={clsx("flex items-center gap-2 min-w-0")}>
-                      <Layers size={13} class={clsx("text-indigo-400 shrink-0")} />
-                      <span class={clsx("text-slate-400 font-medium truncate")}>Overlay</span>
-                    </div>
-                    <span class={clsx("font-semibold text-slate-200 text-right truncate")}>
-                      {Math.round((1 - props.properties.overlay_opacity) * 100)}% Transparent
-                    </span>
-                  </div>
-                </Tooltip>
-
-                <Tooltip
-                  content="Quick unlock credentials"
-                  placement="left"
-                  class={clsx("w-full flex")}
-                >
-                  <div class={clsx("w-full flex justify-between items-center text-[11px] sm:text-xs py-1.5 px-2 rounded hover:bg-white/[0.04] transition-colors gap-2")}>
-                    <div class={clsx("flex items-center gap-2 min-w-0")}>
-                      <KeyRound size={13} class={clsx("text-amber-400 shrink-0")} />
-                      <span class={clsx("text-slate-400 font-medium truncate")}>Unlock</span>
-                    </div>
-                    <span class={clsx("font-semibold text-slate-200 text-right truncate")}>PIN / Password</span>
-                  </div>
-                </Tooltip>
-
-                <Tooltip
-                  content="Hardware-backed OS vault storage"
-                  placement="left"
-                  class={clsx("w-full flex")}
-                >
-                  <div class={clsx("w-full flex justify-between items-center text-[11px] sm:text-xs py-1.5 px-2 rounded hover:bg-white/[0.04] transition-colors gap-2")}>
-                    <div class={clsx("flex items-center gap-2 min-w-0")}>
-                      <Database size={13} class={clsx("text-emerald-400 shrink-0")} />
-                      <span class={clsx("text-slate-400 font-medium truncate")}>Vault</span>
-                    </div>
-                    <span class={clsx("font-semibold text-sky-400 text-right truncate")}>OS Keyring</span>
-                  </div>
-                </Tooltip>
-              </div>
-            </div>
-          </div>
-
-          {/* Software Updates Card */}
-          <div
-            class={clsx(
-              "flex flex-col md:flex-row justify-between items-stretch md:items-center gap-3.5 md:gap-4 p-3.5 sm:p-5 md:p-6 rounded-xl",
-              "bg-slate-900/70 border border-white/10 shadow-xl backdrop-blur-md transition-colors hover:border-white/20"
-            )}
-          >
-            <div class={clsx("flex-1 min-w-0")}>
-              <div class={clsx("flex items-center gap-2 mb-1 flex-wrap")}>
-                <RefreshCw
-                  size={16}
-                  class={clsx("text-blue-400 shrink-0", { "animate-spin": updaterService.state().isChecking })}
-                />
-                <h3 class={clsx("text-[14px] sm:text-[15px] font-semibold text-white m-0 truncate")}>Software Updates</h3>
-                <span class={clsx("text-[11px] font-semibold font-mono px-2 py-0.5 rounded-full bg-white/10 text-slate-200 border border-white/15 shrink-0")}>
-                  v{updaterService.state().currentVersion}
-                </span>
-              </div>
-              <p class={clsx("text-[11.5px] sm:text-xs text-slate-400 mb-2 leading-relaxed")}>
-                Checks official signed releases from GitHub.
-              </p>
-
-              <Show when={updaterService.state().updateAvailable && updaterService.state().updateInfo}>
-                <div class={clsx("p-3 rounded-lg bg-emerald-500/15 border border-emerald-500/30 mt-2")}>
-                  <div class={clsx("flex items-center gap-1.5 text-[13px] text-emerald-300 font-bold mb-1")}>
-                    <CheckCircle2 size={16} class={clsx("text-emerald-400")} />
-                    <strong>New version {updaterService.state().updateInfo?.version} is available!</strong>
-                  </div>
-                  <Show when={updaterService.state().updateInfo?.body}>
-                    <p class={clsx("text-xs text-slate-200 mb-2")}>{updaterService.state().updateInfo?.body}</p>
-                  </Show>
-                  <Show when={!updaterService.state().isDownloaded}>
-                    <button
-                      type="button"
-                      class={clsx(
-                        "inline-flex items-center justify-center gap-1.5 h-9 min-h-[36px] px-3.5 rounded-lg text-xs font-semibold text-white",
-                        "bg-blue-600 hover:bg-blue-500 transition-colors cursor-pointer"
-                      )}
-                      onClick={() => updaterService.downloadAndInstallUpdate()}
-                      disabled={updaterService.state().isDownloading}
-                    >
-                      <Download size={14} />
-                      <span>
-                        {updaterService.state().isDownloading
-                          ? `Downloading (${updaterService.state().progressPercent}%)...`
-                          : "Download & Install Now"}
-                      </span>
-                    </button>
-                  </Show>
-                  <Show when={updaterService.state().isDownloaded}>
-                    <div class={clsx("flex items-center gap-1.5 text-xs text-emerald-400")}>
-                      <Check size={16} class={clsx("text-emerald-400")} />
-                      <span>Update downloaded! Restart Shieldr to complete installation.</span>
-                    </div>
-                  </Show>
-                </div>
-              </Show>
-
-              <Show
-                when={
-                  !updaterService.state().updateAvailable &&
-                  !updaterService.state().isChecking &&
-                  !updaterService.state().error
-                }
-              >
-                <div class={clsx("inline-flex items-center gap-1.5 text-xs text-emerald-400 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20")}>
-                  <CheckCircle2 size={14} class={clsx("text-emerald-400")} />
-                  <span>Latest version installed</span>
-                </div>
-              </Show>
-
-              <Show when={updaterService.state().error}>
-                <div class={clsx("inline-flex items-center gap-1.5 text-xs text-amber-400 px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20")}>
-                  <AlertCircle size={14} class={clsx("text-amber-400")} />
-                  <span>{updaterService.state().error}</span>
-                </div>
-              </Show>
-            </div>
-
-            <div class={clsx("flex flex-col items-stretch md:items-end gap-2 shrink-0 w-full md:w-auto")}>
-              <Tooltip content="Check for updates" placement="top" class={clsx("w-full md:w-auto flex")}>
-                <button
-                  type="button"
-                  class={clsx(
-                    "w-full md:w-auto h-9 min-h-[36px] px-3.5 rounded-lg text-xs font-semibold text-slate-200",
-                    "inline-flex items-center justify-center gap-2 bg-white/[0.07] hover:bg-white/[0.12]",
-                    "border border-white/15 hover:border-blue-400/40 transition-all cursor-pointer",
-                    "disabled:opacity-50 disabled:cursor-not-allowed"
-                  )}
-                  onClick={() => updaterService.checkForUpdates(false)}
-                  disabled={updaterService.state().isChecking}
-                  aria-label="Check for Updates"
-                >
-                  <RefreshCw
-                    size={14}
-                    class={clsx({ "animate-spin": updaterService.state().isChecking })}
-                  />
-                  <span>{updaterService.state().isChecking ? "Checking..." : "Check Updates"}</span>
-                </button>
-              </Tooltip>
-
-              <div class={clsx("grid grid-cols-2 md:flex items-center gap-2 w-full md:w-auto")}>
-                <Tooltip content="GitHub repository" placement="top" class={clsx("w-full md:w-auto flex")}>
-                  <button
-                    type="button"
-                    class={clsx(
-                      "w-full md:w-auto h-9 min-h-[36px] px-3 rounded-lg text-xs font-medium text-slate-400 hover:text-white",
-                      "inline-flex items-center justify-center gap-1.5 bg-slate-950/60 hover:bg-slate-900",
-                      "border border-white/10 hover:border-white/20 transition-all cursor-pointer whitespace-nowrap"
-                    )}
-                    onClick={() => openUrl("https://github.com/AhmedTrooper/Shieldr")}
-                    aria-label="GitHub Repository"
-                  >
-                    <SiGithub size={15} />
-                    <span>GitHub</span>
-                    <ExternalLink size={12} class={clsx("opacity-60")} />
-                  </button>
-                </Tooltip>
-                <Tooltip content="YouTube tutorials" placement="top" class={clsx("w-full md:w-auto flex")}>
-                  <button
-                    type="button"
-                    class={clsx(
-                      "w-full md:w-auto h-9 min-h-[36px] px-3 rounded-lg text-xs font-medium text-slate-400 hover:text-red-400",
-                      "inline-flex items-center justify-center gap-1.5 bg-slate-950/60 hover:bg-slate-900",
-                      "border border-white/10 hover:border-white/20 transition-all cursor-pointer whitespace-nowrap"
-                    )}
-                    onClick={() => openUrl("https://www.youtube.com/@AhmedTrooper")}
-                    aria-label="YouTube Channel"
-                  >
-                    <SiYoutube size={15} />
-                    <span>YouTube</span>
-                    <ExternalLink size={12} class={clsx("opacity-60")} />
-                  </button>
-                </Tooltip>
-              </div>
-            </div>
-          </div>
-
-          {/* Features Grid */}
-          <div class={clsx("grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 w-full")}>
-            <Tooltip
-              content="Blocks mouse clicks, taps, drag gestures, and system hotkeys"
-              placement="top"
-              class={clsx("w-full flex")}
-            >
-              <div
-                class={clsx(
-                  "w-full h-11 min-h-[44px] px-3 rounded-xl bg-slate-900/80 hover:bg-slate-800/90",
-                  "border border-white/10 hover:border-blue-400/40 shadow-md shadow-black/30 hover:shadow-blue-500/10",
-                  "flex items-center gap-2.5 transition-all duration-200 hover:-translate-y-0.5 cursor-pointer group"
-                )}
-              >
-                <div class={clsx("w-7 h-7 rounded-lg flex items-center justify-center bg-white/[0.05] border border-white/10 group-hover:border-blue-400/40 group-hover:scale-105 transition-all shrink-0 text-blue-400")}>
-                  <MousePointerClick size={14} />
-                </div>
-                <h3 class={clsx("text-xs font-semibold text-slate-200 group-hover:text-white m-0 tracking-tight truncate")}>
-                  Input Shield
-                </h3>
-              </div>
-            </Tooltip>
-
-            <Tooltip
-              content="Requires security PIN to dismiss, minimize, or close"
-              placement="top"
-              class={clsx("w-full flex")}
-            >
-              <div
-                class={clsx(
-                  "w-full h-11 min-h-[44px] px-3 rounded-xl bg-slate-900/80 hover:bg-slate-800/90",
-                  "border border-white/10 hover:border-emerald-400/40 shadow-md shadow-black/30 hover:shadow-emerald-500/10",
-                  "flex items-center gap-2.5 transition-all duration-200 hover:-translate-y-0.5 cursor-pointer group"
-                )}
-              >
-                <div class={clsx("w-7 h-7 rounded-lg flex items-center justify-center bg-white/[0.05] border border-white/10 group-hover:border-emerald-400/40 group-hover:scale-105 transition-all shrink-0 text-emerald-400")}>
-                  <ShieldCheck size={14} />
-                </div>
-                <h3 class={clsx("text-xs font-semibold text-slate-200 group-hover:text-white m-0 tracking-tight truncate")}>
-                  PIN Protected
-                </h3>
-              </div>
-            </Tooltip>
-
-            <Tooltip
-              content="Discreet floating padlock fades away during inactivity"
-              placement="top"
-              class={clsx("w-full flex")}
-            >
-              <div
-                class={clsx(
-                  "w-full h-11 min-h-[44px] px-3 rounded-xl bg-slate-900/80 hover:bg-slate-800/90",
-                  "border border-white/10 hover:border-purple-400/40 shadow-md shadow-black/30 hover:shadow-purple-500/10",
-                  "flex items-center gap-2.5 transition-all duration-200 hover:-translate-y-0.5 cursor-pointer group"
-                )}
-              >
-                <div class={clsx("w-7 h-7 rounded-lg flex items-center justify-center bg-white/[0.05] border border-white/10 group-hover:border-purple-400/40 group-hover:scale-105 transition-all shrink-0 text-purple-400")}>
-                  <Sparkles size={14} />
-                </div>
-                <h3 class={clsx("text-xs font-semibold text-slate-200 group-hover:text-white m-0 tracking-tight truncate")}>
-                  Auto-Fade
-                </h3>
-              </div>
-            </Tooltip>
           </div>
         </Motion.div>
       </Show>
@@ -801,7 +510,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2 }}
-          class={clsx("flex flex-1 flex-col gap-3 sm:gap-4 min-h-0 pb-2")}
+          class={clsx("flex flex-1 flex-col gap-3 sm:gap-4 min-h-0 mb-3 sm:mb-4")}
         >
           <div class={clsx("flex flex-col gap-3 sm:gap-3.5 p-3.5 sm:p-5 md:p-6 rounded-xl bg-slate-900/80 border border-white/10 shadow-xl backdrop-blur-md")}>
             <div class={clsx("flex flex-col gap-1 pb-2 border-b border-white/10")}>
@@ -867,19 +576,16 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                 <label class={clsx("text-[12.5px] sm:text-[13px] font-semibold text-slate-200")}>Unlock Icon Position</label>
                 <span class={clsx("text-[11px] sm:text-xs text-slate-400 leading-relaxed")}>Placement of the click-to-unlock trigger</span>
               </div>
-              <div class={clsx("w-full sm:w-auto")}>
-                <select
-                  class={clsx("w-full sm:w-40 md:w-44 h-9 px-3 rounded-lg bg-slate-800 border border-white/15 text-slate-200 text-xs font-semibold outline-none hover:border-blue-400/50 focus:border-blue-500 transition-colors cursor-pointer")}
+              <div class={clsx("w-full sm:w-40 md:w-44")}>
+                <Select
+                  options={positionOptions}
                   value={position()}
-                  onChange={(e) =>
-                    setPosition(e.currentTarget.value as ShieldProperties["lock_icon_position"])
+                  onChange={(v) =>
+                    v && setPosition(v as ShieldProperties["lock_icon_position"])
                   }
-                >
-                  <option value="floating">Floating</option>
-                  <option value="center">Center</option>
-                  <option value="top-right">Top Right</option>
-                  <option value="bottom-right">Bottom Right</option>
-                </select>
+                  ariaLabel="Unlock Icon Position"
+                  triggerClass="w-full"
+                />
               </div>
             </div>
 
@@ -888,18 +594,14 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                 <label class={clsx("text-[12.5px] sm:text-[13px] font-semibold text-slate-200")}>Auto-Hide Timeout</label>
                 <span class={clsx("text-[11px] sm:text-xs text-slate-400 leading-relaxed")}>Hide lock icon after mouse inactivity</span>
               </div>
-              <div class={clsx("w-full sm:w-auto")}>
-                <select
-                  class={clsx("w-full sm:w-40 md:w-44 h-9 px-3 rounded-lg bg-slate-800 border border-white/15 text-slate-200 text-xs font-semibold outline-none hover:border-blue-400/50 focus:border-blue-500 transition-colors cursor-pointer")}
-                  value={autohide()}
-                  onChange={(e) => setAutohide(parseInt(e.currentTarget.value))}
-                >
-                  <option value="0">Never</option>
-                  <option value="2">2 seconds</option>
-                  <option value="3">3 seconds</option>
-                  <option value="5">5 seconds</option>
-                  <option value="10">10 seconds</option>
-                </select>
+              <div class={clsx("w-full sm:w-40 md:w-44")}>
+                <Select
+                  options={autohideOptions}
+                  value={String(autohide())}
+                  onChange={(v) => v && setAutohide(parseInt(v))}
+                  ariaLabel="Auto-Hide Timeout"
+                  triggerClass="w-full"
+                />
               </div>
             </div>
 
@@ -957,7 +659,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
               </div>
             </div>
 
-            <div class={clsx("flex justify-end pt-3 sm:pt-4")}>
+            <div class={clsx("flex justify-end mt-3 sm:mt-4")}>
               <Tooltip content="Save display settings" placement="top">
                 <button
                   type="button"
@@ -983,7 +685,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2 }}
-          class={clsx("flex flex-1 flex-col gap-4 min-h-0 pb-2")}
+          class={clsx("flex flex-1 flex-col gap-4 min-h-0 mb-3 sm:mb-4")}
         >
           <div class={clsx("grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4")}>
             {/* Change PIN Card */}
@@ -1177,7 +879,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2 }}
-          class={clsx("flex flex-1 flex-col gap-4 min-h-0 pb-2")}
+          class={clsx("flex flex-1 flex-col gap-4 min-h-0 mb-3 sm:mb-4")}
         >
           <div class={clsx("flex flex-col gap-3 sm:gap-4 p-3.5 sm:p-5 md:p-6 rounded-xl bg-slate-900/80 border border-white/10 shadow-xl backdrop-blur-md")}>
             <div class={clsx("flex items-center justify-between gap-3 sm:gap-4 pb-2 border-b border-white/10 flex-wrap")}>
@@ -1249,6 +951,153 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                   </For>
                 </tbody>
               </table>
+            </div>
+          </div>
+        </Motion.div>
+      </Show>
+
+      {/* Tab 5: Software Updates */}
+      <Show when={activeTab() === "updates"}>
+        <Motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2 }}
+          class={clsx("flex flex-1 flex-col gap-4 min-h-0 mb-3 sm:mb-4")}
+        >
+          <div
+            class={clsx(
+              "flex flex-col md:flex-row justify-between items-stretch md:items-center gap-3.5 md:gap-4 p-3.5 sm:p-5 md:p-6 rounded-xl",
+              "bg-slate-900/70 border border-white/10 shadow-xl backdrop-blur-md transition-colors hover:border-white/20"
+            )}
+          >
+            <div class={clsx("flex-1 min-w-0")}>
+              <div class={clsx("flex items-center gap-2 mb-1 flex-wrap")}>
+                <RefreshCw
+                  size={16}
+                  class={clsx("text-blue-400 shrink-0", { "animate-spin": updaterService.state().isChecking })}
+                />
+                <h3 class={clsx("text-[14px] sm:text-[15px] font-semibold text-white m-0 truncate")}>Software Updates</h3>
+                <span class={clsx("text-[11px] font-semibold font-mono px-2 py-0.5 rounded-full bg-white/10 text-slate-200 border border-white/15 shrink-0")}>
+                  v{updaterService.state().currentVersion}
+                </span>
+              </div>
+              <p class={clsx("text-[11.5px] sm:text-xs text-slate-400 mb-2 leading-relaxed")}>
+                Checks official signed releases from GitHub.
+              </p>
+
+              <Show when={updaterService.state().updateAvailable && updaterService.state().updateInfo}>
+                <div class={clsx("p-3 rounded-lg bg-emerald-500/15 border border-emerald-500/30 mt-2")}>
+                  <div class={clsx("flex items-center gap-1.5 text-[13px] text-emerald-300 font-bold mb-1")}>
+                    <CheckCircle2 size={16} class={clsx("text-emerald-400")} />
+                    <strong>New version {updaterService.state().updateInfo?.version} is available!</strong>
+                  </div>
+                  <Show when={updaterService.state().updateInfo?.body}>
+                    <p class={clsx("text-xs text-slate-200 mb-2")}>{updaterService.state().updateInfo?.body}</p>
+                  </Show>
+                  <Show when={!updaterService.state().isDownloaded}>
+                    <button
+                      type="button"
+                      class={clsx(
+                        "inline-flex items-center justify-center gap-1.5 h-9 min-h-[36px] px-3.5 rounded-lg text-xs font-semibold text-white",
+                        "bg-blue-600 hover:bg-blue-500 transition-colors cursor-pointer"
+                      )}
+                      onClick={() => updaterService.downloadAndInstallUpdate()}
+                      disabled={updaterService.state().isDownloading}
+                    >
+                      <Download size={14} />
+                      <span>
+                        {updaterService.state().isDownloading
+                          ? `Downloading (${updaterService.state().progressPercent}%)...`
+                          : "Download & Install Now"}
+                      </span>
+                    </button>
+                  </Show>
+                  <Show when={updaterService.state().isDownloaded}>
+                    <div class={clsx("flex items-center gap-1.5 text-xs text-emerald-400")}>
+                      <Check size={16} class={clsx("text-emerald-400")} />
+                      <span>Update downloaded! Restart Shieldr to complete installation.</span>
+                    </div>
+                  </Show>
+                </div>
+              </Show>
+
+              <Show
+                when={
+                  !updaterService.state().updateAvailable &&
+                  !updaterService.state().isChecking &&
+                  !updaterService.state().error
+                }
+              >
+                <div class={clsx("inline-flex items-center gap-1.5 text-xs text-emerald-400 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20")}>
+                  <CheckCircle2 size={14} class={clsx("text-emerald-400")} />
+                  <span>Latest version installed</span>
+                </div>
+              </Show>
+
+              <Show when={updaterService.state().error}>
+                <div class={clsx("inline-flex items-center gap-1.5 text-xs text-amber-400 px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20")}>
+                  <AlertCircle size={14} class={clsx("text-amber-400")} />
+                  <span>{updaterService.state().error}</span>
+                </div>
+              </Show>
+            </div>
+
+            <div class={clsx("flex flex-col items-stretch md:items-end gap-2 shrink-0 w-full md:w-auto")}>
+              <Tooltip content="Check for updates" placement="top" class={clsx("w-full md:w-auto flex")}>
+                <button
+                  type="button"
+                  class={clsx(
+                    "w-full md:w-auto h-9 min-h-[36px] px-3.5 rounded-lg text-xs font-semibold text-slate-200",
+                    "inline-flex items-center justify-center gap-2 bg-white/[0.07] hover:bg-white/[0.12]",
+                    "border border-white/15 hover:border-blue-400/40 transition-all cursor-pointer",
+                    "disabled:opacity-50 disabled:cursor-not-allowed"
+                  )}
+                  onClick={() => updaterService.checkForUpdates(false)}
+                  disabled={updaterService.state().isChecking}
+                  aria-label="Check for Updates"
+                >
+                  <RefreshCw
+                    size={14}
+                    class={clsx({ "animate-spin": updaterService.state().isChecking })}
+                  />
+                  <span>{updaterService.state().isChecking ? "Checking..." : "Check Updates"}</span>
+                </button>
+              </Tooltip>
+
+              <div class={clsx("grid grid-cols-2 md:flex items-center gap-2 w-full md:w-auto")}>
+                <Tooltip content="GitHub repository" placement="top" class={clsx("w-full md:w-auto flex")}>
+                  <button
+                    type="button"
+                    class={clsx(
+                      "w-full md:w-auto h-9 min-h-[36px] px-3 rounded-lg text-xs font-medium text-slate-400 hover:text-white",
+                      "inline-flex items-center justify-center gap-1.5 bg-slate-950/60 hover:bg-slate-900",
+                      "border border-white/10 hover:border-white/20 transition-all cursor-pointer whitespace-nowrap"
+                    )}
+                    onClick={() => openUrl("https://github.com/AhmedTrooper/Shieldr")}
+                    aria-label="GitHub Repository"
+                  >
+                    <SiGithub size={15} />
+                    <span>GitHub</span>
+                    <ExternalLink size={12} class={clsx("opacity-60")} />
+                  </button>
+                </Tooltip>
+                <Tooltip content="YouTube tutorials" placement="top" class={clsx("w-full md:w-auto flex")}>
+                  <button
+                    type="button"
+                    class={clsx(
+                      "w-full md:w-auto h-9 min-h-[36px] px-3 rounded-lg text-xs font-medium text-slate-400 hover:text-red-400",
+                      "inline-flex items-center justify-center gap-1.5 bg-slate-950/60 hover:bg-slate-900",
+                      "border border-white/10 hover:border-white/20 transition-all cursor-pointer whitespace-nowrap"
+                    )}
+                    onClick={() => openUrl("https://www.youtube.com/@AhmedTrooper")}
+                    aria-label="YouTube Channel"
+                  >
+                    <SiYoutube size={15} />
+                    <span>YouTube</span>
+                    <ExternalLink size={12} class={clsx("opacity-60")} />
+                  </button>
+                </Tooltip>
+              </div>
             </div>
           </div>
         </Motion.div>

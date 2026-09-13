@@ -1,6 +1,6 @@
 import { Component, createSignal, Show } from "solid-js";
 import { clsx } from "clsx";
-import { KeyRound, ShieldAlert } from "lucide-solid";
+import { KeyRound } from "lucide-solid";
 import { sound } from "../services/sound";
 import { RecoveryPhraseResetSchema } from "../schemas";
 
@@ -77,10 +77,6 @@ export const RecoveryModal: Component<RecoveryModalProps> = (props) => {
           )}
           onClick={(e) => e.stopPropagation()}
         >
-          <div class={clsx("inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold tracking-wide uppercase bg-amber-500/15 border border-amber-500/30 text-amber-400 mb-2")}>
-            <ShieldAlert size={13} />
-            <span>Recovery</span>
-          </div>
           <h2 class={clsx("text-base font-bold text-zinc-100 mb-0.5 text-center tracking-tight")}>Reset PIN</h2>
           <p class={clsx("text-xs text-zinc-400 mb-3 text-center leading-relaxed")}>
             Enter your 12-word recovery phrase to set a new PIN.

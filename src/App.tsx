@@ -181,7 +181,7 @@ const App: Component = () => {
   return (
     <main
       class={clsx(
-        "w-full h-full min-h-0 relative flex flex-col overflow-hidden",
+        "w-full h-full min-h-0 relative flex flex-col overflow-hidden pb-20",
         status().is_locked
           ? "!bg-transparent"
           : "bg-slate-950 bg-[radial-gradient(circle_at_15%_15%,rgba(59,130,246,0.10)_0%,transparent_50%),radial-gradient(circle_at_85%_85%,rgba(16,185,129,0.07)_0%,transparent_50%),radial-gradient(circle_at_50%_50%,rgba(99,102,241,0.05)_0%,transparent_65%)]"
@@ -190,7 +190,6 @@ const App: Component = () => {
       {/* Frameless Custom Titlebar (Shown when Unlocked) */}
       <Show when={!status().is_locked}>
         <TitleBar
-          isLocked={status().is_locked}
           onRequestClose={handleCloseRequest}
         />
       </Show>

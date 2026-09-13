@@ -35,19 +35,17 @@
   --shadow-input-focus: inset 0 1.5px 3px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--accent-blue), 0 0 0 3.5px var(--accent-blue-glow);
 }
 
-/* Global base reset — non-conflicting (no padding/margin override so Tailwind utilities win) */
+/* Global base reset — text is selectable everywhere by default */
 * {
   box-sizing: border-box;
-  user-select: none;
-  -webkit-user-select: none;
 }
 
-input,
-textarea,
-[contenteditable="true"],
-.select-text {
-  user-select: text;
-  -webkit-user-select: text;
+/* Disable text selection only on interactive controls where it's not useful */
+button,
+[role="button"],
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 /* Custom Minimalist Scrollbars */
@@ -83,6 +81,7 @@ body,
   color: var(--text-main);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  color-scheme: dark;
 }
 
 /* Keyframe Animations */

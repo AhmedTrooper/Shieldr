@@ -134,14 +134,6 @@ export const LockIconWidget: Component<LockIconWidgetProps> = (props) => {
           </linearGradient>
         </defs>
       </svg>
-      <span
-        class={clsx(
-          "text-[10.5px] font-semibold px-2.5 py-0.5 rounded-full",
-          "bg-slate-900/90 backdrop-blur-md border border-white/20 text-slate-100 shadow-md pointer-events-none opacity-95"
-        )}
-      >
-        Unlock
-      </span>
     </div>
   );
 };

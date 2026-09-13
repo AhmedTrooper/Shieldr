@@ -9,7 +9,6 @@ import { updaterService } from "../services/updater";
 import { Tooltip } from "./ui/tooltip";
 
 interface TitleBarProps {
-  isLocked: boolean;
   onRequestClose: () => void;
 }
 
@@ -87,16 +86,6 @@ export const TitleBar: Component<TitleBarProps> = (props) => {
         <div class={clsx("flex items-center gap-1.5 min-w-0")} data-tauri-drag-region>
           <Shield size={15} class={clsx("text-blue-400 shrink-0")} />
           <span class={clsx("text-[13px] font-bold text-slate-200 tracking-tight truncate")}>Shieldr</span>
-          <span
-            class={clsx(
-              "hidden sm:inline-flex text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border shrink-0",
-              props.isLocked
-                ? "bg-amber-500/15 text-amber-400 border-amber-500/30"
-                : "bg-blue-500/15 text-blue-400 border-blue-500/25"
-            )}
-          >
-            {props.isLocked ? "Armed" : "Ready"}
-          </span>
         </div>
       </div>
 
@@ -151,9 +140,6 @@ export const TitleBar: Component<TitleBarProps> = (props) => {
             </button>
           </Tooltip>
         </div>
-        <span class={clsx("text-[10px] font-semibold text-slate-400 bg-white/[0.05] px-2.5 py-0.5 rounded-full border border-white/10 whitespace-nowrap")}>
-          Encrypted
-        </span>
       </div>
     </header>
   );
