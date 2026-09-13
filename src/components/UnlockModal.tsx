@@ -141,8 +141,8 @@ export const UnlockModal: Component<UnlockModalProps> = (props) => {
               <path d="M22.8 29.5L22 36H26L25.2 29.5" fill="rgba(0, 0, 0, 0.8)" />
               <defs>
                 <linearGradient id="modalBodyGradient" x1="10" y1="20" x2="38" y2="42" gradientUnits="userSpaceOnUse">
-                  <stop stop-color={isSuccess() ? "#22c55e" : "#e4e4e7"} />
-                  <stop offset="1" stop-color={isSuccess() ? "#16a34a" : "#71717a"} />
+                  <stop stop-color={isSuccess() ? "#22c55e" : "#60a5fa"} />
+                  <stop offset="1" stop-color={isSuccess() ? "#16a34a" : "#2563eb"} />
                 </linearGradient>
               </defs>
             </svg>

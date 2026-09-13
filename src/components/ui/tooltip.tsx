@@ -150,7 +150,7 @@ export const Tooltip: Component<TooltipProps> = (props) => {
         <KobalteTooltip.Content
           class={clsx(
             "shieldr-tooltip-content z-[9999] select-none rounded-md border px-3 py-1.5 text-center text-[13px] font-medium leading-snug shadow-2xl backdrop-blur-xl transition-all duration-150",
-            "border-zinc-700/60 bg-zinc-900/98 text-zinc-100",
+            "border-slate-700/60 bg-slate-900/98 text-slate-100",
             // Dynamic position-aware styling via clsx
             {
               "origin-bottom": computedPlacement()?.startsWith("top"),

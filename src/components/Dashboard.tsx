@@ -16,6 +16,11 @@ import {
   AlertCircle,
   Download,
   ExternalLink,
+  MousePointerClick,
+  ShieldCheck,
+  Sparkles,
+  Layers,
+  Database,
 } from "lucide-solid";
 import { SiGithub, SiYoutube } from "solid-icons/si";
 import { AuditLogEntry, ShieldProperties } from "../types";
@@ -38,8 +43,9 @@ interface DashboardProps {
 export const Dashboard: Component<DashboardProps> = (props) => {
   const [activeTab, setActiveTab] = createSignal<"control" | "security" | "display" | "audit">("control");
 
-  // Countdown locking state
+  // Countdown locking state (in-memory, never stored)
   const [countdown, setCountdown] = createSignal<number | null>(null);
+  const [delaySeconds, setDelaySeconds] = createSignal<number>(5);
   let countdownTimer: ReturnType<typeof setInterval> | null = null;
 
   // Security Form States
@@ -73,7 +79,8 @@ export const Dashboard: Component<DashboardProps> = (props) => {
 
   const startCountdownLock = () => {
     sound.playKeypadBeep();
-    setCountdown(3);
+    const secs = Math.max(1, delaySeconds() || 5);
+    setCountdown(secs);
     countdownTimer = setInterval(() => {
       const current = countdown();
       if (current === null || current <= 1) {
@@ -293,7 +300,10 @@ export const Dashboard: Component<DashboardProps> = (props) => {
         >
           <div class="hero-card">
             <div class="hero-left">
-              <span class="status-indicator-pill">Ready</span>
+              <span class="status-indicator-pill">
+                <span class="status-dot-pulse" />
+                Ready
+              </span>
               <h1 class="hero-title">Screen Protection</h1>
               <p class="hero-description">
                 Blocks clicks, touches, and keystrokes while media continues playing.
@@ -314,24 +324,63 @@ export const Dashboard: Component<DashboardProps> = (props) => {
                         <span>Lock Screen Now</span>
                       </button>
                     </Tooltip>
-                    <Tooltip content="Lock after 3-second delay" placement="top">
-                      <button
-                        type="button"
-                        class="countdown-lock-btn"
-                        onClick={startCountdownLock}
-                        aria-label="Lock in 3s Delay"
-                      >
-                        <Clock size={16} />
-                        <span>Lock in 3s Delay</span>
-                      </button>
-                    </Tooltip>
+                    <div class="countdown-lock-row">
+                      <Tooltip content={`Lock screen after ${delaySeconds()}s delay`} placement="top">
+                        <button
+                          type="button"
+                          class="countdown-lock-btn"
+                          onClick={startCountdownLock}
+                          aria-label={`Lock in ${delaySeconds()}s Delay`}
+                        >
+                          <Clock size={16} />
+                          <span>Lock in {delaySeconds()}s Delay</span>
+                        </button>
+                      </Tooltip>
+                      <Tooltip content="Adjust delay (1-60s, session only)" placement="top">
+                        <div class="delay-adjuster" role="group" aria-label="Delay duration adjuster">
+                          <button
+                            type="button"
+                            class="delay-stepper-btn"
+                            onClick={() => setDelaySeconds((prev) => Math.max(1, prev - 1))}
+                            aria-label="Decrease delay by 1 second"
+                            disabled={delaySeconds() <= 1}
+                          >
+                            -
+                          </button>
+                          <input
+                            type="number"
+                            min="1"
+                            max="60"
+                            value={delaySeconds()}
+                            onInput={(e) => {
+                              const val = parseInt(e.currentTarget.value, 10);
+                              if (!isNaN(val)) {
+                                setDelaySeconds(Math.max(1, Math.min(60, val)));
+                              }
+                            }}
+                            class="delay-input"
+                            aria-label="Delay duration in seconds"
+                          />
+                          <span class="delay-sec-label">s</span>
+                          <button
+                            type="button"
+                            class="delay-stepper-btn"
+                            onClick={() => setDelaySeconds((prev) => Math.min(60, prev + 1))}
+                            aria-label="Increase delay by 1 second"
+                            disabled={delaySeconds() >= 60}
+                          >
+                            +
+                          </button>
+                        </div>
+                      </Tooltip>
+                    </div>
                   </div>
                 }
               >
                 <div class="countdown-active-box">
                   <div class="countdown-digits">{countdown()}</div>
                   <p class="countdown-hint">
-                    Locking screen...
+                    Locking in {countdown()}s...
                   </p>
                   <Tooltip content="Cancel countdown" placement="bottom">
                     <button
@@ -349,24 +398,44 @@ export const Dashboard: Component<DashboardProps> = (props) => {
 
             <div class="hero-right">
               <div class="spec-card">
-                <div class="spec-item">
-                  <span class="spec-label">Protection</span>
-                  <span class="spec-val">Input Blocked</span>
-                </div>
-                <div class="spec-item">
-                  <span class="spec-label">Overlay Layer</span>
-                  <span class="spec-val">
-                    {Math.round((1 - props.properties.overlay_opacity) * 100)}% Transparent
-                  </span>
-                </div>
-                <div class="spec-item">
-                  <span class="spec-label">Unlock Mode</span>
-                  <span class="spec-val">PIN or Password</span>
-                </div>
-                <div class="spec-item">
-                  <span class="spec-label">Vault</span>
-                  <span class="spec-val text-accent">OS Keyring</span>
-                </div>
+                <Tooltip content="Keyboard, mouse, and touch inputs blocked" placement="left">
+                  <div class="spec-item">
+                    <div class="spec-item-left">
+                      <ShieldCheck size={14} class="text-blue-400" />
+                      <span class="spec-label">Protection</span>
+                    </div>
+                    <span class="spec-val">Input Blocked</span>
+                  </div>
+                </Tooltip>
+                <Tooltip content="Overlay transparency level" placement="left">
+                  <div class="spec-item">
+                    <div class="spec-item-left">
+                      <Layers size={14} class="text-indigo-400" />
+                      <span class="spec-label">Overlay</span>
+                    </div>
+                    <span class="spec-val">
+                      {Math.round((1 - props.properties.overlay_opacity) * 100)}% Transparent
+                    </span>
+                  </div>
+                </Tooltip>
+                <Tooltip content="Quick unlock credentials" placement="left">
+                  <div class="spec-item">
+                    <div class="spec-item-left">
+                      <KeyRound size={14} class="text-amber-400" />
+                      <span class="spec-label">Unlock</span>
+                    </div>
+                    <span class="spec-val">PIN / Password</span>
+                  </div>
+                </Tooltip>
+                <Tooltip content="Hardware-backed OS vault storage" placement="left">
+                  <div class="spec-item">
+                    <div class="spec-item-left">
+                      <Database size={14} class="text-emerald-400" />
+                      <span class="spec-label">Vault</span>
+                    </div>
+                    <span class="spec-val text-accent">OS Keyring</span>
+                  </div>
+                </Tooltip>
               </div>
             </div>
           </div>
@@ -487,27 +556,30 @@ export const Dashboard: Component<DashboardProps> = (props) => {
           </div>
 
           <div class="features-grid">
-            <div class="feature-tile">
-              <div class="tile-icon">👶</div>
-              <h3>Input Blocking</h3>
-              <p>
-                Blocks mouse clicks, taps, drag gestures, and system hotkeys.
-              </p>
-            </div>
-            <div class="feature-tile">
-              <div class="tile-icon">🔒</div>
-              <h3>PIN Protected</h3>
-              <p>
-                Requires your security PIN to dismiss, close, or minimize.
-              </p>
-            </div>
-            <div class="feature-tile">
-              <div class="tile-icon">⚡</div>
-              <h3>Auto-Fade Widget</h3>
-              <p>
-                Discreet padlock icon fades away during inactivity.
-              </p>
-            </div>
+            <Tooltip content="Blocks mouse clicks, taps, drag gestures, and system hotkeys" placement="top">
+              <div class="feature-tile interactive-tile">
+                <div class="tile-icon-wrap text-blue-400">
+                  <MousePointerClick size={18} />
+                </div>
+                <h3>Input Shield</h3>
+              </div>
+            </Tooltip>
+            <Tooltip content="Requires security PIN to dismiss, minimize, or close" placement="top">
+              <div class="feature-tile interactive-tile">
+                <div class="tile-icon-wrap text-emerald-400">
+                  <ShieldCheck size={18} />
+                </div>
+                <h3>PIN Protected</h3>
+              </div>
+            </Tooltip>
+            <Tooltip content="Discreet floating padlock fades away during inactivity" placement="top">
+              <div class="feature-tile interactive-tile">
+                <div class="tile-icon-wrap text-purple-400">
+                  <Sparkles size={18} />
+                </div>
+                <h3>Auto-Fade</h3>
+              </div>
+            </Tooltip>
           </div>
         </Motion.div>
       </Show>
