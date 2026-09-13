@@ -63,8 +63,10 @@ export const TitleBar: Component<TitleBarProps> = (props) => {
       <div class={clsx("flex items-center gap-2 sm:gap-3 min-w-0")} data-tauri-drag-region>
         <div class={clsx("flex items-center gap-1 sm:gap-1.5 pr-1 sm:pr-2 shrink-0 border-r border-white/10 mr-0.5 sm:mr-1")}>
           <Tooltip content="Close to tray" placement="bottom-start">
+            {/* Buttons stop propagation so clicks don't trigger drag. */}
             <button
               type="button"
+              data-tauri-no-drag
               class={clsx(
                 "inline-flex items-center justify-center w-7 h-7 rounded-md cursor-pointer transition-all",
                 "border border-transparent text-slate-400 hover:text-red-400",
@@ -79,6 +81,7 @@ export const TitleBar: Component<TitleBarProps> = (props) => {
           <Tooltip content="Minimize" placement="bottom">
             <button
               type="button"
+              data-tauri-no-drag
               class={clsx(
                 "inline-flex items-center justify-center w-7 h-7 rounded-md cursor-pointer transition-all",
                 "border border-transparent text-slate-400 hover:text-amber-400",
@@ -96,10 +99,12 @@ export const TitleBar: Component<TitleBarProps> = (props) => {
             "inline-flex items-center justify-center w-5 h-5 rounded-md shrink-0",
             "bg-gradient-to-br from-blue-500/25 to-blue-600/15 border border-blue-400/25",
             "shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]"
-          )}>
+          )}
+          data-tauri-drag-region
+          >
             <Shield size={12} class={clsx("text-blue-300")} />
           </div>
-          <span class={clsx("text-[13px] font-bold text-slate-100 tracking-tight truncate")}>Shieldr</span>
+          <span class={clsx("text-[13px] font-bold text-slate-100 tracking-tight truncate")} data-tauri-drag-region>Shieldr</span>
         </div>
       </div>
 
@@ -116,10 +121,11 @@ export const TitleBar: Component<TitleBarProps> = (props) => {
       </div>
 
       {/* RIGHT — utility actions */}
-      <div class={clsx("flex items-center shrink-0 gap-1 sm:gap-1.5")} data-tauri-drag-region>
+      <div class={clsx("flex items-center shrink-0 gap-1 sm:gap-1.5")}>
         <Tooltip content="Check for updates" placement="bottom">
           <button
             type="button"
+            data-tauri-no-drag
             class={clsx(
               "inline-flex items-center justify-center w-7 h-7 rounded-md border border-transparent hover:border-white/15",
               "bg-transparent hover:bg-white/[0.08] text-slate-400 hover:text-slate-100 cursor-pointer transition-all",
@@ -142,6 +148,7 @@ export const TitleBar: Component<TitleBarProps> = (props) => {
         <Tooltip content="GitHub" placement="bottom">
           <button
             type="button"
+            data-tauri-no-drag
             class={clsx(
               "inline-flex items-center justify-center w-7 h-7 rounded-md border border-transparent hover:border-white/15",
               "bg-transparent hover:bg-white/[0.08] text-slate-400 hover:text-white cursor-pointer transition-all"
@@ -156,6 +163,7 @@ export const TitleBar: Component<TitleBarProps> = (props) => {
         <Tooltip content="YouTube" placement="bottom-end">
           <button
             type="button"
+            data-tauri-no-drag
             class={clsx(
               "inline-flex items-center justify-center w-7 h-7 rounded-md border border-transparent hover:border-white/15",
               "bg-transparent hover:bg-white/[0.08] text-slate-400 hover:text-red-400 cursor-pointer transition-all"

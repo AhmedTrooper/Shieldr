@@ -1,4 +1,4 @@
-import { Component, createSignal, For, onMount, Show } from "solid-js";
+import { Component, createEffect, createSignal, For, onMount, Show } from "solid-js";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { Motion } from "@motionone/solid";
@@ -58,9 +58,11 @@ export const Dashboard: Component<DashboardProps> = (props) => {
   const [countdown, setCountdown] = createSignal<number | null>(null);
   const [delaySeconds, setDelaySeconds] = createSignal<number>(5);
   let countdownTimer: ReturnType<typeof setInterval> | null = null;
+  let countdownCancelled = false;
 
-  // Security Form States
-  const [currentCred, setCurrentCred] = createSignal("");
+  // Security Form States (B-033: PIN change now requires the master password,
+  // not the current PIN).
+  const [currentMasterForPin, setCurrentMasterForPin] = createSignal("");
   const [newPin, setNewPin] = createSignal("");
   const [pinChangeMsg, setPinChangeMsg] = createSignal<{ type: "success" | "error"; text: string } | null>(null);
 
@@ -105,23 +107,51 @@ export const Dashboard: Component<DashboardProps> = (props) => {
 
   const startCountdownLock = () => {
     sound.playKeypadBeep();
+    // Guard against double-start (B-040): clear any existing timer first.
+    if (countdownTimer) {
+      clearInterval(countdownTimer);
+      countdownTimer = null;
+    }
+    countdownCancelled = false;
     const secs = Math.max(1, delaySeconds() || 5);
     setCountdown(secs);
     countdownTimer = setInterval(() => {
-      const current = countdown();
-      if (current === null || current <= 1) {
-        clearInterval(countdownTimer!);
-        countdownTimer = null;
-        setCountdown(null);
-        props.onLockNow();
-      } else {
-        sound.playKeypadBeep();
-        setCountdown(current - 1);
+      // If cancel fired, stop ticking immediately.
+      if (countdownCancelled) {
+        if (countdownTimer) {
+          clearInterval(countdownTimer);
+          countdownTimer = null;
+        }
+        return;
       }
+      // Use updater form so read & write happen atomically.
+      setCountdown((current) => {
+        if (current === null) {
+          // Race: countdown was canceled between ticks. Abort.
+          if (countdownTimer) {
+            clearInterval(countdownTimer);
+            countdownTimer = null;
+          }
+          return current;
+        }
+        if (current <= 1) {
+          if (countdownTimer) {
+            clearInterval(countdownTimer);
+            countdownTimer = null;
+          }
+          // Defer lock to next microtask so we exit the updater cleanly.
+          queueMicrotask(() => props.onLockNow());
+          return null;
+        }
+        sound.playKeypadBeep();
+        return current - 1;
+      });
     }, 1000);
   };
 
   const cancelCountdown = () => {
+    // Mark canceled FIRST so any in-flight tick sees the flag.
+    countdownCancelled = true;
     if (countdownTimer) {
       clearInterval(countdownTimer);
       countdownTimer = null;
@@ -134,7 +164,7 @@ export const Dashboard: Component<DashboardProps> = (props) => {
     setPinChangeMsg(null);
 
     const validation = ChangePinSchema.safeParse({
-      currentCredential: currentCred(),
+      currentMaster: currentMasterForPin(),
       newPin: newPin(),
     });
 
@@ -148,10 +178,13 @@ export const Dashboard: Component<DashboardProps> = (props) => {
     }
 
     try {
-      await tauriBridge.changePin(validation.data.currentCredential, validation.data.newPin);
+      // B-033: PIN rotation now requires the master password — not the
+      // current PIN. This makes PIN rotation a privileged action and stops
+      // a user who knows their PIN from quietly rotating it.
+      await tauriBridge.changePin(validation.data.currentMaster, validation.data.newPin);
       sound.playUnlockSound();
       setPinChangeMsg({ type: "success", text: "PIN updated successfully!" });
-      setCurrentCred("");
+      setCurrentMasterForPin("");
       setNewPin("");
     } catch (err: unknown) {
       sound.playErrorBuzz();
@@ -247,9 +280,12 @@ export const Dashboard: Component<DashboardProps> = (props) => {
     setIsLoadingLogs(true);
     try {
       const entries = await tauriBridge.getAuditLogs(30);
-      setLogs(entries);
+      // B-046: Always coerce to an array — a malformed backend response that
+      // returns null/undefined must not crash the <For> renderer downstream.
+      setLogs(Array.isArray(entries) ? entries : []);
     } catch (e) {
       console.error("Failed to load audit logs:", e);
+      setLogs([]);
     } finally {
       setIsLoadingLogs(false);
     }
@@ -257,6 +293,23 @@ export const Dashboard: Component<DashboardProps> = (props) => {
 
   onMount(() => {
     loadAuditLogs();
+  });
+
+  // B-031 / B-026: When the user navigates away from a tab with a half-filled
+  // credential field, clear it so it can't be reused if the app re-locks.
+  // Also clear form success/error messages so they don't linger across tabs.
+  createEffect(() => {
+    // Read activeTab to register as a dependency, then clear sensitive signals.
+    void activeTab();
+    setCurrentMasterForPin("");
+    setNewPin("");
+    setCurrentMaster("");
+    setNewMaster("");
+    setRevealMasterPass("");
+    setPinChangeMsg(null);
+    setMasterChangeMsg(null);
+    setRevealMsg(null);
+    setSaveDisplayMsg(null);
   });
 
   return (
@@ -710,13 +763,14 @@ export const Dashboard: Component<DashboardProps> = (props) => {
 
               <form onSubmit={handleChangePin} class={clsx("flex flex-col gap-2.5 sm:gap-3 mt-0.5")}>
                 <div class={clsx("flex flex-col gap-1")}>
-                  <label class={clsx("text-[11px] sm:text-xs font-semibold text-slate-300")}>Current PIN or Password</label>
+                  <label class={clsx("text-[11px] sm:text-xs font-semibold text-slate-300")}>Current Master Password (required)</label>
                   <input
                     type="password"
                     class={clsx("w-full h-9 sm:h-10 px-3 rounded-lg bg-slate-950/80 border border-white/15 text-white text-xs sm:text-[13px] font-mono outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-slate-600")}
-                    value={currentCred()}
-                    onInput={(e) => setCurrentCred(e.currentTarget.value)}
+                    value={currentMasterForPin()}
+                    onInput={(e) => setCurrentMasterForPin(e.currentTarget.value)}
                     required
+                    autocomplete="current-password"
                   />
                 </div>
                 <div class={clsx("flex flex-col gap-1")}>
@@ -833,7 +887,9 @@ export const Dashboard: Component<DashboardProps> = (props) => {
             <Show when={revealedPhrase()}>
               <div class={clsx("flex flex-col gap-2.5 sm:gap-3 mt-1")}>
                 <div class={clsx("grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1.5 sm:gap-2")}>
-                  <For each={revealedPhrase()?.split(/\s+/) || []}>
+                  {/* B-045: trim and drop empty fragments so a corrupted phrase
+                     with stray whitespace does not render empty badges. */}
+                  <For each={(revealedPhrase() ?? "").trim().split(/\s+/).filter(Boolean)}>
                     {(word, idx) => (
                       <div class={clsx("flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-slate-950/70 border border-white/10 text-xs font-mono select-text min-w-0")}>
                         <span class={clsx("text-slate-500 font-bold select-none text-[10.5px] shrink-0 w-4 text-right")}>{idx() + 1}</span>

@@ -18,13 +18,21 @@ function handleInvokeError(err: unknown): never {
     throw new TauriError(err as AppErrorPayload);
   }
   if (typeof err === "string") {
+    // B-055: The previous implementation nested the JSON.parse try/catch
+    // around the throw, causing the throw to be silently swallowed by the
+    // catch and downgraded to a generic GENERAL_ERROR. Separate the two
+    // concerns so a thrown TauriError propagates correctly.
+    let parsed: AppErrorPayload | null = null;
     try {
-      const parsed = JSON.parse(err);
-      if (parsed.code && parsed.message) {
-        throw new TauriError(parsed);
+      const raw = JSON.parse(err);
+      if (raw && typeof raw === "object" && "code" in raw && "message" in raw) {
+        parsed = raw as AppErrorPayload;
       }
     } catch {
-      // not JSON string
+      // Not a JSON string; fall through to the generic error case below.
+    }
+    if (parsed) {
+      throw new TauriError(parsed);
     }
     throw new TauriError({ code: "GENERAL_ERROR", message: err });
   }
@@ -72,9 +80,11 @@ export const tauriBridge = {
     }
   },
 
-  async changePin(currentCredential: string, newPin: string): Promise<void> {
+  // B-033: PIN rotation requires the master password (not the current PIN).
+  // The Rust `change_pin` command verifies only against the master hash.
+  async changePin(currentMaster: string, newPin: string): Promise<void> {
     try {
-      return await invoke<void>("change_pin", { currentCredential, newPin });
+      return await invoke<void>("change_pin", { currentMaster, newPin });
     } catch (e) {
       return handleInvokeError(e);
     }
@@ -123,6 +133,14 @@ export const tauriBridge = {
   async requestHideWindow(credential?: string): Promise<void> {
     try {
       return await invoke<void>("request_hide_window", { credential });
+    } catch (e) {
+      return handleInvokeError(e);
+    }
+  },
+
+  async requestHideWindowUnlocked(): Promise<void> {
+    try {
+      return await invoke<void>("request_hide_window_unlocked");
     } catch (e) {
       return handleInvokeError(e);
     }

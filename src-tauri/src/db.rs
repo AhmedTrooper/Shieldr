@@ -1,6 +1,6 @@
 use std::{
     path::Path,
-    sync::{Arc, Mutex},
+    sync::{Arc, Mutex, MutexGuard},
 };
 
 use chrono::Utc;
@@ -56,6 +56,20 @@ pub struct SqliteStore {
 }
 
 impl SqliteStore {
+    /// B-069: Acquire the SQLite mutex, recovering from poisoning so a
+    /// panic in one accessor doesn't permanently break the database for
+    /// the rest of the process. The poison error is logged and the inner
+    /// lock state is preserved.
+    fn lock_conn(&self) -> AppResult<MutexGuard<'_, Connection>> {
+        match self.conn.lock() {
+            Ok(g) => Ok(g),
+            Err(p) => {
+                eprintln!("WARN: SQLite mutex was poisoned, recovering.");
+                Ok(p.into_inner())
+            }
+        }
+    }
+
     pub fn new<P: AsRef<Path>>(db_path: P) -> AppResult<Self> {
         if let Some(parent) = db_path.as_ref().parent() {
             std::fs::create_dir_all(parent)?;
@@ -72,7 +86,7 @@ impl SqliteStore {
     }
 
     fn init_schema(&self) -> AppResult<()> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.lock_conn()?;
 
         // 1. Properties table (strictly non-secret metadata & UI preferences)
         conn.execute(
@@ -116,7 +130,7 @@ impl SqliteStore {
     }
 
     pub fn get_property(&self, key: &str) -> AppResult<Option<String>> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.lock_conn()?;
         let mut stmt = conn.prepare("SELECT value FROM properties WHERE key = ?1;")?;
         let mut rows = stmt.query(params![key])?;
 
@@ -129,7 +143,7 @@ impl SqliteStore {
     }
 
     pub fn set_property(&self, key: &str, value: &str) -> AppResult<()> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.lock_conn()?;
         let now = Utc::now().to_rfc3339();
         conn.execute(
             "INSERT INTO properties (key, value, updated_at)
@@ -224,7 +238,7 @@ impl SqliteStore {
     }
 
     pub fn record_audit_event(&self, event_type: &str, details: &str) -> AppResult<()> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.lock_conn()?;
         let now = Utc::now().to_rfc3339();
         conn.execute(
             "INSERT INTO audit_logs (event_type, details, timestamp) VALUES (?1, ?2, ?3);",
@@ -233,8 +247,17 @@ impl SqliteStore {
         Ok(())
     }
 
+    /// B-064: Best-effort audit logging. Returns `()` regardless of outcome.
+    /// Use this in non-critical paths where audit failure must not break the
+    /// user-facing operation (e.g. setup_security, change_pin, lock/unlock).
+    pub fn audit_log_best_effort(&self, event_type: &str, details: &str) {
+        if let Err(e) = self.record_audit_event(event_type, details) {
+            eprintln!("Audit log failure for {event_type}: {e}");
+        }
+    }
+
     pub fn get_audit_logs(&self, limit: u32) -> AppResult<Vec<AuditLogEntry>> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.lock_conn()?;
         let mut stmt = conn.prepare(
             "SELECT id, event_type, details, timestamp
              FROM audit_logs
@@ -262,7 +285,7 @@ impl SqliteStore {
     /// Checks if the system is currently locked out.
     /// Returns Some(remaining_seconds) if locked out, None otherwise.
     pub fn check_lockout(&self) -> AppResult<Option<u64>> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.lock_conn()?;
         let mut stmt = conn.prepare("SELECT locked_until FROM rate_limiter WHERE id = 1;")?;
         let mut rows = stmt.query([])?;
 
@@ -273,8 +296,14 @@ impl SqliteStore {
                     let until_utc = until_dt.with_timezone(&Utc);
                     let now = Utc::now();
                     if until_utc > now {
+                        // B-066: Use saturating arithmetic so a corrupted
+                        // `locked_until` written by another process (or a
+                        // wildly-future clock) cannot panic with i64
+                        // overflow. Clamp to 1 second minimum so the UI
+                        // doesn't display "0s" right before expiring.
                         let diff = (until_utc - now).num_seconds();
-                        return Ok(Some(diff.max(1) as u64));
+                        let clamped = diff.clamp(1, i64::from(u32::MAX)) as u64;
+                        return Ok(Some(clamped));
                     }
                 }
             }
@@ -289,7 +318,7 @@ impl SqliteStore {
         max_attempts: u32,
         lockout_duration_secs: u32,
     ) -> AppResult<(u32, bool, Option<u64>)> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.lock_conn()?;
         let mut stmt =
             conn.prepare("SELECT failed_attempts, locked_until FROM rate_limiter WHERE id = 1;")?;
         let mut rows = stmt.query([])?;
@@ -323,7 +352,7 @@ impl SqliteStore {
 
     /// Clears failed attempts and removes lockout on successful unlock.
     pub fn reset_rate_limiter(&self) -> AppResult<()> {
-        let conn = self.conn.lock().unwrap();
+        let conn = self.lock_conn()?;
         conn.execute(
             "UPDATE rate_limiter SET failed_attempts = 0, locked_until = NULL WHERE id = 1;",
             [],

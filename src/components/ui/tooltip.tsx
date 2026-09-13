@@ -2,6 +2,7 @@ import {
   type Component,
   type JSX,
   createSignal,
+  onCleanup,
   onMount,
   splitProps,
 } from "solid-js";
@@ -119,6 +120,14 @@ export const Tooltip: Component<TooltipProps> = (props) => {
   onMount(() => {
     updatePlacement();
     window.addEventListener("resize", updatePlacement, { passive: true });
+    // B-054: Recompute placement on scroll so the tooltip still hovers the
+    // correct side of its trigger after the user scrolls a scrollable
+    // container (e.g. Dashboard tabs).
+    window.addEventListener("scroll", updatePlacement, { passive: true, capture: true });
+  });
+
+  onCleanup(() => {
+    window.removeEventListener("scroll", updatePlacement as EventListener);
   });
 
   return (

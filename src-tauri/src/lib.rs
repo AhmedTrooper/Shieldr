@@ -8,6 +8,9 @@ pub mod stronghold_store;
 pub mod tray;
 pub mod vault;
 
+#[cfg(desktop)]
+mod shortcut_interceptor;
+
 use std::sync::{
     atomic::{AtomicBool, Ordering},
     Mutex,
@@ -30,8 +33,49 @@ pub struct AppState {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // Defensive hardening for Linux dev/runtime stability:
+    //
+    // WebKitGTK + Wayland + NVIDIA (and some compositors) is known to crash
+    // the WebView with messages like:
+    //   "Gdk-Message: Error flushing display: Resource temporarily unavailable"
+    //   "Gdk-Message: Error 71 (Protocol error) dispatching to Wayland display"
+    //
+    // Workarounds (no-op on unaffected systems):
+    //   - WEBKIT_DISABLE_COMPOSITING_MODE=1  (force CPU compositing, avoids GPU reset)
+    //   - GDK_BACKEND=x11                    (fall back to X11 if Wayland misbehaves)
+    //
+    // We only set these if they are not already set by the user's environment,
+    // so a deliberate override still wins.
+    #[cfg(target_os = "linux")]
+    {
+        if std::env::var_os("WEBKIT_DISABLE_COMPOSITING_MODE").is_none() {
+            std::env::set_var("WEBKIT_DISABLE_COMPOSITING_MODE", "1");
+        }
+        if std::env::var_os("GDK_BACKEND").is_none() {
+            std::env::set_var("GDK_BACKEND", "x11");
+        }
+    }
+
     #[allow(unused_mut)]
     let mut builder = tauri::Builder::default()
+        // B-084: Persist window size + position across launches, but
+        // explicitly skip FULLSCREEN and MAXIMIZED so the lock screen
+        // (which goes fullscreen) doesn't poison the saved state with
+        // `fullscreen: true`. On unlock we always center + size anyway,
+        // and the explicit `save_window_state(...)` call in
+        // `unlock_shield` overwrites whatever the auto-save wrote during
+        // the locked fullscreen phase.
+        .plugin(
+            tauri_plugin_window_state::Builder::new()
+                .with_state_flags(
+                    tauri_plugin_window_state::StateFlags::SIZE
+                        | tauri_plugin_window_state::StateFlags::POSITION
+                        | tauri_plugin_window_state::StateFlags::VISIBLE
+                        | tauri_plugin_window_state::StateFlags::DECORATIONS,
+                )
+                .build(),
+        )
+        .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_opener::init());
 
@@ -50,8 +94,24 @@ pub fn run() {
             std::fs::create_dir_all(&app_data_dir)?;
 
             // 1. Setup Stronghold salt and plugin
+            //
+            // B-062: Validate the salt file at startup — if it's missing,
+            // wrong size, or corrupt, regenerate it (and emit a warning so
+            // the operator can investigate). A zero-length or truncated salt
+            // would otherwise silently produce a weak Argon2 input.
             let salt_path = app_data_dir.join("stronghold_salt.txt");
-            if !salt_path.exists() {
+            let salt_needs_regen = match std::fs::read(&salt_path) {
+                Ok(bytes) if bytes.len() == 32 => false,
+                Ok(bad) => {
+                    eprintln!(
+                        "Stronghold salt file is invalid ({} bytes); regenerating.",
+                        bad.len()
+                    );
+                    true
+                }
+                Err(_) => true, // missing
+            };
+            if salt_needs_regen {
                 let mut salt_bytes = [0u8; 32];
                 rand::rng().fill(&mut salt_bytes);
                 std::fs::write(&salt_path, salt_bytes)?;
@@ -70,7 +130,16 @@ pub fn run() {
 
             // 4. Setup Stronghold Secret Store
             let snap_path = app_data_dir.join("shieldr.vault");
-            let raw_salt = std::fs::read(&salt_path).unwrap_or_else(|_| vec![42u8; 32]);
+            // B-062: Re-read the validated salt (always 32 bytes) rather than
+            // fall back to a hard-coded all-42 vector which previously masked
+            // a corrupted salt file. If the read now fails, the Stronghold
+            // store construction will return the I/O error to the caller.
+            let raw_salt = std::fs::read(&salt_path).map_err(|e| {
+                Box::new(std::io::Error::new(
+                    e.kind(),
+                    format!("Failed to read Stronghold salt: {e}"),
+                )) as Box<dyn std::error::Error>
+            })?;
             let stronghold_key = Sha256::digest(&raw_salt).to_vec();
             let stronghold = StrongholdStore::new(snap_path, stronghold_key)?;
 
@@ -78,9 +147,9 @@ pub fn run() {
             let vault = Vault::new(keyring, stronghold, db);
 
             // Record startup in SQLite audit log
-            let _ = vault
+            vault
                 .db()
-                .record_audit_event("SYSTEM_START", "Shieldr service initialized.");
+                .audit_log_best_effort("SYSTEM_START", "Shieldr service initialized.");
 
             let app_state = AppState {
                 vault,
@@ -90,15 +159,33 @@ pub fn run() {
 
             app.manage(app_state);
 
-            // Intercept window close requests to prevent toddlers/accidental closes when locked
+            // Intercept window close requests to prevent toddlers/accidental closes when locked.
+            // Also force-resize back to fullscreen if the user (or another app) tries to
+            // un-fullscreen via dragging/resizing while locked (B-082).
             if let Some(window) = app.get_webview_window("main") {
                 let win_clone = window.clone();
                 window.on_window_event(move |event| {
-                    if let WindowEvent::CloseRequested { api, .. } = event {
-                        if let Some(state) = win_clone.try_state::<AppState>() {
-                            if state.is_locked.load(Ordering::SeqCst) {
-                                api.prevent_close();
-                                eprintln!("Close attempt blocked: Shield is locked in fullscreen.");
+                    if let Some(state) = win_clone.try_state::<AppState>() {
+                        let locked = state.is_locked.load(Ordering::SeqCst);
+                        if locked {
+                            match event {
+                                WindowEvent::CloseRequested { api, .. } => {
+                                    api.prevent_close();
+                                    eprintln!(
+                                        "Close attempt blocked: Shield is locked in fullscreen."
+                                    );
+                                    state.vault.db().audit_log_best_effort(
+                                        "ESCAPE_BLOCKED",
+                                        "Close attempt blocked while locked.",
+                                    );
+                                }
+                                WindowEvent::Resized(_) | WindowEvent::Moved(_) => {
+                                    // Snap back to fullscreen.
+                                    if let Err(e) = win_clone.set_fullscreen(true) {
+                                        eprintln!("Failed to restore fullscreen: {e}");
+                                    }
+                                }
+                                _ => {}
                             }
                         }
                     }
@@ -125,6 +212,7 @@ pub fn run() {
             get_audit_logs,
             request_close_window,
             request_hide_window,
+            request_hide_window_unlocked,
             minimize_window,
         ])
         .run(tauri::generate_context!())

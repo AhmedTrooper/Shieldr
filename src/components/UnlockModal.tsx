@@ -1,4 +1,4 @@
-import { Component, createSignal, For, onCleanup, onMount, Show } from "solid-js";
+import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } from "solid-js";
 import { clsx } from "clsx";
 import { AlertTriangle, Delete, Eraser, Lock, X } from "lucide-solid";
 import { sound } from "../services/sound";
@@ -57,6 +57,10 @@ export const UnlockModal: Component<UnlockModalProps> = (props) => {
       // Success! Play unlock animation and sound
       setIsSuccess(true);
       sound.playUnlockSound();
+      // B-031: clear credentials on success so a stale re-lock doesn't
+      // immediately re-unlock. (Failure path already clears below.)
+      setPin("");
+      setPassword("");
     } catch (err: unknown) {
       sound.playErrorBuzz();
       setIsShaking(true);
@@ -99,6 +103,18 @@ export const UnlockModal: Component<UnlockModalProps> = (props) => {
 
   onMount(() => {
     window.addEventListener("keydown", handleKeyDown);
+  });
+
+  // B-031: Whenever the modal closes, clear all sensitive signals so that
+  // any subsequent auto-relock cannot use a stale credential.
+  createEffect(() => {
+    if (!props.isOpen) {
+      setPin("");
+      setPassword("");
+      setErrorMessage(null);
+      setIsShaking(false);
+      setIsSuccess(false);
+    }
   });
 
   onCleanup(() => {

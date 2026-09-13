@@ -48,3 +48,9 @@ Thumbs.db
 .idea/
 *.sublime-project
 *.sublime-workspace
+
+# Per-bug working files (optional; the canonical tracker lives in AUDIT.md)
+bug-tracker/
+.ai-fix-notes/
+*.bug.md
+*.fixnotes.md

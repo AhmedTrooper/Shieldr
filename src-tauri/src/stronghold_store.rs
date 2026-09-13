@@ -1,6 +1,6 @@
 use std::{
     path::{Path, PathBuf},
-    sync::{Arc, Mutex},
+    sync::{Arc, Mutex, MutexGuard},
 };
 
 use iota_stronghold::{KeyProvider, SnapshotPath, Stronghold};
@@ -19,6 +19,18 @@ pub struct StrongholdStore {
 }
 
 impl StrongholdStore {
+    /// B-070: Lock the Stronghold mutex, recovering from poisoning so a
+    /// single panicked accessor cannot permanently brick the vault.
+    fn lock_inner(&self) -> MutexGuard<'_, Stronghold> {
+        match self.stronghold.lock() {
+            Ok(g) => g,
+            Err(p) => {
+                eprintln!("WARN: Stronghold mutex was poisoned, recovering.");
+                p.into_inner()
+            }
+        }
+    }
+
     pub fn new<P: AsRef<Path>>(snapshot_path: P, raw_key: Vec<u8>) -> AppResult<Self> {
         let path = snapshot_path.as_ref().to_path_buf();
         if let Some(parent) = path.parent() {
@@ -39,7 +51,15 @@ impl StrongholdStore {
 
         if snap_path.exists() {
             if let Err(e) = stronghold.load_snapshot(&key_provider, &snap_path) {
-                eprintln!("Warning: could not load existing stronghold snapshot: {e}");
+                eprintln!(
+                    "Warning: could not load existing Stronghold snapshot at {}: {e}",
+                    path.display()
+                );
+                eprintln!(
+                    "         This is usually caused by a corrupted or rotated salt \
+                     file. Stronghold starts empty and the user will need to \
+                     re-onboard (set a new PIN and master password)."
+                );
             }
         }
 
@@ -56,7 +76,7 @@ impl StrongholdStore {
     }
 
     pub fn set_secret(&self, key: &str, value: &str) -> AppResult<()> {
-        let stronghold = self.stronghold.lock().unwrap();
+        let stronghold = self.lock_inner();
 
         let client = match stronghold.load_client(CLIENT_NAME) {
             Ok(c) => c,
@@ -86,7 +106,7 @@ impl StrongholdStore {
     }
 
     pub fn get_secret(&self, key: &str) -> AppResult<Option<String>> {
-        let stronghold = self.stronghold.lock().unwrap();
+        let stronghold = self.lock_inner();
 
         let client = match stronghold.load_client(CLIENT_NAME) {
             Ok(c) => c,
@@ -110,7 +130,7 @@ impl StrongholdStore {
     }
 
     pub fn delete_secret(&self, key: &str) -> AppResult<()> {
-        let stronghold = self.stronghold.lock().unwrap();
+        let stronghold = self.lock_inner();
 
         if let Ok(client) = stronghold.load_client(CLIENT_NAME) {
             let _ = client.store().delete(key.as_bytes());

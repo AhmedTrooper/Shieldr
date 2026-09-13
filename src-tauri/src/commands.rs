@@ -2,6 +2,11 @@ use std::sync::atomic::Ordering;
 
 use serde::Serialize;
 use tauri::{AppHandle, LogicalSize, Manager, Size, State};
+use tauri_plugin_window_state::{AppHandleExt, StateFlags};
+use zeroize::Zeroizing;
+
+#[cfg(desktop)]
+use crate::shortcut_interceptor;
 
 use crate::{
     db::{AuditLogEntry, ShieldProperties},
@@ -53,20 +58,42 @@ pub async fn lock_shield(
         .get_webview_window("main")
         .ok_or_else(|| AppError::Window("Main window not found".to_string()))?;
 
-    // Enable fullscreen, always-on-top, and grab focus
-    window
-        .set_fullscreen(true)
-        .map_err(|e| AppError::Window(e.to_string()))?;
-    window
-        .set_always_on_top(true)
-        .map_err(|e| AppError::Window(e.to_string()))?;
-    window
-        .set_focus()
-        .map_err(|e| AppError::Window(e.to_string()))?;
+    // B-037: Record audit FIRST so we have a record even if subsequent ops fail.
+    // Audit failures are logged but do not block the lock (see B-064).
+    if let Err(e) = state.vault.db().record_audit_event(
+        "SHIELD_LOCKED",
+        "Shield locked in transparent fullscreen mode.",
+    ) {
+        eprintln!("Audit log failure for SHIELD_LOCKED: {e}");
+    }
+
+    // Enable fullscreen, always-on-top, and grab focus.
+    // If any of these fail, we still proceed to set is_locked so the
+    // logical state matches the user's intent, then log the failure.
+    let mut window_warnings: Vec<String> = Vec::new();
+    if let Err(e) = window.set_fullscreen(true) {
+        window_warnings.push(format!("set_fullscreen: {e}"));
+    }
+    if let Err(e) = window.set_always_on_top(true) {
+        window_warnings.push(format!("set_always_on_top: {e}"));
+    }
+    if let Err(e) = window.set_focus() {
+        window_warnings.push(format!("set_focus: {e}"));
+    }
 
     state.is_locked.store(true, Ordering::SeqCst);
 
-    // Keep OS and display awake while locked if enabled
+    // B-081: Register OS-level global shortcuts that intercept Alt+F4, Super+Q/W/M/H,
+    // Ctrl+W while locked. These would otherwise close/minimize/hide the window.
+    #[cfg(desktop)]
+    {
+        if let Err(e) = shortcut_interceptor::register_lock_shortcuts(&app) {
+            eprintln!("Warning: failed to register lock shortcuts: {e}");
+            window_warnings.push(format!("shortcuts: {e}"));
+        }
+    }
+
+    // Keep OS and display awake while locked if enabled.
     let props = state.vault.db().get_all_properties().unwrap_or_default();
     if props.keep_awake {
         match keepawake::Builder::default()
@@ -86,14 +113,21 @@ pub async fn lock_shield(
             }
             Err(e) => {
                 eprintln!("Warning: Failed to acquire KeepAwake lock: {e}");
+                window_warnings.push(format!("keepawake: {e}"));
             }
         }
     }
 
-    state.vault.db().record_audit_event(
-        "SHIELD_LOCKED",
-        "Shield locked in transparent fullscreen mode (KeepAwake active).",
-    )?;
+    if !window_warnings.is_empty() {
+        let details = format!("Partial lock (warnings): {}", window_warnings.join("; "));
+        if let Err(e) = state
+            .vault
+            .db()
+            .record_audit_event("SHIELD_LOCK_WARNINGS", &details)
+        {
+            eprintln!("Audit failure for SHIELD_LOCK_WARNINGS: {e}");
+        }
+    }
 
     get_shield_status(state).await
 }
@@ -104,13 +138,26 @@ pub async fn unlock_shield(
     state: State<'_, AppState>,
     credential: String,
 ) -> Result<ShieldStatus, AppError> {
+    let credential = Zeroizing::new(credential);
     let valid = state.vault.verify_credential(&credential)?;
 
     if !valid {
         return Err(AppError::InvalidCredentials);
     }
 
-    // Release OS keepawake inhibitor lock
+    // B-036: Flip is_locked to false FIRST so the UI reflects the user's intent,
+    // then attempt the window operations. If they fail, we still consider the
+    // shield unlocked logically and record a warning in the audit log.
+    state.is_locked.store(false, Ordering::SeqCst);
+
+    // B-081: Unregister the lock-mode global shortcuts so the user regains
+    // normal OS-level hotkey behavior (Alt+F4 closes the window, etc.).
+    #[cfg(desktop)]
+    {
+        shortcut_interceptor::unregister_lock_shortcuts(&app);
+    }
+
+    // Release OS keepawake inhibitor lock.
     if let Ok(mut guard) = state.keep_awake_guard.lock() {
         if guard.is_some() {
             *guard = None; // Drops keepawake::KeepAwake, releasing OS sleep inhibitor
@@ -122,25 +169,58 @@ pub async fn unlock_shield(
         .get_webview_window("main")
         .ok_or_else(|| AppError::Window("Main window not found".to_string()))?;
 
-    window
-        .set_fullscreen(false)
-        .map_err(|e| AppError::Window(e.to_string()))?;
-    window
-        .set_always_on_top(false)
-        .map_err(|e| AppError::Window(e.to_string()))?;
-
-    let _ = window.set_size(Size::Logical(LogicalSize {
+    let mut window_warnings: Vec<String> = Vec::new();
+    if let Err(e) = window.set_fullscreen(false) {
+        window_warnings.push(format!("set_fullscreen: {e}"));
+    }
+    if let Err(e) = window.set_always_on_top(false) {
+        window_warnings.push(format!("set_always_on_top: {e}"));
+    }
+    // B-084: Apply size + center AFTER exiting fullscreen so the OS
+    // doesn't snap us back to the pre-fullscreen position that the
+    // window-state plugin last saw. Best-effort; warnings recorded if
+    // any single step fails.
+    if let Err(e) = window.set_size(Size::Logical(LogicalSize {
         width: 900.0,
         height: 640.0,
-    }));
-    let _ = window.center();
-    let _ = window.set_focus();
+    })) {
+        window_warnings.push(format!("set_size: {e}"));
+    }
+    if let Err(e) = window.center() {
+        window_warnings.push(format!("center: {e}"));
+    }
+    if let Err(e) = window.set_focus() {
+        window_warnings.push(format!("set_focus: {e}"));
+    }
 
-    state.is_locked.store(false, Ordering::SeqCst);
-    state
+    // B-084: Explicitly persist the centered state so subsequent launches
+    // (and any pending auto-save that was queued while we were fullscreen)
+    // overwrite any "top-right" position with our freshly-centered one.
+    // We save SIZE + POSITION only — we already excluded FULLSCREEN and
+    // MAXIMIZED from the plugin builder's auto-tracked flags in lib.rs.
+    if let Err(e) = app.save_window_state(StateFlags::SIZE | StateFlags::POSITION) {
+        window_warnings.push(format!("save_window_state: {e}"));
+    }
+
+    // B-064: Audit is best-effort; don't propagate failures.
+    if let Err(e) = state
         .vault
         .db()
-        .record_audit_event("SHIELD_UNLOCKED", "Shield unlocked successfully.")?;
+        .record_audit_event("SHIELD_UNLOCKED", "Shield unlocked successfully.")
+    {
+        eprintln!("Audit log failure for SHIELD_UNLOCKED: {e}");
+    }
+
+    if !window_warnings.is_empty() {
+        let details = format!("Partial unlock (warnings): {}", window_warnings.join("; "));
+        if let Err(e) = state
+            .vault
+            .db()
+            .record_audit_event("SHIELD_UNLOCK_WARNINGS", &details)
+        {
+            eprintln!("Audit failure for SHIELD_UNLOCK_WARNINGS: {e}");
+        }
+    }
 
     get_shield_status(state).await
 }
@@ -159,10 +239,12 @@ pub async fn reset_pin_with_phrase(
 #[tauri::command]
 pub async fn change_pin(
     state: State<'_, AppState>,
-    current_credential: String,
+    current_master: String,
     new_pin: String,
 ) -> Result<(), AppError> {
-    state.vault.change_pin(&current_credential, &new_pin)
+    let current_master = Zeroizing::new(current_master);
+    let new_pin = Zeroizing::new(new_pin);
+    state.vault.change_pin(&current_master, &new_pin)
 }
 
 #[tauri::command]
@@ -171,6 +253,8 @@ pub async fn change_master_password(
     current_master: String,
     new_master: String,
 ) -> Result<(), AppError> {
+    let current_master = Zeroizing::new(current_master);
+    let new_master = Zeroizing::new(new_master);
     state
         .vault
         .change_master_password(&current_master, &new_master)
@@ -181,6 +265,7 @@ pub async fn reveal_recovery_phrase(
     state: State<'_, AppState>,
     master_password: String,
 ) -> Result<String, AppError> {
+    let master_password = Zeroizing::new(master_password);
     state.vault.reveal_recovery_phrase(&master_password)
 }
 
@@ -206,12 +291,13 @@ pub async fn request_close_window(
     state: State<'_, AppState>,
     credential: Option<String>,
 ) -> Result<(), AppError> {
-    if state.is_locked.load(Ordering::SeqCst) {
-        let cred = credential.ok_or(AppError::LockedPermissionDenied)?;
-        let valid = state.vault.verify_credential(&cred)?;
-        if !valid {
-            return Err(AppError::InvalidCredentials);
-        }
+    // B-035: Always require a valid credential regardless of lock state.
+    // The unlock modal's "Quit" button supplies one; any other path that
+    // omits it (e.g. a desynced state) must be refused.
+    let credential = Zeroizing::new(credential.ok_or(AppError::LockedPermissionDenied)?);
+    let valid = state.vault.verify_credential(&credential)?;
+    if !valid {
+        return Err(AppError::InvalidCredentials);
     }
 
     if let Some(window) = app.get_webview_window("main") {
@@ -232,12 +318,30 @@ pub async fn request_hide_window(
     state: State<'_, AppState>,
     credential: Option<String>,
 ) -> Result<(), AppError> {
+    // B-035: Same hardening as request_close_window.
+    let credential = Zeroizing::new(credential.ok_or(AppError::LockedPermissionDenied)?);
+    let valid = state.vault.verify_credential(&credential)?;
+    if !valid {
+        return Err(AppError::InvalidCredentials);
+    }
+
+    if let Some(window) = app.get_webview_window("main") {
+        window.hide().map_err(|e| AppError::Window(e.to_string()))?;
+    }
+
+    Ok(())
+}
+
+/// Unlocked-only variant: hides the window to tray without requiring a credential.
+/// Refuses to operate while the shield is locked so a frontend bug cannot call it
+/// to bypass the lock screen (B-035 defense in depth).
+#[tauri::command]
+pub async fn request_hide_window_unlocked(
+    app: AppHandle,
+    state: State<'_, AppState>,
+) -> Result<(), AppError> {
     if state.is_locked.load(Ordering::SeqCst) {
-        let cred = credential.ok_or(AppError::LockedPermissionDenied)?;
-        let valid = state.vault.verify_credential(&cred)?;
-        if !valid {
-            return Err(AppError::InvalidCredentials);
-        }
+        return Err(AppError::LockedPermissionDenied);
     }
 
     if let Some(window) = app.get_webview_window("main") {

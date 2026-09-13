@@ -87,10 +87,14 @@ export const SetupSecuritySchema = z
 export type SetupSecurityInput = z.infer<typeof SetupSecuritySchema>;
 
 /**
- * Zod schema for changing PIN
+ * Zod schema for changing PIN.
+ *
+ * B-033: Pin rotation is now an explicit privileged action that requires the
+ * Master Password — not the current PIN. This removes the ambiguity where
+ * `change_pin` would accept either credential.
  */
 export const ChangePinSchema = z.object({
-  currentCredential: z.string().min(1, "Current credential is required"),
+  currentMaster: z.string().min(1, "Current master password is required"),
   newPin: z
     .string()
     .trim()

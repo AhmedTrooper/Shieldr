@@ -1,4 +1,5 @@
 use std::sync::atomic::Ordering;
+use std::time::{Duration, Instant};
 use tauri::{
     menu::{Menu, MenuItem, PredefinedMenuItem},
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
@@ -6,6 +7,13 @@ use tauri::{
 };
 
 use crate::AppState;
+
+/// B-034: Tray-side debounce so a malicious script that can spam the tray
+/// menu (or a stray double-click) cannot lock the screen in a tight loop and
+/// DoS the legitimate user out of their session. The first lock click within
+/// a 1-second window is honored; subsequent clicks are silently dropped.
+static LAST_LOCK_CLICK: std::sync::Mutex<Option<Instant>> = std::sync::Mutex::new(None);
+const LOCK_DEBOUNCE: Duration = Duration::from_secs(1);
 
 #[cfg(desktop)]
 pub fn setup_tray(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
@@ -58,6 +66,21 @@ pub fn setup_tray(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
                 }
             }
             "lock" => {
+                // B-034: Drop the click if it's within the debounce window
+                // of the previous one to prevent lock-spam DoS.
+                {
+                    let Ok(mut guard) = LAST_LOCK_CLICK.lock() else {
+                        return;
+                    };
+                    let now = Instant::now();
+                    if let Some(prev) = *guard {
+                        if now.duration_since(prev) < LOCK_DEBOUNCE {
+                            eprintln!("Tray lock click debounced (DoS protection).");
+                            return;
+                        }
+                    }
+                    *guard = Some(now);
+                }
                 if let Some(window) = app.get_webview_window("main") {
                     let _ = window.show();
                     let _ = window.unminimize();

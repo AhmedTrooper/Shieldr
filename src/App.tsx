@@ -42,13 +42,28 @@ const App: Component = () => {
   const [isShaking, setIsShaking] = createSignal(false);
   const [isUnlocking, setIsUnlocking] = createSignal(false);
 
+  // B-039: A monotonic "end time" stored in a signal so re-entry during a
+  // lockout cannot reset the visible countdown to a higher value. The
+  // interval computes remaining seconds from the end time on every tick.
+  const [lockoutEndAt, setLockoutEndAt] = createSignal<number | null>(null);
   let lockoutCountdownTimer: ReturnType<typeof setInterval> | null = null;
 
   const refreshStatus = async () => {
     try {
       const current = await tauriBridge.getShieldStatus();
-      setStatus(current);
-      sound.setEnabled(current.properties.sound_enabled);
+      // B-051: Always trust the Rust-provided properties as the source of
+      // truth. Merge them defensively over a fallback so a partial payload
+      // doesn't crash renderers that read e.g. `properties.overlay_blur`.
+      setStatus((prev) => ({
+        ...prev,
+        ...current,
+        properties: {
+          ...defaultProperties,
+          ...(prev.properties ?? {}),
+          ...(current.properties ?? {}),
+        },
+      }));
+      sound.setEnabled(current.properties?.sound_enabled ?? defaultProperties.sound_enabled);
 
       if (!current.is_configured) {
         setIsSetupModalOpen(true);
@@ -62,48 +77,95 @@ const App: Component = () => {
     }
   };
 
+  // B-039: Compute the end-of-lockout timestamp once and update only the
+  // visible remaining-seconds field on each tick. If `refreshStatus` is
+  // re-entered (e.g. user clicks unlock during lockout), the new server
+  // value is compared against the existing end time and discarded if it
+  // would push the timer backward.
   const startLockoutTimer = (initialSecs: number) => {
-    if (lockoutCountdownTimer) clearInterval(lockoutCountdownTimer);
-    let remaining = initialSecs;
+    const proposedEnd = Date.now() + initialSecs * 1000;
+    const existing = lockoutEndAt();
+    if (existing !== null && existing > proposedEnd) {
+      // Server reports a shorter window than what we're already counting
+      // down — ignore so the UI doesn't jump forward.
+      return;
+    }
+    setLockoutEndAt(proposedEnd);
 
-    lockoutCountdownTimer = setInterval(() => {
-      remaining -= 1;
-      if (remaining <= 0) {
-        clearInterval(lockoutCountdownTimer!);
-        lockoutCountdownTimer = null;
-        refreshStatus();
-      } else {
-        setStatus((prev) => ({
-          ...prev,
-          lockout_remaining_secs: remaining,
-        }));
+    if (lockoutCountdownTimer) clearInterval(lockoutCountdownTimer);
+
+    const tick = () => {
+      const end = lockoutEndAt();
+      if (end === null) {
+        if (lockoutCountdownTimer) {
+          clearInterval(lockoutCountdownTimer);
+          lockoutCountdownTimer = null;
+        }
+        return;
       }
-    }, 1000);
+      const remainingMs = end - Date.now();
+      const remainingSecs = Math.max(0, Math.ceil(remainingMs / 1000));
+      if (remainingSecs <= 0) {
+        if (lockoutCountdownTimer) {
+          clearInterval(lockoutCountdownTimer);
+          lockoutCountdownTimer = null;
+        }
+        setLockoutEndAt(null);
+        refreshStatus();
+        return;
+      }
+      setStatus((prev) => ({
+        ...prev,
+        lockout_remaining_secs: remainingSecs,
+      }));
+    };
+
+    // Run one tick immediately so the visible number is correct.
+    tick();
+    lockoutCountdownTimer = setInterval(tick, 500);
   };
 
   let unlistenTrayLock: UnlistenFn | null = null;
   let unlistenTrayUpdates: UnlistenFn | null = null;
+  let unlistenEscapeAttempt: UnlistenFn | null = null;
+  // B-042: Track whether the component is still mounted so listeners
+  // registered asynchronously can avoid touching signals after onCleanup
+  // runs (which happens on window close during init or HMR).
+  let mounted = true;
 
   onMount(async () => {
     await refreshStatus();
 
     try {
       unlistenTrayLock = await listen("tray-lock-request", () => {
-        handleLockNow();
+        if (mounted) handleLockNow();
       });
 
       unlistenTrayUpdates = await listen("tray-check-updates", () => {
-        updaterService.checkForUpdates(false);
+        if (mounted) updaterService.checkForUpdates(false);
+      });
+
+      // B-081: Listen for OS-level escape attempts (Alt+F4, Super+Q/W/M/H, Ctrl+W).
+      // The Rust global-shortcut interceptor consumes these keys while locked
+      // and emits this event so we can pop the unlock modal.
+      unlistenEscapeAttempt = await listen("shield-escape-attempt", () => {
+        if (!mounted) return;
+        if (status().is_locked && !isUnlockModalOpen()) {
+          setIsUnlockModalOpen(true);
+        }
       });
     } catch (e) {
-      console.warn("Tray event listeners registration failed:", e);
+      console.warn("Tray / shortcut event listeners registration failed:", e);
     }
   });
 
   onCleanup(() => {
+    mounted = false;
     if (lockoutCountdownTimer) clearInterval(lockoutCountdownTimer);
     if (unlistenTrayLock) unlistenTrayLock();
     if (unlistenTrayUpdates) unlistenTrayUpdates();
+    if (unlistenEscapeAttempt) unlistenEscapeAttempt();
+    setLockoutEndAt(null);
   });
 
 
@@ -119,6 +181,12 @@ const App: Component = () => {
   };
 
   // Unlock Action
+  //
+  // B-032: The unlock path and the secondary "hide"/"close" path are now
+  // separated. If the credential check fails, we rethrow so the modal can
+  // surface the error. If unlock succeeds but the secondary window action
+  // fails, we log and surface a soft error WITHOUT rolling back the unlock —
+  // the shield is already unlocked, the user should see that as success.
   const handleUnlock = async (
     credential: string,
     action: "unlock" | "hide" | "close" = "unlock"
@@ -128,16 +196,24 @@ const App: Component = () => {
       const updated = await tauriBridge.unlockShield(credential);
       setStatus(updated);
 
-      if (action === "hide") {
-        await tauriBridge.requestHideWindow(credential);
-      } else if (action === "close") {
-        await tauriBridge.requestCloseWindow(credential);
-      }
-
       setTimeout(() => {
         setIsUnlocking(false);
         setIsUnlockModalOpen(false);
       }, 500);
+
+      if (action === "hide") {
+        try {
+          await tauriBridge.requestHideWindow(credential);
+        } catch (e) {
+          console.warn("Unlock succeeded but hide-to-tray failed:", e);
+        }
+      } else if (action === "close") {
+        try {
+          await tauriBridge.requestCloseWindow(credential);
+        } catch (e) {
+          console.warn("Unlock succeeded but close-window failed:", e);
+        }
+      }
     } catch (err) {
       setIsUnlocking(false);
       throw err;
@@ -166,11 +242,11 @@ const App: Component = () => {
   };
 
   // Window close request — TitleBar "close to tray" should always hide,
-  // not terminate the app. The TitleBar is only shown when unlocked, so no
-  // credential prompt is needed here.
+  // not terminate the app. The TitleBar is only shown when unlocked, so we
+  // call the unlocked-only backend command which refuses if locked (B-035).
   const handleCloseRequest = async () => {
     try {
-      await tauriBridge.requestHideWindow();
+      await tauriBridge.requestHideWindowUnlocked();
     } catch (e) {
       console.error("Failed to hide window to tray:", e);
     }
